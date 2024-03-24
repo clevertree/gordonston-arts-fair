@@ -27,6 +27,12 @@ body {
     color: var(--foreground-color);
     background: var(--background-color);
     margin: 10px;
+
+}
+
+article {
+    max-width: 1000px;
+    margin: auto;
 }
 
 @layer utilities {
