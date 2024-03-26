@@ -1,0 +1,33 @@
+.container {
+    height: 100vh;
+
+}
+
+.background {
+    background: url("/img/PXL_20220613_225011729.MP6_-scaled.jpg") bottom;
+    background-size: cover;
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 100%;
+    z-index: 8;
+    animation: backgroundScroll 200s linear infinite;
+}
+
+.content {
+    color: var(--foreground-inverted-color);
+    position: relative;
+    z-index: 9;
+}
+
+@keyframes backgroundScroll {
+    0% {
+        background-position: 0 0;
+    }
+    50% {
+        background-position: -400px 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}

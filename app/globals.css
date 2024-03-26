@@ -8,6 +8,8 @@
 :root {
     --foreground-color: rgb(78, 78, 78);
     --background-color: white;
+    --foreground-inverted-color: white;
+    --background-inverted-color: rgb(78, 78, 78);
 }
 
 /*@media (prefers-color-scheme: dark) {*/
@@ -27,7 +29,6 @@ body {
     color: var(--foreground-color);
     background: var(--background-color);
     margin: 10px;
-
 }
 
 article {
