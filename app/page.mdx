@@ -1,6 +1,14 @@
 import HeroContainer from "./components/Hero/HeroContainer";
 import FloatingDiv from "./components/FloatingDiv/FloatingDiv";
 import DateLocationApply from "./fragment/date-location-apply.mdx"
+export const metadata = {
+    title: 'Welcome to the Gordonston Art Fair Website',
+    description: "our annual fine arts and crafts fair, hosted in historic Gordonston's Juliette Gordon Low Park",
+    keywords: "Gordonston, Art Fair, Historic, Juliette Gordon Low Park",
+    openGraph: {
+        images: `${process.env.NEXT_PUBLIC_METADATA_URL}/public/img/Art_Show-768x430.jpg`,
+    }
+}
 
 <FloatingDiv className='flex justify-evenly bg-white'>
     [Home](/#)
