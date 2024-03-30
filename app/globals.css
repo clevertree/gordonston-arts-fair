@@ -8,7 +8,7 @@
 :root {
     --foreground-color: rgb(95, 95, 95);
     --background-color: white;
-    --gold-color: #c9ab81;
+    --gold-color: goldenrod;
     --foreground-inverted-color: white;
     --background-inverted-color: black;
     font-size: 17px;
@@ -42,6 +42,17 @@ article {
     margin: auto;
     display: flex;
     flex-direction: column;
+    z-index: 2;
+}
+
+footer {
+    width: 100%;
+    color: var(--foreground-inverted-color);
+    background-color: var(--background-inverted-color);
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /** Anchor Links **/
@@ -68,6 +79,7 @@ p {
     font-weight: 400;
     font-style: normal;
     margin: 10px 0;
+    text-align: justify;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -91,17 +103,18 @@ h2 {
 
 /* unvisited link */
 a:link {
-    color: blue;
+    color: #7979ff;
 }
 
 /* visited link */
 a:visited {
-    color: darkred;
+    color: #ff7f7f;
 }
 
 /* mouse over link */
 a:hover {
     color: hotpink;
+    font-weight: bold;
 }
 
 /* selected link */

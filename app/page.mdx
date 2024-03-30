@@ -1,5 +1,4 @@
 import HeroContainer from "./components/Hero/HeroContainer";
-import FloatingDiv from "./components/FloatingDiv/FloatingDiv";
 import DateLocationApply from "./fragment/date-location-apply.mdx"
 export const metadata = {
     title: 'Welcome to the Gordonston Art Fair Website',
@@ -10,20 +9,12 @@ export const metadata = {
     }
 }
 
-<FloatingDiv className='flex justify-evenly bg-white text-sm italic'>
-    [Home](/#)
-    [Gordonston](#gordonston-history)
-    [Exhibitors](#exhibitor-information)
-    [Amenities](#artist-amenities)
-    [Volunteer](#volunteering)
-    [FAQ](#faq)
-</FloatingDiv>
 
 <HeroContainer className='flex flex-col items-center opacity-90'>
 
     <div className="pt-24"/>
 
-    <h1 className='text-[color:var(--gold-color)] font-bold italic'>Gordonston</h1>
+    <h1 className='text-[color:var(--gold-color)] font-bold italic drop-shadow-white'>Gordonston</h1>
 
     <h2 className='text-white text-6xl'>ART FAIR</h2>
 
@@ -37,9 +28,12 @@ export const metadata = {
 
 <div className="pt-8"/>
 
-<h1 className='flex flex-col items-center text2xl'>
+
+<h2 className='m-auto text-[color:var(--gold-color)] italic'>Gordonston Art Fair</h2>
+<h1 className='m-auto text-4xl tracking-widest'>
     --- JOIN US ---
 </h1>
+
 
 You are warmly welcomed to our annual fine arts and crafts fair, hosted in historic Gordonston's Juliette Gordon Low
 Park. In addition to juried local and regional artists and artisans, we will hold gently used book and plant sales.
@@ -66,17 +60,21 @@ selected so that they may plan accordingly. Although the deadline is June 30th, 
 will close/extend submissions at our discretion. We will keep artists on a waitlist in the event spaces become
 available.
 
-History of Gordonston
 
-# <a name='gordonston-history'>A Hidden Gem</a>
+<h2 className='m-auto text-[color:var(--gold-color)] italic pt-32'>History of Gordonston</h2>
+<h1 className='m-auto text-4xl tracking-widest'>
+    <a name='gordonston-history'>A Hidden Gem</a>
+</h1>
 
-![](/img/Gates-of-Gordonston-B-W.jpg)
 
-1917
 
-It all started here
 
-## Founded
+![Gates of Gordonston](/img/Gates-of-Gordonston-B-W.jpg)
+
+
+<p className='m-auto text-2xl pt-32'>1917</p>
+<h2 className='m-auto text-[color:var(--gold-color)] italic'>It all started here</h2>
+<h3 className='m-auto text-4xl tracking-widest'>FOUNDED</h3>
 
 Savannah’s Gordonston neighborhood was founded in 1917 in honor of William Washington Gordon III, brother of Girl Scouts
 founder, Juliette Gordon Low. This 80-acre tract of land is said to be the highest ground in Savannah. It was inherited
@@ -84,13 +82,12 @@ by W.W. Gordon III and his siblings, whose family was earlier responsible for th
 Georgia Railroad. Gordonston is one of Savannah’s original streetcar suburbs as it was located on the Thunderbolt
 streetcar line. It now contains 238 homes built primarily in the 1920’s - 1950’s.
 
-![](/img/Gordonston-pathway.jpg)
+![Gordonston pathway](/img/Gordonston-pathway.jpg)
 
-1926
 
-Spacious and Green
-
-## Dedicated Park
+<p className='m-auto text-2xl pt-32'>1926</p>
+<h2 className='m-auto text-[color:var(--gold-color)] italic'>Spacious and Green</h2>
+<h3 className='m-auto text-4xl tracking-widest'>DEDICATED PARK</h3>
 
 The six-acre Juliette Gordon Low Park was dedicated in 1926 with an endowment from its namesake. The park is fully
 enclosed by an iron fence whose original gates were designed and built by Juliette Gordon Low. A fund was established by
@@ -99,11 +96,10 @@ also contains a playground.
 
 ![](/img/PXL_20220613_225011729.MP6_-scaled.jpg)
 
-1948
 
-A Community Structure
-
-## New Cottage
+<p className='m-auto text-2xl pt-10'>1948</p>
+<h2 className='m-auto text-[color:var(--gold-color)] italic'>A Community Structure</h2>
+<h3 className='m-auto text-4xl tracking-widest'>NEW COTTAGE</h3>
 
 The cottage in the park was built in 1948 by Union Camp Corporation and donated to the Girl Scouts who have been holding
 meetings in it for generations. Resident-sponsored, cottage rental is available by visiting
@@ -111,7 +107,11 @@ meetings in it for generations. Resident-sponsored, cottage rental is available 
 
 
 
-# <a name='exhibitor-information'>Exhibitor Information</a>
+<h2 className='m-auto text-[color:var(--gold-color)] italic pt-16'>
+    <a name='exhibitor-information'>Exhibitor Information</a>
+</h2>
+<h3 className='m-auto text-4xl tracking-widest'>BE AN EXHIBITOR</h3>
+
 
 Each exhibitor display space is 12’x12’. Spaces are allocated at the discretion of the Art Fair organizers.
 Requests are considered and met whenever possible. Electrical service is not available.
@@ -146,9 +146,11 @@ media or genre.
 
 </div>
 
-Benefits
 
-# <a name='artist-amenities'>Artist Amenities</a>
+<h2 className='m-auto text-[color:var(--gold-color)] italic pt-16'>
+    <a name='artist-amenities'>Benefits</a>
+</h2>
+<h3 className='m-auto text-4xl tracking-widest'>ARTIST AMENITIES</h3>
 
 Artists will be offered a number of amenities to make their experience as enjoyable as possible
 
@@ -181,10 +183,11 @@ Artists will be offered a number of amenities to make their experience as enjoya
     </div>
 </div>
 
-Become a Volunteer
 
-# <a name='volunteering'>Volunteer</a>
-
+<h2 className='m-auto text-[color:var(--gold-color)] italic pt-16'>
+    <a name='volunteering'>Become a Volunteer</a>
+</h2>
+<h3 className='m-auto text-4xl tracking-widest'>VOLUNTEER</h3>
 
 Please get involved
 
@@ -203,8 +206,11 @@ available to meet all interests, skill levels and talents, these include…
 
 Frequently Asked Questions
 
-# FAQ
-# <a name='faq'>FAQ</a>
+
+<h2 className='m-auto text-[color:var(--gold-color)] italic pt-16'>
+    <a name='faq'>Frequently Asked Questions</a>
+</h2>
+<h3 className='m-auto text-4xl tracking-widest'>FAQ</h3>
 
 See below for common questions and answers
 
@@ -228,44 +234,3 @@ First, you need to apply for an exhibitors booth. Only online applications will 
 $15.00. If accepted, the booth fee is $85.00 and must be paid upon acceptance. The application deadline is July 31st.
 To fill out an application form,
 please [click here](https://www.ojs.biz/gordonstonartfair2024).
-
-[10 Edgewood Rd, Savannah, GA 31404](https://www.google.com/maps/place/Juliette+Low+Park,+10+Edgewood+Rd,+Savannah,+GA+31404/data=!4m2!3m1!1s0x88fb9de42e0ef8fd:0x371c2bd99398a324?sa=X&ved=2ahUKEwjryZe-tKP4AhVoC0QIHd00COMQ8gF6BAggEAE)
-
-[Copyright © Gordonston Arts Association](/web/20231018074855/https://gordonstonartfair.com/cdn-cgi/l/email-protection#8ee7e0e8e1cee9e1fceae1e0fdfae1e0effcfae8efe7fca0ede1e3)
-
-Event Info
-
-<a name='gordonston-history'>Gordonston</a>
-
-[Exhibitors](#exhibitor-information)
-
-[Amenities](#artist-amenities)
-
-[Volunteer](#volunteering)
-
-[FAQ](#faq)
-
-Event Date
-
-Saturday, September 28th 2024
-
-10:00 am – 4:00 pm
-
-## [OPENING HOURS](#)
-
-<s>
-    Tue ‒ Thu: 09am ‒ 07pm
-    Fri ‒ Mon: 09am ‒ 05pm
-</s>
-
-## [ADMISSIONS](#)
-
-Adults: $25
-Children & Students free
-
-## [FIND US](#)
-
-673 12 Constitution Lane Massillon
-781-562-9355, 781-727-6090
-
-[](https://www.facebook.com/QodeInteractive/)[](https://www.instagram.com/qodeinteractive/)[](https://twitter.com/QodeInteractive)

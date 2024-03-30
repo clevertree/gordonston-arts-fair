@@ -1,10 +1,8 @@
-import {MdLocationPin} from "react-icons/md";
 import {CiCalendarDate} from "react-icons/ci";
+import {MdLocationPin} from "react-icons/md";
 import {IoEnterOutline} from "react-icons/io5";
 
-import clsx from "clsx";
-
-<div className={clsx(`grid md:grid-cols-3 gap-4 p-3`, props.className)}>
+<div className='grid sm:grid-cols-3 gap-4 p-3'>
     <div className='pl-[12px]'>
         <h2 className='ml-[-24px]'><CiCalendarDate/> FESTIVAL DATE</h2>
         <>
@@ -20,7 +18,8 @@ import clsx from "clsx";
             Savannah, GA 31404
         </a>
     </div>
-    <div className='pl-[12px]'>
-        <h2 className='ml-[-24px]'><IoEnterOutline/>&nbsp;[APPLY](https://www.ojs.biz/gordonstonartfair2024)</h2>
+    <div>
+        <h2><IoEnterOutline/>&nbsp;[APPLY](https://www.ojs.biz/gordonstonartfair2024)</h2>
     </div>
 </div>
+
