@@ -9,6 +9,9 @@ export default function FloatingDiv({children, containerElm, className, containe
     const [isFloating, setIsFloating] = useState(false)
     const [containerHeight, setContainerHeight] = useState('inherit')
     const refContainer = useRef()
+    let finalChildren = children;
+    if (children.type === 'p')
+        finalChildren = children.props.children
 
     function onScroll() {
         const navElm = refContainer.current
@@ -53,7 +56,7 @@ export default function FloatingDiv({children, containerElm, className, containe
             <div
                 className={clsx({[styles.floatingDiv]: isFloating}, className)}
             >
-                {children}
+                {finalChildren}
             </div>
             <div
                 className={`${styles.bottomText} ${!isFloating ? styles.bottomTextHidden : ''}`}
