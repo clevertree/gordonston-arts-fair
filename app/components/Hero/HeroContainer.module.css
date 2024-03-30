@@ -1,18 +1,19 @@
 .container {
-    height: 80vh;
-    overflow: hidden;
+    height: 36em;
+    /*overflow: hidden;*/
 }
 
 .background {
     background: url("/img/PXL_20220613_225011729.MP6_-scaled.jpg") bottom;
-    background-size: 200%;
+    background-size: 120vh;
     position: absolute;
+    top: 0;
     left: 0;
     right: 0;
-    height: 80vh;
+    height: 36em;
     z-index: 2;
-    animation: backgroundScroll 80s infinite alternate-reverse;
-    animation-timing-function: ease-in;
+    animation: backgroundScroll 50s infinite alternate-reverse;
+    animation-timing-function: ease-in-out;
 }
 
 .content {
@@ -23,9 +24,15 @@
 
 @keyframes backgroundScroll {
     from {
-        left: 0px;
+        background-size: 120vh;
+        /*top: 0;*/
+        /*left: -400px;*/
+        /*right: 0;*/
     }
     to {
-        left: -500px;
+        background-size: 240vh;
+        /*top: -1000px;*/
+        /*left: 0;*/
+        /*right: -400px;*/
     }
 }
