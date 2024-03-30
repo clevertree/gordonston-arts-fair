@@ -1,0 +1,22 @@
+import {MdLocationPin} from "react-icons/md";
+import {CiCalendarDate} from "react-icons/ci";
+import {IoEnterOutline} from "react-icons/io5";
+
+import clsx from "clsx";
+
+<div className={clsx(`grid sm:grid-cols-3 gap-4 p-3`, props.className)}>
+    <div>
+        <div className='grid-cols-2'></div>
+        <h2><CiCalendarDate/> FESTIVAL DATE</h2>
+
+        <p className='font-light pl-6'>{props.date || 'September 28, 2024 10:00am until 4:00pm'}</p>
+    </div>
+    <div>
+        <h2><MdLocationPin/> LOCATION</h2>
+
+        <p className='whitespace-break-spaces font-light pl-6'>{props.address || 'Juliette Gordon Low Park\n10 Edgewood Rd\nSavannah, GA 31404'}</p>
+    </div>
+    <div>
+        <h2><IoEnterOutline/>&nbsp;[APPLY](https://www.ojs.biz/gordonstonartfair2024)</h2>
+    </div>
+</div>

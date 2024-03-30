@@ -6,10 +6,12 @@
 @tailwind utilities;
 
 :root {
-    --foreground-color: rgb(78, 78, 78);
+    --foreground-color: rgb(95, 95, 95);
     --background-color: white;
+    --gold-color: #c9ab81;
     --foreground-inverted-color: white;
-    --background-inverted-color: rgb(78, 78, 78);
+    --background-inverted-color: black;
+    font-size: 17px;
 }
 
 /*@media (prefers-color-scheme: dark) {*/
@@ -28,12 +30,18 @@ html {
 body {
     color: var(--foreground-color);
     background: var(--background-color);
-    margin: 10px;
+}
+
+.inverted-color {
+    color: var(--foreground-inverted-color);
+    background-color: var(--background-inverted-color);
 }
 
 article {
-    max-width: 1000px;
+    max-width: min(80vw, 1600px);
     margin: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 @layer utilities {
@@ -52,7 +60,6 @@ p {
     font-family: "Alegreya Sans", sans-serif;
     font-weight: 400;
     font-style: normal;
-    font-size: 17px;
     margin: 10px 0;
 }
 
@@ -64,13 +71,33 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: 2px;
     display: flex;
     align-items: center;
+    white-space: break-spaces;
 }
 
 h1 {
-    font-size: 3rem;
+    font-size: 1.5rem;
 }
 
 h2 {
-    font-size: 2rem;
+    font-size: 1.1rem;
 }
 
+/* unvisited link */
+a:link {
+    color: blue;
+}
+
+/* visited link */
+a:visited {
+    color: darkred;
+}
+
+/* mouse over link */
+a:hover {
+    color: hotpink;
+}
+
+/* selected link */
+a:active {
+    color: blue;
+}

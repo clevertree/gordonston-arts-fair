@@ -1,33 +1,30 @@
 .container {
-    height: 100vh;
-
+    height: 80vh;
+    overflow: hidden;
 }
 
 .background {
     background: url("/img/PXL_20220613_225011729.MP6_-scaled.jpg") bottom;
-    background-size: cover;
+    background-size: 200%;
     position: absolute;
     left: 0;
     right: 0;
-    height: 100%;
+    height: 80vh;
     z-index: 8;
-    animation: backgroundScroll 200s linear infinite;
+    animation: backgroundScroll 200s linear infinite alternate-reverse;
 }
 
 .content {
-    color: var(--foreground-inverted-color);
+    /*color: var(--foreground-inverted-color);*/
     position: relative;
     z-index: 9;
 }
 
 @keyframes backgroundScroll {
     0% {
-        background-position: 0 0;
-    }
-    50% {
-        background-position: -400px 0;
+        background-position: 100% 0;
     }
     100% {
-        background-position: 0 0;
+        background-position: 0 100%;
     }
 }
