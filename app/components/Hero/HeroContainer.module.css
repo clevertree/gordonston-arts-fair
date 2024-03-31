@@ -12,8 +12,8 @@
     right: 0;
     height: 36em;
     z-index: 2;
-    animation: backgroundScroll 50s infinite alternate-reverse;
-    animation-timing-function: ease-in-out;
+    animation: backgroundScroll 80s infinite alternate-reverse;
+    animation-timing-function: linear;
 }
 
 .content {
@@ -24,13 +24,13 @@
 
 @keyframes backgroundScroll {
     from {
-        background-size: 120vh;
+        background-size: 160vh;
         /*top: 0;*/
         /*left: -400px;*/
         /*right: 0;*/
     }
     to {
-        background-size: 240vh;
+        background-size: 300vh;
         /*top: -1000px;*/
         /*left: 0;*/
         /*right: -400px;*/

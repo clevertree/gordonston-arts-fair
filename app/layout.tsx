@@ -5,7 +5,6 @@ import "./globals.css";
 import Header from "./header.mdx"
 import Footer from "./footer.mdx"
 
-const inter = Inter({subsets: ["latin"]});
 
 export const metadata: Metadata = {
     title: "Gordonston Art Fair",
@@ -19,7 +18,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-        <body className={inter.className}>
+        <body>
         <header><Header/></header>
         <article>{children}</article>
         <footer><Footer/></footer>

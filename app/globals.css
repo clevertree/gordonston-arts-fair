@@ -8,10 +8,12 @@
 :root {
     --foreground-color: rgb(95, 95, 95);
     --background-color: white;
-    --gold-color: goldenrod;
+    --gold-color: #d59900;
     --foreground-inverted-color: white;
     --background-inverted-color: black;
     font-size: 17px;
+    font-family: "Alegreya Sans", sans-serif;
+    font-weight: 400;
 }
 
 /*@media (prefers-color-scheme: dark) {*/
@@ -23,8 +25,9 @@
 /*}*/
 
 html {
-    font-size: 10px;
+    /*font-size: 10px;*/
 
+    scroll-behavior: smooth;
 }
 
 body {
@@ -73,13 +76,10 @@ ul {
     margin-left: 16px;
 }
 
-ul > li,
 p {
-    font-family: "Alegreya Sans", sans-serif;
-    font-weight: 400;
+    text-align: justify;
     font-style: normal;
     margin: 10px 0;
-    text-align: justify;
 }
 
 h1, h2, h3, h4, h5, h6 {

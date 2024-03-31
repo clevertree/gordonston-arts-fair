@@ -2,35 +2,28 @@ import HeroContainer from "./components/Hero/HeroContainer";
 import DateLocationApply from "./fragment/date-location-apply.mdx"
 export const metadata = {
     title: 'Welcome to the Gordonston Art Fair Website',
-    description: "our annual fine arts and crafts fair, hosted in historic Gordonston's Juliette Gordon Low Park",
-    keywords: "Gordonston, Art Fair, Historic, Juliette Gordon Low Park",
+    description: "our annual fine arts and crafts fair, hosted in historic Gordonston's Juliette Gordon Low Park, Savannah GA",
+    keywords: "Gordonston, Art Fair, Historic, Juliette Gordon Low Park, Savannah, Georgia",
     openGraph: {
         images: `${process.env.NEXT_PUBLIC_METADATA_URL}/public/img/Art_Show-768x430.jpg`,
     }
 }
 
-
+{
 <HeroContainer className='flex flex-col items-center opacity-90'>
-
     <div className="pt-8 md:pt-24"/>
-
     <h1 className='text-[color:var(--gold-color)] font-bold italic drop-shadow-white'>Gordonston</h1>
-
-    <h2 className='text-white text-2xl md:text-6xl drop-shadow-white'>ART FAIR</h2>
-
+    <h2 className='text-white text-4xl md:text-6xl drop-shadow-white uppercase'>Art Fair</h2>
     <h3 className='text-white md:text-2xl font-bold drop-shadow-white'>September 28, 2024</h3>
-
     <div className="pt-12 md:pt-24"/>
-
     <DateLocationApply className='bg-white'/>
-
 </HeroContainer>
-
+}
 
 
 <h2 className='m-auto text-[color:var(--gold-color)] italic'>Gordonston Art Fair</h2>
-<h1 className='m-auto text-2xl sm:text-4xl tracking-widest'>
-    --- JOIN US ---
+<h1 className='m-auto text-2xl sm:text-4xl tracking-widest uppercase'>
+    --- Join Us ---
 </h1>
 
 
@@ -60,20 +53,19 @@ will close/extend submissions at our discretion. We will keep artists on a waitl
 available.
 
 
-<h2 className='m-auto text-[color:var(--gold-color)] italic pt-8 md:pt-32'>History of Gordonston</h2>
+<h2 className='m-auto text-[color:var(--gold-color)] italic pt-8 md:pt-18'>History of Gordonston</h2>
 <h1 className='m-auto text-2xl sm:text-4xl tracking-widest'>
     <a name='gordonston-history'>A Hidden Gem</a>
 </h1>
 
 
 
+<img src='img/Gates-of-Gordonston-B-W.jpg' className='m-auto pt-8' alt='Gates of Gordonston'/>
 
-![Gates of Gordonston](/img/Gates-of-Gordonston-B-W.jpg)
 
-
-<p className='m-auto text-2xl pt-8 md:pt-32'>1917</p>
+<p className='m-auto sm:text-2xl pt-8 md:pt-18'>1917</p>
 <h2 className='m-auto text-[color:var(--gold-color)] italic'>It all started here</h2>
-<h3 className='m-auto text-2xl sm:text-4xl tracking-widest'>FOUNDED</h3>
+<h3 className='m-auto text-2xl sm:text-4xl tracking-widest uppercase'>Founded</h3>
 
 Savannah’s Gordonston neighborhood was founded in 1917 in honor of William Washington Gordon III, brother of Girl Scouts
 founder, Juliette Gordon Low. This 80-acre tract of land is said to be the highest ground in Savannah. It was inherited
@@ -81,24 +73,24 @@ by W.W. Gordon III and his siblings, whose family was earlier responsible for th
 Georgia Railroad. Gordonston is one of Savannah’s original streetcar suburbs as it was located on the Thunderbolt
 streetcar line. It now contains 238 homes built primarily in the 1920’s - 1950’s.
 
-![Gordonston pathway](/img/Gordonston-pathway.jpg)
+<img src='img/Gordonston-pathway.jpg' className='m-auto pt-4' alt='Gordonston pathway'/>
 
 
-<p className='m-auto text-2xl pt-8 md:pt-32'>1926</p>
+<p className='m-auto sm:text-2xl pt-8 md:pt-18'>1926</p>
 <h2 className='m-auto text-[color:var(--gold-color)] italic'>Spacious and Green</h2>
-<h3 className='m-auto text-2xl sm:text-4xl tracking-widest'>DEDICATED PARK</h3>
+<h3 className='m-auto text-2xl sm:text-4xl tracking-widest uppercase'>Dedicated Park</h3>
 
 The six-acre Juliette Gordon Low Park was dedicated in 1926 with an endowment from its namesake. The park is fully
 enclosed by an iron fence whose original gates were designed and built by Juliette Gordon Low. A fund was established by
 her to maintain the park into perpetuity for the use of Gordonston residents and especially for its children. The park
 also contains a playground.
 
-![](/img/PXL_20220613_225011729.MP6_-scaled.jpg)
+<img src='/img/PXL_20220613_225011729.MP6_-scaled.jpg' className='m-auto' alt='Gordonston Park Gates'/>
 
 
-<p className='m-auto text-2xl pt-8 md:pt-32'>1948</p>
+<p className='m-auto sm:text-2xl pt-8 md:pt-18'>1948</p>
 <h2 className='m-auto text-[color:var(--gold-color)] italic'>A Community Structure</h2>
-<h3 className='m-auto text-2xl sm:text-4xl tracking-widest'>NEW COTTAGE</h3>
+<h3 className='m-auto text-2xl sm:text-4xl tracking-widest uppercase'>New Cottage</h3>
 
 The cottage in the park was built in 1948 by Union Camp Corporation and donated to the Girl Scouts who have been holding
 meetings in it for generations. Resident-sponsored, cottage rental is available by visiting
@@ -109,7 +101,7 @@ meetings in it for generations. Resident-sponsored, cottage rental is available 
 <h2 className='m-auto text-[color:var(--gold-color)] italic pt-16'>
     <a name='exhibitor-information'>Exhibitor Information</a>
 </h2>
-<h3 className='m-auto text-2xl sm:text-4xl tracking-widest'>BE AN EXHIBITOR</h3>
+<h3 className='m-auto text-2xl sm:text-4xl tracking-widest uppercase'>Be an Exhibitor</h3>
 
 
 Each exhibitor display space is 12’x12’. Spaces are allocated at the discretion of the Art Fair organizers.
@@ -149,7 +141,7 @@ media or genre.
 <h2 className='m-auto text-[color:var(--gold-color)] italic pt-16'>
     <a name='artist-amenities'>Benefits</a>
 </h2>
-<h3 className='m-auto text-2xl sm:text-4xl tracking-widest'>ARTIST AMENITIES</h3>
+<h3 className='m-auto text-2xl sm:text-4xl tracking-widest uppercase'>Artist Amenities</h3>
 
 Artists will be offered a number of amenities to make their experience as enjoyable as possible
 
@@ -186,7 +178,7 @@ Artists will be offered a number of amenities to make their experience as enjoya
 <h2 className='m-auto text-[color:var(--gold-color)] italic pt-16'>
     <a name='volunteering'>Become a Volunteer</a>
 </h2>
-<h3 className='m-auto text-2xl sm:text-4xl tracking-widest'>VOLUNTEER</h3>
+<h3 className='m-auto text-2xl sm:text-4xl tracking-widest uppercase'>Volunteer</h3>
 
 Please get involved
 
@@ -206,7 +198,6 @@ available to meet all interests, skill levels and talents, these include…
 <h2 className='m-auto text-[color:var(--gold-color)] italic pt-16'>
     <a name='faq'>Frequently Asked Questions</a>
 </h2>
-<h3 className='m-auto text-2xl sm:text-4xl tracking-widest'>FAQ</h3>
 
 See below for common questions and answers
 
@@ -231,3 +222,4 @@ $15.00. If accepted, the booth fee is $85.00 and must be paid upon acceptance. T
 To fill out an application form,
 please [click here](https://www.ojs.biz/gordonstonartfair2024).
 
+<div className='pb-16'/>
