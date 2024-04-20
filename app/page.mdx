@@ -1,23 +1,13 @@
-import HeroContainer from "./components/Hero/HeroContainer";
 import DateLocationApply from "./fragment/date-location-apply.mdx"
+import ClientImage from "./components/ClientImage/ClientImage";
 export const metadata = {
     title: 'Welcome to the Gordonston Art Fair Website',
     description: "our annual fine arts and crafts fair, hosted in historic Gordonston's Juliette Gordon Low Park, Savannah GA",
     keywords: "Gordonston, Art Fair, Historic, Juliette Gordon Low Park, Savannah, Georgia",
     openGraph: {
-        images: `${process.env.NEXT_PUBLIC_METADATA_URL}/public/img/Art_Show-768x430.jpg`,
+        url: "https://gordonstonartfair.com",
+        images: `${process.env.NEXT_PUBLIC_METADATA_URL}/img/Art_Show-768x430.jpg`,
     }
-}
-
-{
-<HeroContainer className='flex flex-col items-center opacity-90'>
-    <div className="pt-8 md:pt-24"/>
-    <h1 className='text-[color:var(--gold-color)] font-bold italic drop-shadow-white'>Gordonston</h1>
-    <h2 className='text-white text-4xl md:text-6xl drop-shadow-white uppercase'>Art Fair</h2>
-    <h3 className='text-white md:text-2xl font-bold drop-shadow-white'>September 28, 2024</h3>
-    <div className="pt-12 md:pt-24"/>
-    <DateLocationApply className='bg-white'/>
-</HeroContainer>
 }
 
 
@@ -60,7 +50,9 @@ available.
 
 
 
-<img src='img/Gates-of-Gordonston-B-W.jpg' className='m-auto pt-8' alt='Gates of Gordonston'/>
+<ClientImage src={require('/public/img/Gates-of-Gordonston-B-W.jpg')}
+             className='m-auto pt-8'
+             alt='Gates of Gordonston'/>
 
 
 <p className='m-auto sm:text-2xl pt-8 md:pt-18'>1917</p>
@@ -85,7 +77,8 @@ enclosed by an iron fence whose original gates were designed and built by Juliet
 her to maintain the park into perpetuity for the use of Gordonston residents and especially for its children. The park
 also contains a playground.
 
-<img src='/img/PXL_20220613_225011729.MP6_-scaled.jpg' className='m-auto' alt='Gordonston Park Gates'/>
+<ClientImage src={require('/public/img/PXL_20220613_225011729.MP6_-scaled.jpg')}
+             className='m-auto' alt='Gordonston Park Gates'/>
 
 
 <p className='m-auto sm:text-2xl pt-8 md:pt-18'>1948</p>
@@ -169,7 +162,9 @@ Artists will be offered a number of amenities to make their experience as enjoya
         >Artists receive a complimentary continental breakfast on Saturday morning.
     </div>
     <div>
-        ![](/img/Art_Show.jpg)
+        <ClientImage
+            src={require('/public/img/Art_Show.jpg')}
+            alt='Art Show'/>
     </div>
 </div>
 
@@ -199,7 +194,9 @@ Artists will be offered a number of amenities to make their experience as enjoya
 
     </div>
     <div>
-        ![](/img/Gordonston-Children-Art-Activities.jpg)
+        <ClientImage
+            src={require('/public/img/Gordonston-Children-Art-Activities.jpg')}
+            alt='Gordonston Children Art Activities'/>
     </div>
 </div>
 

@@ -1,4 +1,6 @@
 import FloatingDiv from "./components/FloatingDiv/FloatingDiv";
+import HeroContainer from "./components/Hero/HeroContainer";
+import DateLocationApply from "./fragment/date-location-apply.mdx"
 
 <FloatingDiv className='flex flex-wrap justify-evenly bg-gray-300 text-sm italic gap-x-3 relative p-1 z-10'>
     [Home](/#)
@@ -8,3 +10,12 @@ import FloatingDiv from "./components/FloatingDiv/FloatingDiv";
     [Volunteer](#volunteering)
     [FAQ](#faq)
 </FloatingDiv>
+
+<HeroContainer className='flex flex-col items-center opacity-90' containerClassName='mb-4'>
+    <div className="pt-8 md:pt-24"/>
+    <h1 className='text-[color:var(--gold-color)] font-bold italic drop-shadow-white'>Gordonston</h1>
+    <h2 className='text-white text-4xl md:text-6xl drop-shadow-white uppercase'>Art Fair</h2>
+    <h3 className='text-white md:text-2xl font-bold drop-shadow-white'>September 28, 2024</h3>
+    <div className="pt-12 md:pt-24"/>
+    <DateLocationApply className='bg-white'/>
+</HeroContainer>

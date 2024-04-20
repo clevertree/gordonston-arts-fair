@@ -1,18 +1,23 @@
 .container {
-    height: 36em;
+    position: relative;
+    height: 34em;
+    width: 100%;
+    left: 0;
     /*overflow: hidden;*/
 }
 
-.background {
-    background: url("/img/PXL_20220613_225011729.MP6_-scaled.jpg") bottom;
-    background-size: 120vh;
+.backgroundImg {
+    /*background: url("/img/PXL_20220613_225011729.MP6_-scaled.jpg") bottom;*/
+    /*background-size: 120vh;*/
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
     height: 36em;
+    object-position: center bottom;
+    /*top: 0;*/
+    /*left: 0;*/
+    /*right: 0;*/
+    /*height: 36em;*/
     z-index: 2;
-    animation: backgroundScroll 80s infinite alternate-reverse;
+    animation: backgroundScroll 50s infinite alternate-reverse;
     animation-timing-function: linear;
 }
 
@@ -24,13 +29,15 @@
 
 @keyframes backgroundScroll {
     from {
-        background-size: 160vh;
+        /*background-size: 160vh;*/
+        object-position: 0% 0%;
         /*top: 0;*/
         /*left: -400px;*/
         /*right: 0;*/
     }
     to {
-        background-size: 300vh;
+        object-position: 100% 100%;
+        /*background-size: 300vh;*/
         /*top: -1000px;*/
         /*left: 0;*/
         /*right: -400px;*/

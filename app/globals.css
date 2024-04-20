@@ -41,11 +41,17 @@ body {
 }
 
 article {
-    max-width: min(80vw, 1600px);
+    max-width: 80vw;
     margin: auto;
     display: flex;
     flex-direction: column;
     z-index: 2;
+}
+
+@media screen and (min-width: 1200px) {
+    article {
+        max-width: 1000px;
+    }
 }
 
 footer {
