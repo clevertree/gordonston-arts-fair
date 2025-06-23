@@ -1,5 +1,6 @@
 import DateLocationApply from "@fragments/date-location-apply.mdx"
 import ClientImage from "@components/ClientImage/ClientImage";
+import {formatToLocal, getTimeSpan} from "../util/date";
 
 export const metadata = {
     title: 'Welcome to the Gordonston Art Fair Website',
@@ -10,6 +11,13 @@ export const metadata = {
         images: `${process.env.NEXT_PUBLIC_METADATA_URL}/img/Art_Show-768x430.jpg`,
     }
 }
+
+export const eventDateString = formatToLocal(new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`));
+export const registrationOpenDate = new Date(`${process.env.NEXT_PUBLIC_REGISTRATION_OPEN_DATE}`);
+export const registrationOpenDateString = formatToLocal(registrationOpenDate);
+export const registrationTimeUntil = getTimeSpan(new Date(), registrationOpenDate);
+export const registrationEndDate = new Date(`${process.env.NEXT_PUBLIC_REGISTRATION_END_DATE}`);
+export const registrationEndDateString = formatToLocal(registrationEndDate, {weekday: undefined});
 
 
 <h2 className='m-auto text-[color:var(--gold-color)] italic'>Gordonston Art Fair</h2>
@@ -25,21 +33,23 @@ There will be food trucks, live music and a supervised children's crafts area.
 
 Welcome to the application page. Please carefully read the following:
 
-* This event takes place on Saturday, February 28, 2026
-* Online applications will be accepted on September 1, 2025.
-* Applications must be submitted by November 15, 2025 with a non-refundable fee of $15.
-* Artists/artisans will be notified of their status (accepted, declined, or waiting list) by December 1, 2025.
+* This event takes place on {eventDateString}
+* Online applications will be accepted on {registrationOpenDateString}.
+* Applications must be submitted by November 15, 2025 with a non-refundable fee of ${process.env.NEXT_PUBLIC_REGISTRATION_FEE}`.
+* Artists/artisans will be notified of their status (accepted, declined, or waiting list) by {registrationEndDateString}.
 * We will then be expecting an $85 booth fee to be made by January 1, 2026
 * As our vending space is limited, we may fill up before the deadline. In this event, we will maintain a
 waiting list.
 
-Only online applications will be accepted. The registration fee is $15.00. If accepted, the booth fee is $85.00 and must
+Only online applications will be accepted. The registration fee is ${process.env.NEXT_PUBLIC_REGISTRATION_FEE}.00. If accepted, the booth fee is $85.00 and must
 be paid upon acceptance.
 
-Application deadline is *TBD*; however, artists will be informed in a timely manner whether they have been
-selected so that they may plan accordingly. Although the deadline is July 31, spaces may fill up before that time. We
-will close/extend submissions at our discretion. We will keep artists on a waitlist in the event spaces become
-available.
+Application deadline is {registrationEndDateString};
+however, artists will be informed in a timely manner whether they have
+been selected so that they may plan accordingly.
+Spaces may fill up before the deadline.
+We will close/extend submissions at our discretion.
+We will keep artists on a waitlist in the event spaces become available.
 
 
 <h2 className='m-auto text-[color:var(--gold-color)] italic pt-8 md:pt-18'>History of Gordonston</h2>
@@ -228,7 +238,7 @@ Ave. at #10 Edgewood Road, Savannah, Georgia 31404
 ## I would like an exhibitors booth, what do I do?
 
 First, you need to apply for an exhibitors booth. Only online applications will be accepted. The application fee is
-$15.00. If accepted, the booth fee is $85.00 and must be paid upon acceptance. The application deadline is July 31st.
-The website will begin accepting applications for artists on September 1, 2025.
+${process.env.NEXT_PUBLIC_REGISTRATION_FEE}.00. If accepted, the booth fee is $85.00 and must be paid upon acceptance. The application deadline is July 31st.
+The website will begin accepting applications for artists on {registrationOpenDateString}.
 
 <div className='pb-16'/>

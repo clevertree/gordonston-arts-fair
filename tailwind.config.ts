@@ -4,7 +4,7 @@ const config: Config = {
     content: [
         "./pages/**/*.{js,ts,jsx,tsx,md,mdx}",
         "./components/**/*.{js,ts,jsx,tsx,md,mdx}",
-        "./fragment/**/*.{js,ts,jsx,tsx,md,mdx}",
+        "./fragments/**/*.{js,ts,jsx,tsx,md,mdx}",
         "./app/**/*.{js,ts,jsx,tsx,md,mdx}",
     ],
     theme: {
