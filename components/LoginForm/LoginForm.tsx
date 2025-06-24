@@ -4,7 +4,7 @@ import React, {useState} from 'react';
 import {Box, Button, TextField, Typography} from '@mui/material';
 
 interface LoginFormProps {
-    redirectURL: string
+    redirectURL: string,
 }
 
 function LoginForm({
@@ -60,7 +60,7 @@ function LoginForm({
             }}
         >
             <Typography variant="h6" align="center">
-                Login
+                Artist Login
             </Typography>
             {error && <Typography variant="caption" color="red" align="center">
                 {error}

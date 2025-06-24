@@ -1,4 +1,6 @@
 import RegisterForm from "../../components/RegisterForm/RegisterForm";
+import Link from "next/link";
+import {Box} from "@mui/material";
 export const metadata = {
     title: 'Artist Registration',
 }
@@ -6,3 +8,7 @@ export const metadata = {
 <h2 className='m-auto text-[color:var(--gold-color)] italic'>Artist Registration</h2>
 
 <RegisterForm redirectURL='/profile'/>
+
+<Box sx={{margin: 'auto'}}>
+    <Link href='/login'>Click here to log in as an Artist</Link>
+</Box>
