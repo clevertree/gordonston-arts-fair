@@ -9,10 +9,12 @@ import {
     InputLabel,
     MenuItem,
     Select,
+    Stack,
     TextField,
     TextFieldProps,
     Typography
 } from '@mui/material';
+import Paper from '@mui/material/Paper';
 import {UserProfileData} from "@util/profile";
 
 interface ProfileFormProps {
@@ -20,10 +22,11 @@ interface ProfileFormProps {
 
 function ProfileForm({}: ProfileFormProps) {
     const [status, setStatus] = useState<'loading' | 'loaded' | 'unsaved' | 'updating' | 'updated' | 'error'>('loading');
-    const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
     const [profileData, setProfileData] = useState<UserProfileData>({})
     const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
     const formRef = useRef<HTMLFormElement>();
+    const {entries = []} = profileData;
 
     function getFormValues() {
         if (formRef.current) {
@@ -37,9 +40,13 @@ function ProfileForm({}: ProfileFormProps) {
         const formData = new FormData(formRef.current);
         let unsaved = false;
         for (const [key, value] of formData.entries()) {
-            console.log('entry', key, value)
+            switch (key) {
+                case 'uploads':
+                    continue;
+            }
             // console.log(`${key}: ${value}`);
             if (profileData[key as keyof UserProfileData] !== value) {
+                console.log('changed', key, value)
                 unsaved = true;
             }
         }
@@ -69,7 +76,7 @@ function ProfileForm({}: ProfileFormProps) {
         const formValues: UserProfileData = getFormValues();
         event.preventDefault();
         setStatus('updating');
-        setError('');
+        setMessage('');
 
         try {
             const response = await fetch('/api/profile', {
@@ -81,14 +88,14 @@ function ProfileForm({}: ProfileFormProps) {
             })
             // Check if the response was successful (e.g., status code 200-299)
             if (!response.ok) {
-                setError(`HTTP error! status: ${response.status}`);
+                setMessage(`HTTP error! status: ${response.status}`);
                 setStatus('error');
             } else {
                 setStatus('updated');
             }
         } catch (e: any) {
             setStatus('error');
-            setError(e.message)
+            setMessage(e.message)
         }
     };
 
@@ -100,6 +107,7 @@ function ProfileForm({}: ProfileFormProps) {
                 shrink: true
             }
         },
+        onChange: updateFormStatus,
         onBlur: updateFormStatus
     }
 
@@ -277,42 +285,87 @@ function ProfileForm({}: ProfileFormProps) {
             </fieldset>
 
             <Typography variant="h6">
-                Manage Images
+                Upload & Manage Images
             </Typography>
 
-            <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
+            <fieldset disabled={status === 'updating'}>
+
                 <input
-                    name='uploads'
                     type='file'
                     multiple={true}
                     accept="image/*"
-                    onChange={e => {
-                        console.log(e)
+                    onChange={async e => {
+                        setStatus('updating')
                         const input = e.target;
+                        let count = 0;
                         if (input && input.files) {
                             for (const file of input.files) {
-                                fetch(
-                                    `/api/profile/upload?entry=0&filename=${file.name}&mimetype=${file.type}`,
+                                console.log("Uploading file: ", file)
+                                const response = await fetch(
+                                    `/api/profile/upload?filename=${file.name}&mimetype=${file.type}`,
                                     {
                                         method: 'POST',
                                         body: file,
                                     },
-                                ).then(response => response.json())
-                                    .then(responseJSON => {
-                                        console.log('responseJSON', responseJSON)
-                                    })
+                                );
+                                const {profileData} = await response.json();
+                                setProfileData(profileData);
+                                count++;
                             }
                         }
+                        setMessage(count + " file" + (count === 1 ? '' : 's') + ' have been uploaded')
+                        setStatus('updated')
+                        e.target.value = '';
                     }}
                 />
+
+                <Stack component={Paper} spacing={2} padding={1}>
+                    {entries.map((row, i) => <Paper
+                        key={row.title + i}
+                    >
+                        <div className='grid sm:grid-cols-2 gap-x-8'>
+                            <div>
+                                <TextField
+                                    label="Title"
+                                    required
+                                    defaultValue={row.title}
+                                    placeholder='Title this image...'
+                                    {...textFieldProps}
+                                />
+                                <TextField
+                                    label="Description"
+                                    required
+                                    multiline
+                                    minRows={4}
+                                    defaultValue={row.description}
+                                    placeholder='Describe this image...'
+                                    {...textFieldProps}
+                                    slotProps={{
+                                        htmlInput: {
+                                            maxLength: 600,
+                                        },
+                                        inputLabel: {
+                                            shrink: true
+                                        }
+                                    }}
+                                />
+                            </div>
+                            <a
+                                href={row.url}
+                                target='_blank'
+                            >
+                                <img
+                                    src={row.url}
+                                    alt={row.title}
+                                />
+                            </a>
+                        </div>
+                    </Paper>)}
+                </Stack>
             </fieldset>
 
-
-            {error && <Typography variant="caption" color="red" align="center">
-                {error}
-            </Typography>}
-            {status === 'updated' && <Typography variant="caption" color="blue" align="center">
-                Profile has been updated successfully
+            {message && <Typography variant="caption" color={status === 'error' ? "red" : "blue"} align="center">
+                {message}
             </Typography>}
             <Button type="submit" variant="contained" color="primary" disabled={status !== 'unsaved'}>
                 Update Profile

@@ -1,7 +1,8 @@
 import {decryptSession} from "@util/session";
 import {NextRequest} from "next/server";
-import {isProfileComplete} from "@util/profile";
+import {isProfileComplete, UserProfileData} from "@util/profile";
 import {getRedisClient} from "@util/redis";
+import {head} from "@vercel/blob";
 
 export async function GET(
     request: NextRequest,
@@ -13,11 +14,29 @@ export async function GET(
                 status: 401,
             })
         }
-        const redisClient = await getRedisClient();
-        const profileHash = 'profile:' + session.email.toLowerCase();
 
-        const profileString = await redisClient.get(profileHash);
-        const profileData = profileString ? JSON.parse(profileString) : {};
+        // Get redis client
+        const redisClient = await getRedisClient();
+
+        // Get profile data
+        const profilePath = 'profile:' + session.email.toLowerCase();
+        const profileString = await redisClient.get(profilePath);
+        const profileData: UserProfileData = profileString ? JSON.parse(profileString) : {};
+
+        if (profileData.entries) {
+            for (let entry = 0; entry < profileData.entries.length; entry++) {
+                const entryData = profileData.entries[entry];
+                const imagePath = 'profile/' + session.email.toLowerCase() + '/image-' + entry;
+                console.log("Fetching url for image path: ", imagePath)
+                try {
+                    const headResult = await head(imagePath);
+                    entryData.url = headResult.url;
+                } catch (e) {
+                    console.error(e.message);
+                }
+            }
+        }
+
         return Response.json({
             profileData,
             isProfileComplete: isProfileComplete(profileData)

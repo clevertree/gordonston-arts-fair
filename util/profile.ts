@@ -23,8 +23,9 @@ export interface UserProfileData {
 
 export interface UserProfileEntryData {
     title: string,
-    description: string,
-    path: string
+    description?: string,
+    url?: string
+    // path: string
 }
 
 export function isProfileComplete(profileData: UserProfileData) {
