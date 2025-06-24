@@ -1,14 +1,15 @@
-import RegisterForm from "../../components/RegisterForm/RegisterForm";
+import RegisterForm from "../../components/SessionForms/RegisterForm";
 import Link from "next/link";
-import {Box} from "@mui/material";
+import {Stack} from "@mui/material";
 export const metadata = {
-    title: 'Artist Registration',
+    title: 'Artist password reset',
 }
 
-<h2 className='m-auto text-[color:var(--gold-color)] italic'>Artist Registration</h2>
+<h2 className='m-auto text-[color:var(--gold-color)] italic'>Artist Password Reset</h2>
 
 <RegisterForm redirectURL='/profile'/>
 
-<Box sx={{margin: 'auto'}}>
+<Stack sx={{margin: 'auto'}} direction='column'>
     <Link href='/login'>Click here to log in as an Artist</Link>
-</Box>
+    <Link href='/password'>Click here to reset your password</Link>
+</Stack>

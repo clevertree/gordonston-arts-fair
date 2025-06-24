@@ -12,12 +12,11 @@ export async function POST(
             email,
             password
         } = await request.json();
-        const hashedPassword = await bcrypt.hash(password, 10);
 
         const redisClient = await getRedisClient();
-        const loginHash = 'user:' + email.toLowerCase() + ":login";
+        const redisLoginKey = 'user:' + email.toLowerCase() + ":login";
 
-        const count = await redisClient.exists(loginHash);
+        const count = await redisClient.exists(redisLoginKey);
         if (count >= 1) {
             console.log('User already exists:', email);
             return Response.json({error: "User already exists with this email. Please log in or reset your password"}, {
@@ -26,7 +25,8 @@ export async function POST(
         }
 
         // Store user in the database
-        await redisClient.set(loginHash, hashedPassword);
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await redisClient.set(redisLoginKey, hashedPassword);
 
         console.log("Registered a new user: ", email)
 

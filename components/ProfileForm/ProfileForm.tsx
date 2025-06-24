@@ -126,7 +126,7 @@ function ProfileForm({}: ProfileFormProps) {
             }}
         >
             <Typography variant="h6" id='step1'>
-                Step 1: Contact Information
+                Contact Information
             </Typography>
             <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
                 <TextField
@@ -275,6 +275,38 @@ function ProfileForm({}: ProfileFormProps) {
                     }}
                 />
             </fieldset>
+
+            <Typography variant="h6">
+                Manage Images
+            </Typography>
+
+            <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
+                <input
+                    name='uploads'
+                    type='file'
+                    multiple={true}
+                    accept="image/*"
+                    onChange={e => {
+                        console.log(e)
+                        const input = e.target;
+                        if (input && input.files) {
+                            for (const file of input.files) {
+                                fetch(
+                                    `/api/profile/upload?entry=0&filename=${file.name}&mimetype=${file.type}`,
+                                    {
+                                        method: 'POST',
+                                        body: file,
+                                    },
+                                ).then(response => response.json())
+                                    .then(responseJSON => {
+                                        console.log('responseJSON', responseJSON)
+                                    })
+                            }
+                        }
+                    }}
+                />
+            </fieldset>
+
 
             {error && <Typography variant="caption" color="red" align="center">
                 {error}

@@ -3,44 +3,39 @@
 import React, {useState} from 'react';
 import {Box, Button, TextField, Typography} from '@mui/material';
 
-interface LoginFormProps {
-    redirectURL: string,
-}
-
-function LoginForm({
-                       redirectURL
-                   }: LoginFormProps) {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+function PasswordResetForm() {
+    const [status, setStatus] = useState<'loaded' | 'submitting' | 'submitted' | 'error'>('loaded');
+    const [message, setMessage] = useState('');
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
 
     const handleSubmit = async (event: any) => {
         event.preventDefault();
-        setLoading(true);
-        setError('');
+        setMessage('');
+        setStatus('submitting')
 
-        const loginRequest = {
+        const resetRequest = {
             email,
-            password
         }
         try {
-            const response = await fetch('/api/login', {
+            const response = await fetch('/api/password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(loginRequest),
+                body: JSON.stringify(resetRequest),
             })
-            setLoading(false);
             // Check if the response was successful (e.g., status code 200-299)
+            const responseData = await response.json();
             if (!response.ok) {
-                setError(`HTTP error! status: ${response.status}`);
+                setStatus('error')
+                setMessage(responseData.error || `HTTP error! status: ${response.status}`);
             } else {
-                document.location.href = redirectURL;
+                setStatus('submitted')
+                setMessage(responseData.message)
             }
         } catch (e: any) {
-            setError(e.message)
+            setStatus('error')
+            setMessage(e.message)
         }
     };
 
@@ -60,41 +55,33 @@ function LoginForm({
             }}
         >
             <Typography variant="h6" align="center">
-                Artist Login
+                Submit Password Reset Request
             </Typography>
-            {error && <Typography variant="caption" color="red" align="center">
-                {error}
+            {message && <Typography variant="caption" color={status === 'error' ? "red" : "blue"} align="center">
+                {message}
             </Typography>}
             <TextField
                 label="Email Address"
                 variant="outlined"
+                type='email'
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                    setEmail(e.target.value)
+                    setStatus('loaded')
+                }}
                 fullWidth
                 slotProps={{
                     inputLabel: {
                         shrink: true
                     }
                 }}
+                helperText="Enter the email you wish to send a reset request to"
             />
-            <TextField
-                label="Password"
-                variant="outlined"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                fullWidth
-                slotProps={{
-                    inputLabel: {
-                        shrink: true
-                    }
-                }}
-            />
-            <Button type="submit" variant="contained" color="primary" disabled={loading}>
-                Login
+            <Button type="submit" variant="contained" color="primary" disabled={status !== 'loaded'}>
+                Submit request
             </Button>
         </Box>
     );
 }
 
-export default LoginForm;
+export default PasswordResetForm;

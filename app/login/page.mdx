@@ -1,6 +1,6 @@
-import LoginForm from "../../components/LoginForm/LoginForm";
+import LoginForm from "../../components/SessionForms/LoginForm";
 import Link from "next/link";
-import {Box} from "@mui/material";
+import {Stack} from "@mui/material";
 export const metadata = {
     title: 'Artist Login',
 }
@@ -9,6 +9,7 @@ export const metadata = {
 
 <LoginForm redirectURL='/profile'/>
 
-<Box sx={{margin: 'auto'}}>
+<Stack sx={{margin: 'auto'}} direction='column'>
     <Link href='/register'>Click here to register as an Artist</Link>
-</Box>
+    <Link href='/password'>Click here to reset your password</Link>
+</Stack>

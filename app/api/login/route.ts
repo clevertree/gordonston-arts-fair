@@ -3,18 +3,15 @@ import {NextRequest} from "next/server";
 import {getRedisClient} from "@util/redis";
 import bcrypt from "bcrypt";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 60 // revalidate every minute
-
 export async function POST(
     request: NextRequest,
 ) {
     try {
         const {email, password} = await request.json();
         const redisClient = await getRedisClient();
-        const loginHash = 'user:' + email.toLowerCase() + ":login";
+        const redisLoginKey = 'user:' + email.toLowerCase() + ":login";
 
-        const count = await redisClient.exists(loginHash);
+        const count = await redisClient.exists(redisLoginKey);
         if (count === 0) {
             console.log('User is not registered:', email);
             return Response.json({error: "Invalid email/password combination. Please try again or register before logging in"}, {
@@ -23,7 +20,7 @@ export async function POST(
         }
 
         // Get user from database
-        const passwordHash = await redisClient.get(loginHash);
+        const passwordHash = await redisClient.get(redisLoginKey);
         const passwordResult = passwordHash && await bcrypt.compare(password, passwordHash);
         if (!passwordResult) {
             console.log('Password is invalid:', email);
