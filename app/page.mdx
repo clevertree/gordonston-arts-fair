@@ -1,5 +1,3 @@
-import DateLocationApply from "@fragments/date-location-apply.mdx"
-import ClientImage from "@components/ClientImage/ClientImage";
 import {formatToLocal, getTimeSpan} from "../util/date";
 
 export const metadata = {
@@ -25,9 +23,6 @@ export const registrationEndDateString = formatToLocal(registrationEndDate, {wee
 You are warmly welcomed to our annual fine arts and crafts fair, hosted in historic Gordonston's Juliette Gordon Low
 Park. In addition to juried local and regional artists and artisans, we will hold gently used book and plant sales.
 There will be food trucks, live music and a supervised children's crafts area.
-
-
-<DateLocationApply/>
 
 # Artist Application for the 2026 Gordonston Art Fair
 
@@ -57,12 +52,10 @@ We will keep artists on a waitlist in the event spaces become available.
     <a name='gordonston-history'>A Hidden Gem</a>
 </h1>
 
-
-
-<ClientImage src={require('/public/img/Gates-of-Gordonston-B-W.jpg')}
-             className='m-auto pt-8'
-             alt='Gates of Gordonston'/>
-
+<img src='/img/Gates-of-Gordonston-B-W.jpg'
+     loading='lazy'
+     className='m-auto pt-8'
+     alt='Gates of Gordonston'/>
 
 <p className='m-auto sm:text-2xl pt-8 md:pt-18'>1917</p>
 <h2 className='m-auto text-[color:var(--gold-color)] italic'>It all started here</h2>
@@ -74,7 +67,10 @@ by W.W. Gordon III and his siblings, whose family was earlier responsible for th
 Georgia Railroad. Gordonston is one of Savannah’s original streetcar suburbs as it was located on the Thunderbolt
 streetcar line. It now contains 238 homes built primarily in the 1920’s - 1950’s.
 
-<img src='img/Gordonston-pathway.jpg' className='m-auto pt-4' alt='Gordonston pathway'/>
+<img src='/img/Gordonston-pathway.jpg'
+     loading='lazy'
+     className='m-auto pt-4'
+     alt='Gordonston pathway'/>
 
 
 <p className='m-auto sm:text-2xl pt-8 md:pt-18'>1926</p>
@@ -86,8 +82,10 @@ enclosed by an iron fence whose original gates were designed and built by Juliet
 her to maintain the park into perpetuity for the use of Gordonston residents and especially for its children. The park
 also contains a playground.
 
-<ClientImage src={require('/public/img/PXL_20220613_225011729.MP6_-scaled.jpg')}
-             className='m-auto' alt='Gordonston Park Gates'/>
+<img src='/img/PXL_20220613_225011729.MP6_-scaled.jpg'
+     loading='lazy'
+     className='m-auto'
+     alt='Gordonston Park Gates'/>
 
 
 <p className='m-auto sm:text-2xl pt-8 md:pt-18'>1948</p>
@@ -173,8 +171,9 @@ Artists will be offered a number of amenities to make their experience as enjoya
         >Artists receive a complimentary continental breakfast on Saturday morning.
     </div>
     <div>
-        <ClientImage
-            src={require('/public/img/Art_Show.jpg')}
+        <img
+            loading='lazy'
+            src='/img/Art_Show.jpg'
             alt='Art Show'/>
     </div>
 </div>
@@ -205,8 +204,9 @@ Artists will be offered a number of amenities to make their experience as enjoya
 
     </div>
     <div>
-        <ClientImage
-            src={require('/public/img/Gordonston-Children-Art-Activities.jpg')}
+        <img
+            loading='lazy'
+            src='/img/Gordonston-Children-Art-Activities.jpg'
             alt='Gordonston Children Art Activities'/>
     </div>
 </div>

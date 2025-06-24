@@ -42,7 +42,7 @@ body {
 
 article {
     max-width: 80vw;
-    margin: auto;
+    margin: 1rem auto;
     display: flex;
     flex-direction: column;
     z-index: 2;
