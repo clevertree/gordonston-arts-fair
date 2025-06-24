@@ -16,6 +16,7 @@ export interface UserProfileData {
     state?: string,
     zip?: string,
     category?: string,
+    description?: string,
     entries?: UserProfileEntryData[]
     // expiresAt: Date
 }
@@ -26,20 +27,28 @@ export interface UserProfileEntryData {
     path: string
 }
 
+export function isProfileComplete(profileData: UserProfileData) {
+    const {
+        firstName,
+        lastName,
+        phone,
+        address,
+        city,
+        state,
+        zip,
+        category,
+        description
+    } = profileData
 
-// <select name="data[Registration][category_id]" id="RegistrationCategoryId">
-// <option value="">Select a category...</option>
-// <option value="1252">Apparel</option>
-//     <option value="1253">Ceramics</option>
-//     <option value="1254">Drawings/Pastels</option>
-//     <option value="1255">Fiber</option>
-//     <option value="1256">Glass</option>
-//     <option value="1257">Graphics</option>
-//     <option value="1258">Jewelry</option>
-//     <option value="1259">Leather</option>
-//     <option value="1260">Metal</option>
-//     <option value="1261">Mixed Media</option>
-// <option value="1262">Other (Describe in Comments field)</option>
-// <option value="1263">Photography</option>
-//     <option value="1264">Wood</option>
-//     </select>
+    if (!firstName) return 'First Name is required';
+    if (!lastName) return 'Last name is required';
+    if (!phone) return 'Phone number is required';
+    if (!address) return 'Address is required';
+    if (!city) return 'City is required';
+    if (!state) return 'State is required';
+    if (!zip) return 'ZIP code is required';
+    if (!category) return 'Category is required';
+    if (!description) return 'Description is required';
+
+    return true;
+}

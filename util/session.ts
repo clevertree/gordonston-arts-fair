@@ -3,7 +3,7 @@ import {JWTPayload, jwtVerify, SignJWT} from 'jose'
 import {cookies} from "next/headers";
 
 interface SessionPayload extends JWTPayload {
-    id: string,
+    email: string,
     // expiresAt: Date
 }
 
@@ -32,8 +32,8 @@ export async function decrypt(session: string | undefined = '') {
 export async function login(sessionID: string) {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
-    const sessionData = {
-        id: sessionID,
+    const sessionData: SessionPayload = {
+        email: sessionID,
         // expiresAt
     };
 

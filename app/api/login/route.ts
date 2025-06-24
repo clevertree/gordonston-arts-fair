@@ -1,5 +1,7 @@
 import {login} from "@util/session";
 import {NextRequest} from "next/server";
+import {getRedisClient} from "@util/redis";
+import bcrypt from "bcrypt";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60 // revalidate every minute
@@ -8,18 +10,29 @@ export async function POST(
     request: NextRequest,
 ) {
     try {
-        const loginRequest = await request.json();
-        // const userContent = {id: 'test'}
-        // await sendMail({
-        //     to: userEmail,
-        //     html: "HTML",
-        //     text: "TEXT",
-        //     subject: "SUBJECT"
-        // })
+        const {email, password} = await request.json();
+        const redisClient = await getRedisClient();
+        const loginHash = 'user:' + email.toLowerCase() + ":login";
 
+        const count = await redisClient.exists(loginHash);
+        if (count === 0) {
+            console.log('User is not registered:', email);
+            return Response.json({error: "Invalid email/password combination. Please try again or register before logging in"}, {
+                status: 401,
+            })
+        }
 
-        // 2. Encrypt the session ID
-        await login(loginRequest.email.toLowerCase())
+        // Get user from database
+        const passwordHash = await redisClient.get(loginHash);
+        const passwordResult = passwordHash && await bcrypt.compare(password, passwordHash);
+        if (!passwordResult) {
+            console.log('Password is invalid:', email);
+            return Response.json({error: "Invalid email/password combination. Please try again or register before logging in"}, {
+                status: 401,
+            })
+        }
+
+        await login(email)
 
         return Response.json({message: "Login successful"}, {
             status: 200,

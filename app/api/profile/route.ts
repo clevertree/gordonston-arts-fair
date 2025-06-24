@@ -1,6 +1,7 @@
-import {head, put} from "@vercel/blob";
 import {decryptSession} from "@util/session";
 import {NextRequest} from "next/server";
+import {isProfileComplete} from "@util/profile";
+import {getRedisClient} from "@util/redis";
 
 export async function GET(
     request: NextRequest,
@@ -12,13 +13,15 @@ export async function GET(
                 status: 401,
             })
         }
-        const userEmail = session.id;
+        const redisClient = await getRedisClient();
+        const profileHash = 'profile:' + session.email.toLowerCase();
 
-        const headResponse = await head(`user/${userEmail}/profile`);
-
-        const response = await fetch(headResponse.url, {cache: 'no-store'})
-        const profileData = await response.json();
-        return Response.json(profileData, {
+        const profileString = await redisClient.get(profileHash);
+        const profileData = profileString ? JSON.parse(profileString) : {};
+        return Response.json({
+            profileData,
+            isProfileComplete: isProfileComplete(profileData)
+        }, {
             status: 200,
         })
 
@@ -40,19 +43,17 @@ export async function POST(
                 status: 401,
             })
         }
-        const userEmail = session.id;
-        const userContent = await request.json();
+        const redisClient = await getRedisClient();
+        const profileHash = 'profile:' + session.email.toLowerCase();
 
-        const {url} = await put(`user/${userEmail}/profile`,
-            JSON.stringify(userContent),
-            {
-                access: 'public',
-                contentType: 'application/json',
-                allowOverwrite: true
-            });
+        const profileString = await redisClient.get(profileHash);
+        const oldProfileData = profileString ? JSON.parse(profileString) : {};
+        const newProfileData = await request.json();
+        const updatedProfileData = {...oldProfileData, ...newProfileData}
+        const putResult = await redisClient.set(profileHash, JSON.stringify(updatedProfileData));
 
-        console.log("Updated user profile:", url)
-        return Response.json(session, {
+        console.log("Updated user profile:", putResult)
+        return Response.json(putResult, {
             status: 200,
         })
 

@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
     Box,
     Button,
@@ -10,6 +10,7 @@ import {
     MenuItem,
     Select,
     TextField,
+    TextFieldProps,
     Typography
 } from '@mui/material';
 import {UserProfileData} from "@util/profile";
@@ -18,11 +19,33 @@ interface ProfileFormProps {
 }
 
 function ProfileForm({}: ProfileFormProps) {
-    const [loading, setLoading] = useState(false);
-    const [updated, setUpdated] = useState(false);
+    const [status, setStatus] = useState<'loading' | 'loaded' | 'unsaved' | 'updating' | 'updated' | 'error'>('loading');
     const [error, setError] = useState('');
     const [profileData, setProfileData] = useState<UserProfileData>({})
     const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
+    const formRef = useRef<HTMLFormElement>();
+
+    function getFormValues() {
+        if (formRef.current) {
+            const formData = new FormData(formRef.current);
+            return Object.fromEntries(formData.entries());
+        }
+        return {};
+    }
+
+    function updateFormStatus() {
+        const formData = new FormData(formRef.current);
+        let unsaved = false;
+        for (const [key, value] of formData.entries()) {
+            console.log('entry', key, value)
+            // console.log(`${key}: ${value}`);
+            if (profileData[key as keyof UserProfileData] !== value) {
+                unsaved = true;
+            }
+        }
+        setStatus(unsaved ? 'unsaved' : 'loaded');
+
+    }
 
     useEffect(() => {
         fetch('/api/profile', {
@@ -32,18 +55,20 @@ function ProfileForm({}: ProfileFormProps) {
             },
         })
             .then(response => response.json())
-            .then(async (profileData) => {
-                if (profileData.category) {
+            .then(async ({profileData, isProfileComplete}) => {
+                if (profileData.category && !categoryList.includes(profileData.category)) {
                     setCategoryList([...categoryList, profileData.category])
                 }
                 setProfileData(profileData)
+                setStatus('loaded')
             })
     }, []);
 
     const handleSubmit = async (event: any) => {
+
+        const formValues: UserProfileData = getFormValues();
         event.preventDefault();
-        setLoading(true);
-        setUpdated(false);
+        setStatus('updating');
         setError('');
 
         try {
@@ -52,199 +77,213 @@ function ProfileForm({}: ProfileFormProps) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(profileData),
+                body: JSON.stringify(formValues),
             })
-            setLoading(false);
             // Check if the response was successful (e.g., status code 200-299)
             if (!response.ok) {
                 setError(`HTTP error! status: ${response.status}`);
+                setStatus('error');
             } else {
-                setUpdated(true);
+                setStatus('updated');
             }
         } catch (e: any) {
-            setLoading(false);
+            setStatus('error');
             setError(e.message)
         }
     };
+
+    const textFieldProps: TextFieldProps = {
+        fullWidth: true,
+        variant: 'outlined',
+        slotProps: {
+            inputLabel: {
+                shrink: true
+            }
+        },
+        onBlur: updateFormStatus
+    }
+
+    if (status === "loading") {
+        return <Box>
+            Loading Profile Form...
+        </Box>
+    }
 
     return (
         <Box
             component="form"
             onSubmit={handleSubmit}
+            ref={formRef}
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
+                minWidth: '100%',
                 gap: 2,
-                maxWidth: 400,
                 margin: 'auto',
                 padding: 3,
                 border: '1px solid #ccc',
                 borderRadius: 4,
             }}
         >
-            <Typography variant="h6" align="center">
-                Artist Profile
+            <Typography variant="h6" id='step1'>
+                Step 1: Contact Information
             </Typography>
+            <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
+                <TextField
+                    name='firstName'
+                    label="First Name"
+                    required
+                    defaultValue={profileData.firstName}
+                    fullWidth
+                    helperText="Please enter your first name"
+                    {...textFieldProps}
+                />
+                <TextField
+                    name='lastName'
+                    label="Last Name"
+                    required
+                    defaultValue={profileData.lastName}
+                    helperText="Please enter your last name"
+                    {...textFieldProps}
+                />
+                <TextField
+                    name='companyName'
+                    label="Company Name"
+                    defaultValue={profileData.companyName}
+                    helperText="Optional company name"
+                    {...textFieldProps}
+                />
+            </fieldset>
+            <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
+                <TextField
+                    name='phone'
+                    label="Primary Phone"
+                    required
+                    defaultValue={profileData.phone}
+                    helperText="Primary Phone (i.e. home)"
+                    {...textFieldProps}
+                />
+                <TextField
+                    name='phone2'
+                    label="Contact Phone"
+                    defaultValue={profileData.phone2}
+                    helperText="Contact Phone (i.e. cell)"
+                    {...textFieldProps}
+                />
+                <TextField
+                    name='website'
+                    label="Website"
+                    defaultValue={profileData.website}
+                    placeholder='myartsite.com'
+                    helperText="Artist Website"
+                    {...textFieldProps}
+                />
+            </fieldset>
+            <fieldset disabled={status === 'updating'} className='grid md:grid-cols-4 gap-4'>
+                <TextField
+                    name='address'
+                    label="Address"
+                    required
+                    defaultValue={profileData.address}
+                    placeholder='123 Art st.'
+                    helperText="Enter your Address"
+                    {...textFieldProps}
+                />
+                <TextField
+                    name='city'
+                    label="City"
+                    required
+                    defaultValue={profileData.city}
+                    placeholder='Savannah'
+                    helperText="Enter your city name"
+                    {...textFieldProps}
+                />
+                <FormControl fullWidth>
+                    <InputLabel required id="state-label">State</InputLabel>
+                    <Select
+                        name='state'
+                        labelId="state-label"
+                        value={profileData.state}
+                        required
+                        label="State"
+                        onChange={updateFormStatus}
+                    >
+                        {LIST_STATES.map(state => (
+                            <MenuItem key={state} value={state}>{state}</MenuItem>
+                        ))}
+                    </Select>
+                    <FormHelperText>Select your state</FormHelperText>
+                </FormControl>
+                <TextField
+                    name='zip'
+                    label="Zipcode"
+                    required
+                    defaultValue={profileData.zip}
+                    placeholder='Savannah'
+                    helperText="Enter your zipcode"
+                    {...textFieldProps}
+                />
+            </fieldset>
+            <Typography variant="h6">
+                Exhibit Information
+            </Typography>
+            <fieldset disabled={status === 'updating'}>
+                <FormControl fullWidth>
+                    <InputLabel required id="category-label">Category</InputLabel>
+                    <Select
+                        name='category'
+                        labelId="category-label"
+                        required
+                        defaultValue={profileData.category}
+                        label="Category"
+                        onChange={(e) => {
+                            let category = e.target.value;
+                            if (category === 'Custom') {
+                                category = prompt("Please enter a custom art category") || '';
+                                if (category) {
+                                    setCategoryList(list => ([...list, category]));
+                                }
+                            }
+                            updateFormStatus()
+                        }}
+                    >
+                        {categoryList.map(category => (
+                            <MenuItem key={category} value={category}>{category}</MenuItem>
+                        ))}
+                    </Select>
+                    <FormHelperText>Select your art category</FormHelperText>
+                </FormControl>
+            </fieldset>
+            <fieldset disabled={status === 'updating'}>
+                <TextField
+                    name='description'
+                    label="Description"
+                    required
+                    multiline
+                    minRows={4}
+                    defaultValue={profileData.description}
+                    placeholder='Information about my exhibit...'
+                    helperText="Describe your exhibit"
+                    {...textFieldProps}
+                    slotProps={{
+                        htmlInput: {
+                            maxLength: 600,
+                        },
+                        inputLabel: {
+                            shrink: true
+                        }
+                    }}
+                />
+            </fieldset>
+
             {error && <Typography variant="caption" color="red" align="center">
                 {error}
             </Typography>}
-            {updated && <Typography variant="caption" color="blue" align="center">
+            {status === 'updated' && <Typography variant="caption" color="blue" align="center">
                 Profile has been updated successfully
             </Typography>}
-            <TextField
-                label="First Name"
-                variant="outlined"
-                required
-                value={profileData.firstName || ''}
-                onChange={(e) => setProfileData(profile => ({
-                    ...profile,
-                    firstName: e.target.value
-                }))}
-                fullWidth
-            />
-            <TextField
-                label="Last Name"
-                variant="outlined"
-                required
-                value={profileData.lastName || ''}
-                onChange={(e) => setProfileData(profile => ({
-                    ...profile,
-                    lastName: e.target.value
-                }))}
-                fullWidth
-            />
-            <TextField
-                label="Company Name"
-                variant="outlined"
-                value={profileData.companyName || ''}
-                onChange={(e) => setProfileData(profile => ({
-                    ...profile,
-                    companyName: e.target.value
-                }))}
-                fullWidth
-            />
-            <TextField
-                label="Primary Phone"
-                variant="outlined"
-                required
-                value={profileData.phone || ''}
-                onChange={(e) => setProfileData(profile => ({
-                    ...profile,
-                    phone: e.target.value
-                }))}
-                helperText="Enter your Primary Phone (i.e. home)"
-                fullWidth
-            />
-            <TextField
-                label="Contact Phone"
-                variant="outlined"
-                value={profileData.phone2 || ''}
-                onChange={(e) => setProfileData(profile => ({
-                    ...profile,
-                    phone2: e.target.value
-                }))}
-                helperText="Enter your Contact Phone (i.e. cell)"
-                fullWidth
-            />
-            <TextField
-                label="Website"
-                variant="outlined"
-                value={profileData.website || ''}
-                placeholder='myartsite.com'
-                onChange={(e) => setProfileData(profile => ({
-                    ...profile,
-                    website: e.target.value
-                }))}
-                fullWidth
-                helperText="Enter your Artist Website"
-            />
-            <TextField
-                label="Address"
-                variant="outlined"
-                required
-                value={profileData.address || ''}
-                placeholder='123 Art st.'
-                onChange={(e) => setProfileData(profile => ({
-                    ...profile,
-                    address: e.target.value
-                }))}
-                helperText="Enter your Address"
-                fullWidth
-            />
-            <TextField
-                label="City"
-                variant="outlined"
-                required
-                value={profileData.city || ''}
-                placeholder='Savannah'
-                onChange={(e) => setProfileData(profile => ({
-                    ...profile,
-                    city: e.target.value
-                }))}
-                helperText="Enter your city name"
-                fullWidth
-            />
-            <FormControl fullWidth>
-                <InputLabel required id="state-label">State</InputLabel>
-                <Select
-                    labelId="state-label"
-                    value={profileData.state || ''}
-                    required
-                    label="State"
-                    onChange={(e) => setProfileData(profile => ({
-                        ...profile,
-                        state: e.target.value
-                    }))}
-                >
-                    {LIST_STATES.map(state => (
-                        <MenuItem key={state} value={state}>{state}</MenuItem>
-                    ))}
-                </Select>
-                <FormHelperText>Select your state</FormHelperText>
-            </FormControl>
-            <TextField
-                label="Zipcode"
-                variant="outlined"
-                required
-                value={profileData.zip || ''}
-                placeholder='Savannah'
-                onChange={(e) => setProfileData(profile => ({
-                    ...profile,
-                    zip: e.target.value
-                }))}
-                fullWidth
-                helperText="Enter your zipcode"
-            />
-            <FormControl fullWidth>
-                <InputLabel required id="category-label">Category</InputLabel>
-                <Select
-                    labelId="category-label"
-                    required
-                    value={profileData.category || ''}
-                    label="Category"
-                    onChange={(e) => {
-                        let category = e.target.value;
-                        if (category === 'Custom') {
-                            category = prompt("Please enter a custom art category") || '';
-                            if (!category)
-                                return;
-                            setCategoryList(list => ([...list, category]));
-                        }
-                        setProfileData(profile => ({
-                            ...profile,
-                            category
-                        }))
-                    }}
-                >
-                    {categoryList.map(category => (
-                        <MenuItem key={category} value={category}>{category}</MenuItem>
-                    ))}
-                </Select>
-                <FormHelperText>Select your art category</FormHelperText>
-            </FormControl>
-
-            <Button type="submit" variant="contained" color="primary" disabled={loading}>
-                Profile
+            <Button type="submit" variant="contained" color="primary" disabled={status !== 'unsaved'}>
+                Update Profile
             </Button>
         </Box>
     );
