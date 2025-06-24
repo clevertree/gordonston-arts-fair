@@ -2,9 +2,9 @@
 import nodemailer from 'nodemailer';
 import Mail from "nodemailer/lib/mailer";
 
-const SMTP_SERVER_HOST = process.env.NEXT_PUBLIC_SMTP_SERVER_HOST;
-const SMTP_SERVER_USERNAME = process.env.NEXT_PUBLIC_SMTP_SERVER_USERNAME;
-const SMTP_SERVER_PASSWORD = process.env.NEXT_PUBLIC_SMTP_SERVER_PASSWORD;
+const SMTP_SERVER_HOST = process.env.SMTP_SERVER_HOST;
+const SMTP_SERVER_USERNAME = process.env.SMTP_SERVER_USERNAME;
+const SMTP_SERVER_PASSWORD = process.env.SMTP_SERVER_PASSWORD;
 const EMAIL_ADMIN = process.env.NEXT_PUBLIC_EMAIL_ADMIN;
 const EMAIL_BCC = process.env.NEXT_PUBLIC_EMAIL_BCC;
 const transporter = nodemailer.createTransport({

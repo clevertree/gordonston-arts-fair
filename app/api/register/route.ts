@@ -15,7 +15,7 @@ export async function POST(
         } = await request.json();
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser: UserData = {
-            email,
+            email: email.toLowerCase(),
             password: hashedPassword
         }
         const blobPathLogin = `user/${email}/login`;

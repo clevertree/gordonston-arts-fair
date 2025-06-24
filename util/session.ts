@@ -7,7 +7,7 @@ interface SessionPayload extends JWTPayload {
     // expiresAt: Date
 }
 
-const secretKey = process.env.PUBLIC_NEXT_SESSION_SECRET
+const secretKey = process.env.SESSION_SECRET
 const encodedKey = new TextEncoder().encode(secretKey)
 
 export async function encrypt(payload: SessionPayload) {
