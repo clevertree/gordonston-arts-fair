@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Box,
     Button,
@@ -23,7 +23,23 @@ function ProfileForm({}: ProfileFormProps) {
     const [error, setError] = useState('');
     const [profileData, setProfileData] = useState<UserProfileData>({})
     const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
-    console.log('profileData', profileData)
+
+    useEffect(() => {
+        fetch('/api/profile', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+            .then(response => response.json())
+            .then(async (profileData) => {
+                if (profileData.category) {
+                    setCategoryList([...categoryList, profileData.category])
+                }
+                setProfileData(profileData)
+            })
+    }, []);
+
     const handleSubmit = async (event: any) => {
         event.preventDefault();
         setLoading(true);
