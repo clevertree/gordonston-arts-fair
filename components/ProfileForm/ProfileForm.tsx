@@ -13,7 +13,6 @@ import {
     TextFieldProps,
     Typography
 } from '@mui/material';
-import Paper from '@mui/material/Paper';
 import {UserProfile, UserProfileInfo, UserProfileUpload} from "@util/profile";
 
 interface ProfileFormProps {
@@ -234,10 +233,12 @@ function ProfileForm({}: ProfileFormProps) {
                             native
                             name='state'
                             labelId="state-label"
-                            defaultValue={profileInfo.state || ''}
+                            defaultValue={profileInfo.state}
                             required
                             label="State"
                         >
+                            <option disabled value=''>Select a state</option>
+                            <option value=''></option>
                             {Object.entries(LIST_STATES).map(([state, name]) => (
                                 <option
                                     key={state}
@@ -287,6 +288,8 @@ function ProfileForm({}: ProfileFormProps) {
                                 handleFormChange();
                             }}
                         >
+                            <option disabled value=''>Select a category</option>
+                            <option value=''></option>
                             {LIST_CATEGORIES.map(category => (
                                 <option
                                     key={category}
@@ -326,44 +329,65 @@ function ProfileForm({}: ProfileFormProps) {
                 </fieldset>
 
                 <Typography variant="h6">
-                    Upload & Manage Images
+                    Upload images
                 </Typography>
 
                 <fieldset disabled={status === 'updating'}>
                     <Stack spacing={2}>
-
-                        <input
-                            type='file'
-                            multiple={true}
-                            accept="image/*"
-                            onChange={async e => {
-                                setStatus('updating')
-                                const input = e.target;
-                                let count = 0;
-                                if (input && input.files) {
-                                    for (const file of input.files) {
-                                        console.log("Uploading file: ", file)
-                                        const response = await fetch(
-                                            `/api/profile/upload?filename=${file.name}&mimetype=${file.type}`,
-                                            {
-                                                method: 'POST',
-                                                body: file,
-                                            },
-                                        );
-                                        const {uploadList} = await response.json();
-                                        console.log('uploadList', uploadList);
-                                        debugger;
-                                        // setProfileData(profileData);
-                                        count++;
+                        <label htmlFor="file-upload-multiple">
+                            <Button variant="outlined"
+                                    component="span"
+                                    color="secondary"
+                            >
+                                Click here to Upload multiple images
+                            </Button>
+                            <input
+                                style={{display: "none"}}
+                                id='file-upload-multiple'
+                                type='file'
+                                multiple={true}
+                                accept="image/*"
+                                onChange={async e => {
+                                    setStatus('updating')
+                                    const input = e.target;
+                                    let count = 0;
+                                    let updatedProfileData: UserProfile | null = null
+                                    if (input && input.files) {
+                                        for (const file of input.files) {
+                                            console.log("Uploading file: ", file)
+                                            const response = await fetch(
+                                                `/api/profile/upload?filename=${file.name}&mimetype=${file.type}`,
+                                                {
+                                                    method: 'POST',
+                                                    body: file,
+                                                },
+                                            );
+                                            const {profileData} = await response.json();
+                                            updatedProfileData = profileData;
+                                            count++;
+                                        }
                                     }
-                                }
-                                setMessage(count + " file" + (count === 1 ? '' : 's') + ' have been uploaded')
-                                setStatus('updated')
-                                e.target.value = '';
-                            }}
-                        />
+                                    setMessage(count + " file" + (count === 1 ? '' : 's') + ' have been uploaded')
+                                    setStatus('updated')
+                                    e.target.value = '';
+                                    console.log('updatedProfileData', updatedProfileData);
+                                    if (updatedProfileData) {
+                                        setProfileData(updatedProfileData);
+                                    }
+                                }}
+                            />
+                        </label>
+                    </Stack>
+                </fieldset>
 
-                        {Object.keys(profileUploads).map((filename: string, i) => <Paper
+                <Typography variant="h6">
+                    Manage uploaded images
+                </Typography>
+
+                <fieldset disabled={status === 'updating'}>
+                    <Stack spacing={2}>
+                        {Object.keys(profileUploads).map((filename: string, i) => <Box
+
                             key={filename + i}
                         >
                             <div className='grid sm:grid-cols-2 gap-x-8'>
@@ -393,18 +417,47 @@ function ProfileForm({}: ProfileFormProps) {
                                             }
                                         }}
                                     />
+                                    <div>
+                                        <Button variant="outlined" color="secondary"
+                                                sx={{float: 'right'}}
+                                                onClick={async () => {
+                                                    console.log("Deleting file: ", filename)
+                                                    const response = await fetch(
+                                                        `/api/profile/upload/delete`,
+                                                        {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'Content-Type': 'application/json'
+                                                            },
+                                                            body: JSON.stringify({
+                                                                filename
+                                                            }),
+                                                        },
+                                                    );
+                                                    const {profileData} = await response.json();
+                                                    setProfileData(profileData);
+                                                }}>
+                                            Delete Image
+                                        </Button>
+                                    </div>
                                 </Stack>
                                 <a
                                     href={profileUploads[filename].url}
                                     target='_blank'
                                 >
                                     <img
+                                        onError={(e: any) => {
+                                            setTimeout(() => {
+                                                e.target.src += '?&'
+                                            }, 5000)
+                                        }}
+                                        loading='lazy'
                                         src={profileUploads[filename].url}
                                         alt={filename}
                                     />
                                 </a>
                             </div>
-                        </Paper>)}
+                        </Box>)}
                     </Stack>
                 </fieldset>
 
@@ -423,7 +476,7 @@ export default ProfileForm;
 
 
 const LIST_STATES = {
-    "": "",
+    // "": "",
     "AL": "Alabama",
     "AK": "Alaska",
     "AZ": "Arizona",
@@ -477,7 +530,7 @@ const LIST_STATES = {
 }
 
 const LIST_CATEGORIES = [
-    '',
+    // '',
     'Custom',
     "Painting", // Includes oil, acrylic, watercolor, etc.
     "Sculpture", //  Includes classical, modern, assemblage, and other 3D forms

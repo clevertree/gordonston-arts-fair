@@ -1,10 +1,9 @@
-import {put} from '@vercel/blob';
+import {del} from '@vercel/blob';
 import {NextRequest, NextResponse} from 'next/server';
 import {decryptSession} from "@util/session";
 import {fetchProfileData, getImageUploadBlobPath} from "@app/api/profile/profileUtil";
 
-interface FileUploadParams {
-    mimetype: string,
+interface FileDeleteParams {
     filename: string
 }
 
@@ -15,27 +14,17 @@ export async function POST(request: NextRequest) {
             status: 401,
         })
     }
-    const {searchParams} = new URL(request.url);
-    const contentType = searchParams.get('mimetype');
-    if (!contentType) throw new Error("Invalid content type");
-
-    const filename = searchParams.get('filename');
+    const requestData: FileDeleteParams = await request.json();
+    const {filename} = requestData
     if (!filename) throw new Error("Invalid file name")
-
-    if (!request.body) {
-        return NextResponse.json({error: 'Invalid body'});
-    }
 
     const imagePath = getImageUploadBlobPath(session.email);
 
-    console.log("Uploading file: ", filename);
-    await put(`${imagePath}/${filename}`, request.body, {
-        access: 'public',
-        contentType,
-        allowOverwrite: true
-    });
+    console.log("Deleting file: ", `${imagePath}/${filename}`);
+    await del(`${imagePath}/${filename}`);
 
     const profileData = await fetchProfileData(session.email);
+    delete profileData.uploads[filename];
 
     return NextResponse.json({
         profileData,
