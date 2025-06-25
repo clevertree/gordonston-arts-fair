@@ -94,7 +94,8 @@ function LoginForm({
                     }
                 }}
             />
-            <Button type="submit" variant="contained" color="primary" disabled={status !== 'loaded'}>
+            <Button type="submit" variant="contained" color="primary"
+                    disabled={status !== 'loaded' && status !== 'error'}>
                 Login
             </Button>
         </Box>

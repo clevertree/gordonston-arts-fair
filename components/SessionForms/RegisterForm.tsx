@@ -10,15 +10,16 @@ interface RegisterFormProps {
 function RegisterForm({
                           redirectURL
                       }: RegisterFormProps) {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+
+    const [status, setStatus] = useState<'loaded' | 'submitting' | 'submitted' | 'error'>('loaded');
+    const [message, setMessage] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const handleSubmit = async (event: any) => {
         event.preventDefault();
-        setLoading(true);
-        setError('');
+        setStatus('submitting');
+        setMessage('');
 
         const registerRequest = {
             email,
@@ -32,16 +33,19 @@ function RegisterForm({
                 },
                 body: JSON.stringify(registerRequest),
             })
-            setLoading(false);
             const responseData = await response.json();
             // Check if the response was successful (e.g., status code 200-299)
             if (!response.ok) {
-                setError(responseData.error || `HTTP error! status: ${response.status}`);
+                setStatus('error');
+                setMessage(responseData.error || `HTTP error! status: ${response.status}`);
             } else {
+                setStatus('submitted');
                 document.location.href = responseData.redirectURL || redirectURL;
+                setMessage(responseData.message || `Registration was successful`);
             }
         } catch (e: any) {
-            setError(e.message)
+            setStatus('error');
+            setMessage(e.message);
         }
     };
 
@@ -63,8 +67,8 @@ function RegisterForm({
             <Typography variant="h6" align="center">
                 Register an Artist Account
             </Typography>
-            {error && <Typography variant="caption" color="red" align="center">
-                {error}
+            {message && <Typography variant="caption" color={status === 'error' ? "red" : "blue"} align="center">
+                {message}
             </Typography>}
             <TextField
                 label="Email Address"
@@ -92,7 +96,9 @@ function RegisterForm({
                     }
                 }}
             />
-            <Button type="submit" variant="contained" color="primary" disabled={loading}>
+
+            <Button type="submit" variant="contained" color="primary"
+                    disabled={status !== 'loaded' && status !== 'error'}>
                 Register
             </Button>
         </Box>
