@@ -30,15 +30,17 @@ export interface UserProfileUpload {
 
 export function isProfileComplete(profileData: UserProfile) {
     const {
-        firstName,
-        lastName,
-        phone,
-        address,
-        city,
-        state,
-        zip,
-        category,
-        description
+        info: {
+            firstName,
+            lastName,
+            phone,
+            address,
+            city,
+            state,
+            zip,
+            category,
+            description
+        }
     } = profileData
 
     if (!firstName) return 'First Name is required';

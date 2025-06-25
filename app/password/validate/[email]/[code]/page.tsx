@@ -6,15 +6,13 @@ export const metadata = {
     title: 'Artist Registration: Set a new password',
 }
 
+export default async function PasswordResetValidationPage({
+                                                              params,
+                                                          }: {
+    params: Promise<{ email: string, code: string }>
+}) {
+    const {email, code} = await params
 
-interface PasswordResetValidationPageProps {
-    params: {
-        email: string;
-        code: string;
-    };
-}
-
-export default function PasswordResetValidationPage({params: {email, code}}: PasswordResetValidationPageProps) {
     return (
         <>
             <h2 className='m-auto text-[color:var(--gold-color)] italic'>Artist Registration</h2>
