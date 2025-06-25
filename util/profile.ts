@@ -1,10 +1,12 @@
-export interface UserData {
-    email: string,
-    password: string,
-    profile?: UserProfileData
+export interface UserProfile {
+    info: UserProfileInfo,
+    uploads: {
+        [filename: string]: UserProfileUpload
+    }
+    // expiresAt: Date
 }
 
-export interface UserProfileData {
+export interface UserProfileInfo {
     firstName?: string,
     lastName?: string,
     companyName?: string,
@@ -17,18 +19,16 @@ export interface UserProfileData {
     zip?: string,
     category?: string,
     description?: string,
-    entries?: UserProfileEntryData[]
-    // expiresAt: Date
 }
 
-export interface UserProfileEntryData {
+export interface UserProfileUpload {
     title: string,
     description?: string,
     url?: string
     // path: string
 }
 
-export function isProfileComplete(profileData: UserProfileData) {
+export function isProfileComplete(profileData: UserProfile) {
     const {
         firstName,
         lastName,

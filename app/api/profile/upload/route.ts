@@ -1,8 +1,6 @@
-import {put} from '@vercel/blob';
+import {list, put} from '@vercel/blob';
 import {NextRequest, NextResponse} from 'next/server';
 import {decryptSession} from "@util/session";
-import {getRedisClient} from "@util/redis";
-import {UserProfileData} from "@util/profile";
 
 interface FileUploadParams {
     mimetype: string,
@@ -30,36 +28,42 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({error: 'Invalid body'});
     }
 
-    // Get redis client
-    const redisClient = await getRedisClient();
+    // // Get redis client
+    // const redisClient = await getRedisClient();
+    //
+    // // Get profile data
+    // const profilePath = 'profile:' + session.email.toLowerCase();
+    // const profileString = await redisClient.get(profilePath);
+    // const profileData: UserProfileData = profileString ? JSON.parse(profileString) : {};
+    // if (!profileData.entries)
+    //     profileData.entries = [];
+    // if (!entry || profileData.entries.length < entry) {
+    //     entry = profileData.entries.length;
+    // }
+    // if (!profileData.entries[entry]) {
+    //     profileData.entries[entry] = {
+    //         title: filename
+    //     }
+    //     // Update profile with new entry
+    //     await redisClient.set(profilePath, JSON.stringify(profileData));
+    // }
 
-    // Get profile data
-    const profilePath = 'profile:' + session.email.toLowerCase();
-    const profileString = await redisClient.get(profilePath);
-    const profileData: UserProfileData = profileString ? JSON.parse(profileString) : {};
-    if (!profileData.entries)
-        profileData.entries = [];
-    if (!entry || profileData.entries.length < entry) {
-        entry = profileData.entries.length;
-    }
-    if (!profileData.entries[entry]) {
-        profileData.entries[entry] = {
-            title: filename
-        }
-        // Update profile with new entry
-        await redisClient.set(profilePath, JSON.stringify(profileData));
-    }
-
-    const imagePath = 'profile/' + session.email.toLowerCase() + '/image-' + entry;
+    const imagePath = 'profile/' + session.email.toLowerCase() + '/uploads';
 
     console.log("Uploading file: ", filename);
-    const blob = await put(imagePath, request.body, {
+    await put(`${imagePath}/${filename}`, request.body, {
         access: 'public',
         contentType,
         allowOverwrite: true
     });
+
+    const uploadList = await list({
+        prefix: imagePath
+    })
+
     return NextResponse.json({
-        profileData,
+        // profileData,
+        uploadList
         // blob
     });
 

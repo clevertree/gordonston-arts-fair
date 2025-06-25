@@ -24,6 +24,11 @@
 /*    }*/
 /*}*/
 
+/* Style invalid required inputs when in focus */
+input:required:focus:invalid {
+    border-color: red; /* Example: change border color for invalid input */
+}
+
 html {
     /*font-size: 10px;*/
 

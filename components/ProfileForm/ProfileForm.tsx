@@ -7,7 +7,6 @@ import {
     FormControl,
     FormHelperText,
     InputLabel,
-    MenuItem,
     Select,
     Stack,
     TextField,
@@ -15,7 +14,7 @@ import {
     Typography
 } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import {UserProfileData} from "@util/profile";
+import {UserProfile, UserProfileInfo, UserProfileUpload} from "@util/profile";
 
 interface ProfileFormProps {
 }
@@ -23,35 +22,32 @@ interface ProfileFormProps {
 function ProfileForm({}: ProfileFormProps) {
     const [status, setStatus] = useState<'loading' | 'loaded' | 'unsaved' | 'updating' | 'updated' | 'error'>('loading');
     const [message, setMessage] = useState('');
-    const [profileData, setProfileData] = useState<UserProfileData>({})
-    const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
+    const [profileData, setProfileData] = useState<UserProfile>({info: {}, uploads: {}})
+    // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
     const formRef = useRef<HTMLFormElement>();
-    const {entries = []} = profileData;
+    const {uploads: profileUploads = {}, info: profileInfo = {}} = profileData;
 
-    function getFormValues() {
-        if (formRef.current) {
-            const formData = new FormData(formRef.current);
-            return Object.fromEntries(formData.entries());
-        }
-        return {};
-    }
-
-    function updateFormStatus() {
+    function getFormData() {
         const formData = new FormData(formRef.current);
-        let unsaved = false;
-        for (const [key, value] of formData.entries()) {
-            switch (key) {
+        const profileData: UserProfile = {info: {}, uploads: {}}
+        for (const entry of formData.entries()) {
+            const [fieldName, value] = entry;
+            const split = fieldName.split(/:/g);
+            switch (split[0]) {
                 case 'uploads':
-                    continue;
-            }
-            // console.log(`${key}: ${value}`);
-            if (profileData[key as keyof UserProfileData] !== value) {
-                console.log('changed', key, value)
-                unsaved = true;
+                    const [, filename, key] = split;
+                    if (!profileData.uploads[filename])
+                        profileData.uploads[filename] = {
+                            title: filename
+                        };
+                    profileData.uploads[filename][key as keyof UserProfileUpload] = value + '';
+                    break;
+                default:
+                    profileData.info[fieldName as keyof UserProfileInfo] = `${value}`
+                    break;
             }
         }
-        setStatus(unsaved ? 'unsaved' : 'loaded');
-
+        return profileData;
     }
 
     useEffect(() => {
@@ -63,52 +59,73 @@ function ProfileForm({}: ProfileFormProps) {
         })
             .then(response => response.json())
             .then(async ({profileData, isProfileComplete}) => {
-                if (profileData.category && !categoryList.includes(profileData.category)) {
-                    setCategoryList([...categoryList, profileData.category])
-                }
+                // if (profileData.category && !categoryList.includes(profileData.category)) {
+                //     setCategoryList([...categoryList, profileData.category])
+                // }
                 setProfileData(profileData)
                 setStatus('loaded')
             })
     }, []);
 
     const handleSubmit = async (event: any) => {
-
-        const formValues: UserProfileData = getFormValues();
         event.preventDefault();
-        setStatus('updating');
-        setMessage('');
+
+        if (!formRef.current) {
+            setStatus('error');
+            setMessage("Invalid Form Ref")
+            return;
+        }
 
         try {
+            const profileData = getFormData();
+            event.preventDefault();
+            setStatus('updating');
+            setMessage('');
+
             const response = await fetch('/api/profile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(formValues),
+                body: JSON.stringify(profileData),
             })
             // Check if the response was successful (e.g., status code 200-299)
+            const {error, message} = await response.json();
             if (!response.ok) {
-                setMessage(`HTTP error! status: ${response.status}`);
+                setMessage(error || `HTTP error! status: ${response.status}`);
                 setStatus('error');
             } else {
                 setStatus('updated');
+                setMessage(message)
             }
         } catch (e: any) {
+            console.error(e);
             setStatus('error');
             setMessage(e.message)
         }
     };
+
+    function handleFormChange() {
+        switch (status) {
+            case 'error':
+            case 'updated':
+            case 'loaded':
+                setMessage('');
+                setStatus('unsaved');
+                break;
+        }
+    }
 
     const textFieldProps: TextFieldProps = {
         fullWidth: true,
         variant: 'outlined',
         slotProps: {
             inputLabel: {
-                shrink: true
+                // shrink: true
             }
         },
-        onChange: updateFormStatus,
-        onBlur: updateFormStatus
+        onChange: handleFormChange
+        // onBlur: updateFormStatus
     }
 
     if (status === "loading") {
@@ -117,268 +134,350 @@ function ProfileForm({}: ProfileFormProps) {
         </Box>
     }
 
+
     return (
-        <Box
-            component="form"
-            onSubmit={handleSubmit}
-            ref={formRef}
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                minWidth: '100%',
-                gap: 2,
-                margin: 'auto',
-                padding: 3,
-                border: '1px solid #ccc',
-                borderRadius: 4,
+        <form
+            ref={(formElm) => {
+                if (formElm) formRef.current = formElm
             }}
+            onSubmit={handleSubmit}
         >
-            <Typography variant="h6" id='step1'>
-                Contact Information
-            </Typography>
-            <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
-                <TextField
-                    name='firstName'
-                    label="First Name"
-                    required
-                    defaultValue={profileData.firstName}
-                    fullWidth
-                    helperText="Please enter your first name"
-                    {...textFieldProps}
-                />
-                <TextField
-                    name='lastName'
-                    label="Last Name"
-                    required
-                    defaultValue={profileData.lastName}
-                    helperText="Please enter your last name"
-                    {...textFieldProps}
-                />
-                <TextField
-                    name='companyName'
-                    label="Company Name"
-                    defaultValue={profileData.companyName}
-                    helperText="Optional company name"
-                    {...textFieldProps}
-                />
-            </fieldset>
-            <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
-                <TextField
-                    name='phone'
-                    label="Primary Phone"
-                    required
-                    defaultValue={profileData.phone}
-                    helperText="Primary Phone (i.e. home)"
-                    {...textFieldProps}
-                />
-                <TextField
-                    name='phone2'
-                    label="Contact Phone"
-                    defaultValue={profileData.phone2}
-                    helperText="Contact Phone (i.e. cell)"
-                    {...textFieldProps}
-                />
-                <TextField
-                    name='website'
-                    label="Website"
-                    defaultValue={profileData.website}
-                    placeholder='myartsite.com'
-                    helperText="Artist Website"
-                    {...textFieldProps}
-                />
-            </fieldset>
-            <fieldset disabled={status === 'updating'} className='grid md:grid-cols-4 gap-4'>
-                <TextField
-                    name='address'
-                    label="Address"
-                    required
-                    defaultValue={profileData.address}
-                    placeholder='123 Art st.'
-                    helperText="Enter your Address"
-                    {...textFieldProps}
-                />
-                <TextField
-                    name='city'
-                    label="City"
-                    required
-                    defaultValue={profileData.city}
-                    placeholder='Savannah'
-                    helperText="Enter your city name"
-                    {...textFieldProps}
-                />
-                <FormControl fullWidth>
-                    <InputLabel required id="state-label">State</InputLabel>
-                    <Select
-                        name='state'
-                        labelId="state-label"
-                        value={profileData.state}
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    minWidth: '100%',
+                    gap: 2,
+                    margin: 'auto',
+                    padding: 3,
+                    border: '1px solid #ccc',
+                    borderRadius: 4,
+                }}
+            >
+                <Typography variant="h6" id='step1'>
+                    Contact Information
+                </Typography>
+                <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
+                    <TextField
+                        name='firstName'
+                        label="First Name"
                         required
-                        label="State"
-                        onChange={updateFormStatus}
-                    >
-                        {LIST_STATES.map(state => (
-                            <MenuItem key={state} value={state}>{state}</MenuItem>
-                        ))}
-                    </Select>
-                    <FormHelperText>Select your state</FormHelperText>
-                </FormControl>
-                <TextField
-                    name='zip'
-                    label="Zipcode"
-                    required
-                    defaultValue={profileData.zip}
-                    placeholder='Savannah'
-                    helperText="Enter your zipcode"
-                    {...textFieldProps}
-                />
-            </fieldset>
-            <Typography variant="h6">
-                Exhibit Information
-            </Typography>
-            <fieldset disabled={status === 'updating'}>
-                <FormControl fullWidth>
-                    <InputLabel required id="category-label">Category</InputLabel>
-                    <Select
-                        name='category'
-                        labelId="category-label"
+                        defaultValue={profileInfo.firstName}
+                        fullWidth
+                        helperText="Please enter your first name"
+                        {...textFieldProps}
+                    />
+                    <TextField
+                        name='lastName'
+                        label="Last Name"
                         required
-                        defaultValue={profileData.category}
-                        label="Category"
-                        onChange={(e) => {
-                            let category = e.target.value;
-                            if (category === 'Custom') {
-                                category = prompt("Please enter a custom art category") || '';
-                                if (category) {
-                                    setCategoryList(list => ([...list, category]));
+                        defaultValue={profileInfo.lastName}
+                        helperText="Please enter your last name"
+                        {...textFieldProps}
+                    />
+                    <TextField
+                        name='companyName'
+                        label="Company Name"
+                        defaultValue={profileInfo.companyName}
+                        helperText="Optional company name"
+                        {...textFieldProps}
+                    />
+                </fieldset>
+                <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
+                    <TextField
+                        name='phone'
+                        label="Primary Phone"
+                        required
+                        defaultValue={profileInfo.phone}
+                        helperText="Primary Phone (i.e. home)"
+                        {...textFieldProps}
+                    />
+                    <TextField
+                        name='phone2'
+                        label="Contact Phone"
+                        defaultValue={profileInfo.phone2}
+                        helperText="Contact Phone (i.e. cell)"
+                        {...textFieldProps}
+                    />
+                    <TextField
+                        name='website'
+                        label="Website"
+                        defaultValue={profileInfo.website}
+                        placeholder='myartsite.com'
+                        helperText="Artist Website"
+                        {...textFieldProps}
+                    />
+                </fieldset>
+                <fieldset disabled={status === 'updating'} className='grid md:grid-cols-4 gap-4'>
+                    <TextField
+                        name='address'
+                        label="Address"
+                        required
+                        defaultValue={profileInfo.address}
+                        placeholder='123 Art st.'
+                        helperText="Enter your Address"
+                        {...textFieldProps}
+                    />
+                    <TextField
+                        name='city'
+                        label="City"
+                        required
+                        defaultValue={profileInfo.city}
+                        placeholder='Savannah'
+                        helperText="Enter your city name"
+                        {...textFieldProps}
+                    />
+
+                    <FormControl required fullWidth>
+                        <InputLabel id="state-label">State</InputLabel>
+                        <Select
+                            native
+                            name='state'
+                            labelId="state-label"
+                            defaultValue={profileInfo.state || ''}
+                            required
+                            label="State"
+                        >
+                            {Object.entries(LIST_STATES).map(([state, name]) => (
+                                <option
+                                    key={state}
+                                    value={state}
+                                    selected={state === profileInfo.state}
+                                >{name}</option>
+                            ))}
+                        </Select>
+                        <FormHelperText>Select your art category</FormHelperText>
+                    </FormControl>
+                    <TextField
+                        name='zip'
+                        label="Zipcode"
+                        required
+                        defaultValue={profileInfo.zip}
+                        placeholder='Savannah'
+                        helperText="Enter your zipcode"
+                        {...textFieldProps}
+                    />
+                </fieldset>
+                <Typography variant="h6">
+                    Exhibit Information
+                </Typography>
+                <fieldset disabled={status === 'updating'}>
+                    <FormControl required fullWidth>
+                        <InputLabel id="category-label">Category</InputLabel>
+                        <Select
+                            native
+                            name='category'
+                            labelId="category-label"
+                            defaultValue={profileInfo.category}
+                            label="Category"
+                            required
+                            onChange={(e) => {
+                                const select = e.target as HTMLSelectElement;
+                                let category = select.value;
+                                if (category === 'Custom') {
+                                    category = prompt("Please enter a custom art category") || '';
+                                    if (category) {
+                                        const newOption = document.createElement("option");
+                                        newOption.value = category;
+                                        newOption.textContent = category;
+                                        select.appendChild(newOption);
+                                        select.value = category;
+                                    }
                                 }
+                                handleFormChange();
+                            }}
+                        >
+                            {LIST_CATEGORIES.map(category => (
+                                <option
+                                    key={category}
+                                    value={category}
+                                    selected={category === profileInfo.category}
+                                >{category}</option>
+                            ))}
+                            {profileInfo.category && !LIST_CATEGORIES.includes(profileInfo.category) && <option
+                                key={profileInfo.category}
+                                value={profileInfo.category}
+                                selected={true}
+                            >{profileInfo.category}</option>}
+                        </Select>
+                        <FormHelperText>Select your art category</FormHelperText>
+                    </FormControl>
+                </fieldset>
+                <fieldset disabled={status === 'updating'}>
+                    <TextField
+                        name='description'
+                        label="Description"
+                        required
+                        multiline
+                        minRows={4}
+                        defaultValue={profileInfo.description}
+                        placeholder='Information about my exhibit...'
+                        helperText="Describe your exhibit"
+                        {...textFieldProps}
+                        slotProps={{
+                            htmlInput: {
+                                maxLength: 600,
+                            },
+                            inputLabel: {
+                                shrink: true
                             }
-                            updateFormStatus()
                         }}
-                    >
-                        {categoryList.map(category => (
-                            <MenuItem key={category} value={category}>{category}</MenuItem>
-                        ))}
-                    </Select>
-                    <FormHelperText>Select your art category</FormHelperText>
-                </FormControl>
-            </fieldset>
-            <fieldset disabled={status === 'updating'}>
-                <TextField
-                    name='description'
-                    label="Description"
-                    required
-                    multiline
-                    minRows={4}
-                    defaultValue={profileData.description}
-                    placeholder='Information about my exhibit...'
-                    helperText="Describe your exhibit"
-                    {...textFieldProps}
-                    slotProps={{
-                        htmlInput: {
-                            maxLength: 600,
-                        },
-                        inputLabel: {
-                            shrink: true
-                        }
-                    }}
-                />
-            </fieldset>
+                    />
+                </fieldset>
 
-            <Typography variant="h6">
-                Upload & Manage Images
-            </Typography>
+                <Typography variant="h6">
+                    Upload & Manage Images
+                </Typography>
 
-            <fieldset disabled={status === 'updating'}>
+                <fieldset disabled={status === 'updating'}>
+                    <Stack spacing={2}>
 
-                <input
-                    type='file'
-                    multiple={true}
-                    accept="image/*"
-                    onChange={async e => {
-                        setStatus('updating')
-                        const input = e.target;
-                        let count = 0;
-                        if (input && input.files) {
-                            for (const file of input.files) {
-                                console.log("Uploading file: ", file)
-                                const response = await fetch(
-                                    `/api/profile/upload?filename=${file.name}&mimetype=${file.type}`,
-                                    {
-                                        method: 'POST',
-                                        body: file,
-                                    },
-                                );
-                                const {profileData} = await response.json();
-                                setProfileData(profileData);
-                                count++;
-                            }
-                        }
-                        setMessage(count + " file" + (count === 1 ? '' : 's') + ' have been uploaded')
-                        setStatus('updated')
-                        e.target.value = '';
-                    }}
-                />
+                        <input
+                            type='file'
+                            multiple={true}
+                            accept="image/*"
+                            onChange={async e => {
+                                setStatus('updating')
+                                const input = e.target;
+                                let count = 0;
+                                if (input && input.files) {
+                                    for (const file of input.files) {
+                                        console.log("Uploading file: ", file)
+                                        const response = await fetch(
+                                            `/api/profile/upload?filename=${file.name}&mimetype=${file.type}`,
+                                            {
+                                                method: 'POST',
+                                                body: file,
+                                            },
+                                        );
+                                        const {uploadList} = await response.json();
+                                        console.log('uploadList', uploadList);
+                                        debugger;
+                                        // setProfileData(profileData);
+                                        count++;
+                                    }
+                                }
+                                setMessage(count + " file" + (count === 1 ? '' : 's') + ' have been uploaded')
+                                setStatus('updated')
+                                e.target.value = '';
+                            }}
+                        />
 
-                <Stack component={Paper} spacing={2} padding={1}>
-                    {entries.map((row, i) => <Paper
-                        key={row.title + i}
-                    >
-                        <div className='grid sm:grid-cols-2 gap-x-8'>
-                            <div>
-                                <TextField
-                                    label="Title"
-                                    required
-                                    defaultValue={row.title}
-                                    placeholder='Title this image...'
-                                    {...textFieldProps}
-                                />
-                                <TextField
-                                    label="Description"
-                                    required
-                                    multiline
-                                    minRows={4}
-                                    defaultValue={row.description}
-                                    placeholder='Describe this image...'
-                                    {...textFieldProps}
-                                    slotProps={{
-                                        htmlInput: {
-                                            maxLength: 600,
-                                        },
-                                        inputLabel: {
-                                            shrink: true
-                                        }
-                                    }}
-                                />
+                        {Object.keys(profileUploads).map((filename: string, i) => <Paper
+                            key={filename + i}
+                        >
+                            <div className='grid sm:grid-cols-2 gap-x-8'>
+                                <Stack spacing={2}>
+                                    <TextField
+                                        name={`uploads:${filename}:title`}
+                                        label="Title"
+                                        required
+                                        defaultValue={profileUploads[filename].title}
+                                        placeholder='Title this image...'
+                                        {...textFieldProps}
+                                    />
+                                    <TextField
+                                        name={`uploads:${filename}:description`}
+                                        label="Description"
+                                        multiline
+                                        minRows={4}
+                                        defaultValue={profileUploads[filename].description}
+                                        placeholder='Describe this image...'
+                                        {...textFieldProps}
+                                        slotProps={{
+                                            htmlInput: {
+                                                maxLength: 600,
+                                            },
+                                            inputLabel: {
+                                                shrink: true
+                                            }
+                                        }}
+                                    />
+                                </Stack>
+                                <a
+                                    href={profileUploads[filename].url}
+                                    target='_blank'
+                                >
+                                    <img
+                                        src={profileUploads[filename].url}
+                                        alt={filename}
+                                    />
+                                </a>
                             </div>
-                            <a
-                                href={row.url}
-                                target='_blank'
-                            >
-                                <img
-                                    src={row.url}
-                                    alt={row.title}
-                                />
-                            </a>
-                        </div>
-                    </Paper>)}
-                </Stack>
-            </fieldset>
+                        </Paper>)}
+                    </Stack>
+                </fieldset>
 
-            {message && <Typography variant="caption" color={status === 'error' ? "red" : "blue"} align="center">
-                {message}
-            </Typography>}
-            <Button type="submit" variant="contained" color="primary" disabled={status !== 'unsaved'}>
-                Update Profile
-            </Button>
-        </Box>
+                {message && <Typography variant="caption" color={status === 'error' ? "red" : "blue"} align="center">
+                    {message}
+                </Typography>}
+                <Button type="submit" variant="contained" color="primary" disabled={status !== 'unsaved'}>
+                    Update Profile
+                </Button>
+            </Box>
+        </form>
     );
 }
 
 export default ProfileForm;
 
 
-const LIST_STATES = ['', 'Alabama', 'Alaska', 'American Samoa', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Federated States of Micronesia', 'Florida', 'Georgia', 'Guam', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Marshall Islands', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Northern Mariana Islands', 'Ohio', 'Oklahoma', 'Oregon', 'Palau', 'Pennsylvania', 'Puerto Rico', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virgin Island', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
+const LIST_STATES = {
+    "": "",
+    "AL": "Alabama",
+    "AK": "Alaska",
+    "AZ": "Arizona",
+    "AR": "Arkansas",
+    "CA": "California",
+    "CO": "Colorado",
+    "CT": "Connecticut",
+    "DE": "Delaware",
+    "FL": "Florida",
+    "GA": "Georgia",
+    "HI": "Hawaii",
+    "ID": "Idaho",
+    "IL": "Illinois",
+    "IN": "Indiana",
+    "IA": "Iowa",
+    "KS": "Kansas",
+    "KY": "Kentucky",
+    "LA": "Louisiana",
+    "ME": "Maine",
+    "MD": "Maryland",
+    "MA": "Massachusetts",
+    "MI": "Michigan",
+    "MN": "Minnesota",
+    "MS": "Mississippi",
+    "MO": "Missouri",
+    "MT": "Montana",
+    "NE": "Nebraska",
+    "NV": "Nevada",
+    "NH": "New Hampshire",
+    "NJ": "New Jersey",
+    "NM": "New Mexico",
+    "NY": "New York",
+    "NC": "North Carolina",
+    "ND": "North Dakota",
+    "OH": "Ohio",
+    "OK": "Oklahoma",
+    "OR": "Oregon",
+    "PA": "Pennsylvania",
+    "RI": "Rhode Island",
+    "SC": "South Carolina",
+    "SD": "South Dakota",
+    "TN": "Tennessee",
+    "TX": "Texas",
+    "UT": "Utah",
+    "VT": "Vermont",
+    "VA": "Virginia",
+    "WA": "Washington",
+    "WV": "West Virginia",
+    "WI": "Wisconsin",
+    "WY": "Wyoming"
+}
+
 const LIST_CATEGORIES = [
+    '',
     'Custom',
     "Painting", // Includes oil, acrylic, watercolor, etc.
     "Sculpture", //  Includes classical, modern, assemblage, and other 3D forms
