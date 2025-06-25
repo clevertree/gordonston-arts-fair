@@ -16,9 +16,12 @@ import {
 import {UserProfile, UserProfileInfo, UserProfileUpload} from "@util/profile";
 
 interface ProfileFormProps {
+    redirectNoSessionURL: string
 }
 
-function ProfileForm({}: ProfileFormProps) {
+function ProfileForm({
+                         redirectNoSessionURL
+                     }: ProfileFormProps) {
     const [status, setStatus] = useState<'loading' | 'loaded' | 'unsaved' | 'updating' | 'updated' | 'error'>('loading');
     const [message, setMessage] = useState('');
     const [profileData, setProfileData] = useState<UserProfile>({info: {}, uploads: {}})
@@ -61,8 +64,16 @@ function ProfileForm({}: ProfileFormProps) {
                 // if (profileData.category && !categoryList.includes(profileData.category)) {
                 //     setCategoryList([...categoryList, profileData.category])
                 // }
-                setProfileData(profileData)
-                setStatus('loaded')
+                if (profileData) {
+                    setProfileData(profileData)
+                    setStatus('loaded')
+                } else {
+                    setStatus('error')
+                    setMessage('Unable to load profile. Please log in')
+                    setTimeout(() => {
+                        document.location.href = redirectNoSessionURL || '/login'
+                    }, 3000)
+                }
             })
     }, []);
 
