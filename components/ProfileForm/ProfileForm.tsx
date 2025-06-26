@@ -61,7 +61,9 @@ function ProfileForm({
         for (const form of [formInfo, formUploads]) {
             if (!form.isValidated && form.firstError) {
                 const {getRef, message} = form.firstError;
-                getRef().scrollIntoView()
+                const inputElm = getRef()
+                inputElm.scrollIntoView({behavior: 'smooth', block: 'center'}); // Optional: Add smooth scrolling
+                inputElm.focus()
                 setStatus('error');
                 setMessage(message)
                 return;
@@ -160,7 +162,7 @@ function ProfileForm({
                     />
                     <TextField
                         helperText="Contact Phone (i.e. cell)"
-                        {...formInfo.setupRequiredInput('phone2', "Contact Phone", validatePhone)}
+                        {...formInfo.setupInput('phone2', "Contact Phone")}
                     />
                     <TextField
                         helperText="Artist Website"
@@ -388,8 +390,10 @@ function ProfileForm({
                                 const firstError = formInfo.firstError || formUploads.firstError;
                                 if (!firstError)
                                     throw new Error("First error missing");
-                                setMessage(firstError.message);
-                                setStatus('error')
+                                window.setTimeout(() => {
+                                    setMessage(firstError.message);
+                                    setStatus('error')
+                                }, 50)
                             }
                         }}
                 >

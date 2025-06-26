@@ -11,7 +11,7 @@ interface InputProps {
     slotProps?: any,
     required?: boolean,
 
-    ref(e: HTMLElement | null): void,
+    inputRef(e: HTMLElement | null): void,
 
     onChange(e: any): void,
 
@@ -85,7 +85,7 @@ export function useFormHook(
         const props: InputProps = {
             name: fieldName,
             label,
-            ref: (input: HTMLElement | null) => {
+            inputRef: (input: HTMLElement | null) => {
                 if (input) {
                     fieldRefs.current[fieldName] = input;
                 } else {
