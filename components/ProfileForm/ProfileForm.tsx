@@ -1,19 +1,10 @@
 'use client'
 
-import React, {useEffect, useRef, useState} from 'react';
-import {
-    Box,
-    Button,
-    FormControl,
-    FormHelperText,
-    InputLabel,
-    Select,
-    Stack,
-    TextField,
-    TextFieldProps,
-    Typography
-} from '@mui/material';
-import {UserProfile, UserProfileInfo, UserProfileUpload} from "@util/profile";
+import React, {useEffect, useState} from 'react';
+import {Box, Button, MenuItem, Stack, TextField, Typography} from '@mui/material';
+import {UserProfile} from "@util/profile";
+import SelectField from "@components/Form/SelectField";
+import {useFormHook, validatePhone} from "@components/Form/formHooks";
 
 interface ProfileFormProps {
     redirectNoSessionURL: string
@@ -26,31 +17,19 @@ function ProfileForm({
     const [message, setMessage] = useState('');
     const [profileData, setProfileData] = useState<UserProfile>({info: {}, uploads: {}})
     // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
-    const formRef = useRef<HTMLFormElement>();
+    // const formRef = useRef<HTMLFormElement>();
     const {uploads: profileUploads = {}, info: profileInfo = {}} = profileData;
 
-    function getFormData() {
-        const formData = new FormData(formRef.current);
-        const profileData: UserProfile = {info: {}, uploads: {}}
-        for (const entry of formData.entries()) {
-            const [fieldName, value] = entry;
-            const split = fieldName.split(/:/g);
-            switch (split[0]) {
-                case 'uploads':
-                    const [, filename, key] = split;
-                    if (!profileData.uploads[filename])
-                        profileData.uploads[filename] = {
-                            title: filename
-                        };
-                    profileData.uploads[filename][key as keyof UserProfileUpload] = value + '';
-                    break;
-                default:
-                    profileData.info[fieldName as keyof UserProfileInfo] = `${value}`
-                    break;
-            }
-        }
-        return profileData;
-    }
+    const formInfo = useFormHook(profileData.info, (formData) => {
+        setProfileData(oldData => ({...oldData, info: formData}));
+        setStatus('unsaved');
+        setMessage('')
+    }, status === 'error');
+    const formUploads = useFormHook(profileData.uploads, (formData) => {
+        setProfileData(oldData => ({...oldData, uploads: formData}));
+        setStatus('unsaved');
+        setMessage('')
+    }, status === 'error');
 
     useEffect(() => {
         fetch('/api/profile', {
@@ -77,18 +56,21 @@ function ProfileForm({
             })
     }, []);
 
-    const handleSubmit = async (event: any) => {
-        event.preventDefault();
-
-        if (!formRef.current) {
-            setStatus('error');
-            setMessage("Invalid Form Ref")
-            return;
+    const handleSubmit = async () => {
+        // Validation
+        for (const form of [formInfo, formUploads]) {
+            if (!form.isValidated && form.firstError) {
+                const {getRef, message} = form.firstError;
+                getRef().scrollIntoView()
+                setStatus('error');
+                setMessage(message)
+                return;
+            }
         }
 
+        // Submit to server
         try {
-            const profileData = getFormData();
-            event.preventDefault();
+            // const {profileData} = validateForm(formRef.current);
             setStatus('updating');
             setMessage('');
 
@@ -104,6 +86,7 @@ function ProfileForm({
             if (!response.ok) {
                 setMessage(error || `HTTP error! status: ${response.status}`);
                 setStatus('error');
+                debugger;
             } else {
                 setStatus('updated');
                 setMessage(message)
@@ -126,17 +109,6 @@ function ProfileForm({
         }
     }
 
-    const textFieldProps: TextFieldProps = {
-        fullWidth: true,
-        variant: 'outlined',
-        slotProps: {
-            inputLabel: {
-                // shrink: true
-            }
-        },
-        onChange: handleFormChange
-        // onBlur: updateFormStatus
-    }
 
     if (status === "loading") {
         return <Box>
@@ -147,10 +119,10 @@ function ProfileForm({
 
     return (
         <form
-            ref={(formElm) => {
-                if (formElm) formRef.current = formElm
+            onSubmit={(e: any) => {
+                e.preventDefault();
+                handleSubmit()
             }}
-            onSubmit={handleSubmit}
         >
             <Box
                 sx={{
@@ -169,165 +141,101 @@ function ProfileForm({
                 </Typography>
                 <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
                     <TextField
-                        name='firstName'
-                        label="First Name"
-                        required
-                        defaultValue={profileInfo.firstName}
-                        fullWidth
                         helperText="Please enter your first name"
-                        {...textFieldProps}
+                        {...formInfo.setupRequiredInput('firstName', 'First Name')}
                     />
                     <TextField
-                        name='lastName'
-                        label="Last Name"
-                        required
-                        defaultValue={profileInfo.lastName}
-                        helperText="Please enter your last name"
-                        {...textFieldProps}
+                        helperText="Please enter your first name"
+                        {...formInfo.setupRequiredInput('lastName', 'Last Name')}
                     />
                     <TextField
-                        name='companyName'
-                        label="Company Name"
-                        defaultValue={profileInfo.companyName}
                         helperText="Optional company name"
-                        {...textFieldProps}
+                        {...formInfo.setupInput('companyName', "Company Name")}
                     />
                 </fieldset>
                 <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
                     <TextField
-                        name='phone'
-                        label="Primary Phone"
-                        required
-                        defaultValue={profileInfo.phone}
                         helperText="Primary Phone (i.e. home)"
-                        {...textFieldProps}
+                        {...formInfo.setupRequiredInput('phone', "Primary Phone", validatePhone)}
                     />
                     <TextField
-                        name='phone2'
-                        label="Contact Phone"
-                        defaultValue={profileInfo.phone2}
                         helperText="Contact Phone (i.e. cell)"
-                        {...textFieldProps}
+                        {...formInfo.setupRequiredInput('phone2', "Contact Phone", validatePhone)}
                     />
                     <TextField
-                        name='website'
-                        label="Website"
-                        defaultValue={profileInfo.website}
-                        placeholder='myartsite.com'
                         helperText="Artist Website"
-                        {...textFieldProps}
+                        {...formInfo.setupInput('website', "Website")}
                     />
                 </fieldset>
                 <fieldset disabled={status === 'updating'} className='grid md:grid-cols-4 gap-4'>
                     <TextField
-                        name='address'
-                        label="Address"
-                        required
-                        defaultValue={profileInfo.address}
-                        placeholder='123 Art st.'
                         helperText="Enter your Address"
-                        {...textFieldProps}
+                        placeholder='123 Art st.'
+                        {...formInfo.setupRequiredInput('address', "Address")}
                     />
                     <TextField
-                        name='city'
-                        label="City"
-                        required
-                        defaultValue={profileInfo.city}
-                        placeholder='Savannah'
                         helperText="Enter your city name"
-                        {...textFieldProps}
+                        placeholder='Savannah'
+                        {...formInfo.setupRequiredInput('city', "City")}
                     />
 
-                    <FormControl required fullWidth>
-                        <InputLabel id="state-label">State</InputLabel>
-                        <Select
-                            native
-                            name='state'
-                            labelId="state-label"
-                            defaultValue={profileInfo.state}
-                            required
-                            label="State"
-                        >
-                            <option disabled value=''>Select a state</option>
-                            <option value=''></option>
-                            {Object.entries(LIST_STATES).map(([state, name]) => (
-                                <option
-                                    key={state}
-                                    value={state}
-                                    selected={state === profileInfo.state}
-                                >{name}</option>
-                            ))}
-                        </Select>
-                        <FormHelperText>Select your art category</FormHelperText>
-                    </FormControl>
+                    <SelectField
+                        helperText="Enter your state"
+                        {...formInfo.setupRequiredInput('state', "State")}
+                    >
+                        <MenuItem disabled value=''>Select a state</MenuItem>
+                        <MenuItem value=''></MenuItem>
+                        {Object.entries(LIST_STATES).map(([state, name]) => (
+                            <MenuItem
+                                key={state}
+                                value={state}
+                                selected={state === profileInfo.state}
+                            >{name}</MenuItem>
+                        ))}
+                    </SelectField>
                     <TextField
-                        name='zip'
-                        label="Zipcode"
-                        required
-                        defaultValue={profileInfo.zip}
-                        placeholder='Savannah'
                         helperText="Enter your zipcode"
-                        {...textFieldProps}
+                        placeholder='Savannah'
+                        {...formInfo.setupRequiredInput('zip', "Zipcode")}
                     />
                 </fieldset>
                 <Typography variant="h6">
                     Exhibit Information
                 </Typography>
-                <fieldset disabled={status === 'updating'}>
-                    <FormControl required fullWidth>
-                        <InputLabel id="category-label">Category</InputLabel>
-                        <Select
-                            native
-                            name='category'
-                            labelId="category-label"
-                            defaultValue={profileInfo.category}
-                            label="Category"
-                            required
-                            onChange={(e) => {
-                                const select = e.target as HTMLSelectElement;
-                                let category = select.value;
-                                if (category === 'Custom') {
-                                    category = prompt("Please enter a custom art category") || '';
-                                    if (category) {
-                                        const newOption = document.createElement("option");
-                                        newOption.value = category;
-                                        newOption.textContent = category;
-                                        select.appendChild(newOption);
-                                        select.value = category;
-                                    }
-                                }
-                                handleFormChange();
-                            }}
-                        >
-                            <option disabled value=''>Select a category</option>
-                            <option value=''></option>
-                            {LIST_CATEGORIES.map(category => (
-                                <option
-                                    key={category}
-                                    value={category}
-                                    selected={category === profileInfo.category}
-                                >{category}</option>
-                            ))}
-                            {profileInfo.category && !LIST_CATEGORIES.includes(profileInfo.category) && <option
-                                key={profileInfo.category}
-                                value={profileInfo.category}
-                                selected={true}
-                            >{profileInfo.category}</option>}
-                        </Select>
-                        <FormHelperText>Select your art category</FormHelperText>
-                    </FormControl>
+                <fieldset disabled={status === 'updating'} className='grid md:grid-cols-2 gap-4'>
+                    <SelectField
+                        fullWidth
+                        {...formInfo.setupRequiredInput('category', "Category")}
+                    >
+                        <MenuItem disabled value=''>Select a category</MenuItem>
+                        {LIST_CATEGORIES.map(category => (
+                            <MenuItem
+                                key={category}
+                                value={category}
+                            >{category}</MenuItem>
+                        ))}
+                        {profileInfo.category && !LIST_CATEGORIES.includes(profileInfo.category) && <MenuItem
+                            key={profileInfo.category}
+                            value={profileInfo.category}
+                        >{profileInfo.category}</MenuItem>}
+                    </SelectField>
+                    <Button
+                        onClick={(e) => {
+                            const category = prompt("Please enter a custom art category") || '';
+                            if (category) {
+                                formInfo.setFieldValue('category', category);
+                            }
+                        }}>
+                        Custom Category
+                    </Button>
                 </fieldset>
                 <fieldset disabled={status === 'updating'}>
                     <TextField
-                        name='description'
-                        label="Description"
-                        required
                         multiline
                         minRows={4}
-                        defaultValue={profileInfo.description}
-                        placeholder='Information about my exhibit...'
                         helperText="Describe your exhibit"
-                        {...textFieldProps}
+                        placeholder='Information about my exhibit...'
+                        {...formInfo.setupRequiredInput('description', "Description")}
                         slotProps={{
                             htmlInput: {
                                 maxLength: 600,
@@ -359,6 +267,7 @@ function ProfileForm({
                                 multiple={true}
                                 accept="image/*"
                                 onChange={async e => {
+                                    setMessage('');
                                     setStatus('updating')
                                     const input = e.target;
                                     let count = 0;
@@ -404,21 +313,16 @@ function ProfileForm({
                             <div className='grid sm:grid-cols-2 gap-x-8'>
                                 <Stack spacing={2}>
                                     <TextField
-                                        name={`uploads:${filename}:title`}
-                                        label="Title"
-                                        required
-                                        defaultValue={profileUploads[filename].title}
+                                        helperText="Title this image"
                                         placeholder='Title this image...'
-                                        {...textFieldProps}
+                                        {...formUploads.setupRequiredInput(`uploads:${filename}:title`, "Title")}
                                     />
                                     <TextField
-                                        name={`uploads:${filename}:description`}
-                                        label="Description"
                                         multiline
                                         minRows={4}
-                                        defaultValue={profileUploads[filename].description}
+                                        helperText="Describe this image"
                                         placeholder='Describe this image...'
-                                        {...textFieldProps}
+                                        {...formUploads.setupRequiredInput(`uploads:${filename}:description`, "Description")}
                                         slotProps={{
                                             htmlInput: {
                                                 maxLength: 600,
@@ -475,7 +379,20 @@ function ProfileForm({
                 {message && <Typography variant="caption" color={status === 'error' ? "red" : "blue"} align="center">
                     {message}
                 </Typography>}
-                <Button type="submit" variant="contained" color="primary" disabled={status !== 'unsaved'}>
+                <Button type="submit"
+                        variant="contained"
+                        color="primary"
+                        disabled={status !== 'unsaved'}
+                        onClick={(e) => {
+                            if (!formInfo.isValidated || !formUploads.isValidated) {
+                                const firstError = formInfo.firstError || formUploads.firstError;
+                                if (!firstError)
+                                    throw new Error("First error missing");
+                                setMessage(firstError.message);
+                                setStatus('error')
+                            }
+                        }}
+                >
                     Update Profile
                 </Button>
             </Box>
@@ -541,8 +458,6 @@ const LIST_STATES = {
 }
 
 const LIST_CATEGORIES = [
-    // '',
-    'Custom',
     "Painting", // Includes oil, acrylic, watercolor, etc.
     "Sculpture", //  Includes classical, modern, assemblage, and other 3D forms
     "Photography", // Includes various styles and techniques
