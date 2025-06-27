@@ -1,10 +1,17 @@
 'use client'
 
 import React, {useEffect, useState} from 'react';
-import {Box, Button, MenuItem, Stack, TextField, Typography} from '@mui/material';
-import {UserProfile} from "@util/profile";
-import SelectField from "@components/Form/SelectField";
-import {useFormHook, validatePhone} from "@components/Form/formHooks";
+import {Box, Button, MenuItem, Stack, Typography} from '@mui/material';
+import {UserProfile, UserProfileUpload} from "@util/profile";
+import {SelectField, TextField} from "@components/FormFields/";
+import {
+    formatPhone,
+    FormFieldValues,
+    FormHookObject,
+    useFormHook,
+    validatePhone,
+    validateRequired
+} from "@components/FormFields/formHooks";
 
 interface ProfileFormProps {
     redirectNoSessionURL: string
@@ -19,16 +26,13 @@ function ProfileForm({
     // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
     // const formRef = useRef<HTMLFormElement>();
     const {uploads: profileUploads = {}, info: profileInfo = {}} = profileData;
+    const formUploadList: { [filename: string]: FormHookObject } = {}
 
-    const formInfo = useFormHook(profileData.info, (formData) => {
+    const formInfo = useFormHook(profileInfo as FormFieldValues, (formData) => {
         setProfileData(oldData => ({...oldData, info: formData}));
-        setStatus('unsaved');
-        setMessage('')
-    }, status === 'error');
-    const formUploads = useFormHook(profileData.uploads, (formData) => {
-        setProfileData(oldData => ({...oldData, uploads: formData}));
-        setStatus('unsaved');
-        setMessage('')
+        if (status !== 'error')
+            setStatus('unsaved');
+        // setMessage('')
     }, status === 'error');
 
     useEffect(() => {
@@ -54,11 +58,12 @@ function ProfileForm({
                     }, 3000)
                 }
             })
-    }, []);
+    }, [redirectNoSessionURL]);
 
     const handleSubmit = async () => {
         // Validation
-        for (const form of [formInfo, formUploads]) {
+        const allForms = [formInfo, ...Object.values(formUploadList)];
+        for (const form of allForms) {
             if (!form.isValidated && form.firstError) {
                 const {getRef, message} = form.firstError;
                 const inputElm = getRef()
@@ -69,6 +74,8 @@ function ProfileForm({
                 return;
             }
         }
+
+        // TODO: validate file upload fields
 
         // Submit to server
         try {
@@ -84,7 +91,7 @@ function ProfileForm({
                 body: JSON.stringify(profileData),
             })
             // Check if the response was successful (e.g., status code 200-299)
-            const {error, message} = await response.json();
+            const {error, message, updatedProfileData} = await response.json();
             if (!response.ok) {
                 setMessage(error || `HTTP error! status: ${response.status}`);
                 setStatus('error');
@@ -92,6 +99,9 @@ function ProfileForm({
             } else {
                 setStatus('updated');
                 setMessage(message)
+                if (!updatedProfileData)
+                    throw new Error("Invalid updatedProfileData");
+                setProfileData(updatedProfileData)
             }
         } catch (e: any) {
             console.error(e);
@@ -102,10 +112,10 @@ function ProfileForm({
 
     function handleFormChange() {
         switch (status) {
-            case 'error':
-            case 'updated':
+            // case 'error':
+            // case 'updated':
             case 'loaded':
-                setMessage('');
+                // setMessage('');
                 setStatus('unsaved');
                 break;
         }
@@ -121,6 +131,7 @@ function ProfileForm({
 
     return (
         <form
+            onChange={handleFormChange}
             onSubmit={(e: any) => {
                 e.preventDefault();
                 handleSubmit()
@@ -144,11 +155,13 @@ function ProfileForm({
                 <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
                     <TextField
                         helperText="Please enter your first name"
-                        {...formInfo.setupRequiredInput('firstName', 'First Name')}
+                        {...formInfo.setupInput('firstName', 'First Name', validateRequired)}
+                        required
                     />
                     <TextField
                         helperText="Please enter your first name"
-                        {...formInfo.setupRequiredInput('lastName', 'Last Name')}
+                        {...formInfo.setupInput('lastName', 'Last Name', [validateRequired, validateRequired])}
+                        required
                     />
                     <TextField
                         helperText="Optional company name"
@@ -158,11 +171,14 @@ function ProfileForm({
                 <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
                     <TextField
                         helperText="Primary Phone (i.e. home)"
-                        {...formInfo.setupRequiredInput('phone', "Primary Phone", validatePhone)}
+                        {...formInfo.setupInput('phone', "Primary Phone", validatePhone)}
+                        autoFormat={formatPhone}
+                        required
                     />
                     <TextField
                         helperText="Contact Phone (i.e. cell)"
-                        {...formInfo.setupInput('phone2', "Contact Phone")}
+                        {...formInfo.setupInput('phone2', "Contact Phone", validatePhone)}
+                        autoFormat={formatPhone}
                     />
                     <TextField
                         helperText="Artist Website"
@@ -173,20 +189,21 @@ function ProfileForm({
                     <TextField
                         helperText="Enter your Address"
                         placeholder='123 Art st.'
-                        {...formInfo.setupRequiredInput('address', "Address")}
+                        {...formInfo.setupInput('address', "Address")}
+                        required
                     />
                     <TextField
                         helperText="Enter your city name"
                         placeholder='Savannah'
-                        {...formInfo.setupRequiredInput('city', "City")}
+                        {...formInfo.setupInput('city', "City")}
+                        required
                     />
 
                     <SelectField
                         helperText="Enter your state"
-                        {...formInfo.setupRequiredInput('state', "State")}
+                        {...formInfo.setupInput('state', "State", validateRequired)}
                     >
                         <MenuItem disabled value=''>Select a state</MenuItem>
-                        <MenuItem value=''></MenuItem>
                         {Object.entries(LIST_STATES).map(([state, name]) => (
                             <MenuItem
                                 key={state}
@@ -197,8 +214,9 @@ function ProfileForm({
                     </SelectField>
                     <TextField
                         helperText="Enter your zipcode"
-                        placeholder='Savannah'
-                        {...formInfo.setupRequiredInput('zip', "Zipcode")}
+                        placeholder='31404'
+                        {...formInfo.setupInput('zip', "Zipcode")}
+                        required
                     />
                 </fieldset>
                 <Typography variant="h6">
@@ -207,7 +225,8 @@ function ProfileForm({
                 <fieldset disabled={status === 'updating'} className='grid md:grid-cols-2 gap-4'>
                     <SelectField
                         fullWidth
-                        {...formInfo.setupRequiredInput('category', "Category")}
+                        helperText="Select an exhibit category"
+                        {...formInfo.setupInput('category', "Category", validateRequired)}
                     >
                         <MenuItem disabled value=''>Select a category</MenuItem>
                         {LIST_CATEGORIES.map(category => (
@@ -237,7 +256,8 @@ function ProfileForm({
                         minRows={4}
                         helperText="Describe your exhibit"
                         placeholder='Information about my exhibit...'
-                        {...formInfo.setupRequiredInput('description', "Description")}
+                        {...formInfo.setupInput('description', "Description")}
+                        required
                         slotProps={{
                             htmlInput: {
                                 maxLength: 600,
@@ -292,7 +312,6 @@ function ProfileForm({
                                     setMessage(count + " file" + (count === 1 ? '' : 's') + ' have been uploaded')
                                     setStatus('updated')
                                     e.target.value = '';
-                                    console.log('updatedProfileData', updatedProfileData);
                                     if (updatedProfileData) {
                                         setProfileData(updatedProfileData);
                                     }
@@ -308,73 +327,32 @@ function ProfileForm({
 
                 <fieldset disabled={status === 'updating'}>
                     <Stack spacing={2}>
-                        {Object.keys(profileUploads).map((filename: string, i) => <Box
-
-                            key={filename + i}
-                        >
-                            <div className='grid sm:grid-cols-2 gap-x-8'>
-                                <Stack spacing={2}>
-                                    <TextField
-                                        helperText="Title this image"
-                                        placeholder='Title this image...'
-                                        {...formUploads.setupRequiredInput(`uploads:${filename}:title`, "Title")}
-                                    />
-                                    <TextField
-                                        multiline
-                                        minRows={4}
-                                        helperText="Describe this image"
-                                        placeholder='Describe this image...'
-                                        {...formUploads.setupRequiredInput(`uploads:${filename}:description`, "Description")}
-                                        slotProps={{
-                                            htmlInput: {
-                                                maxLength: 600,
-                                            },
-                                            inputLabel: {
-                                                shrink: true
-                                            }
-                                        }}
-                                    />
-                                    <div>
-                                        <Button variant="outlined" color="secondary"
-                                                sx={{float: 'right'}}
-                                                onClick={async () => {
-                                                    console.log("Deleting file: ", filename)
-                                                    const response = await fetch(
-                                                        `/api/profile/upload/delete`,
-                                                        {
-                                                            method: 'POST',
-                                                            headers: {
-                                                                'Content-Type': 'application/json'
-                                                            },
-                                                            body: JSON.stringify({
-                                                                filename
-                                                            }),
-                                                        },
-                                                    );
-                                                    const {profileData} = await response.json();
-                                                    setProfileData(profileData);
-                                                }}>
-                                            Delete Image
-                                        </Button>
-                                    </div>
-                                </Stack>
-                                <a
-                                    href={profileUploads[filename].url}
-                                    target='_blank'
-                                >
-                                    <img
-                                        onError={(e: any) => {
-                                            setTimeout(() => {
-                                                e.target.src += '?&'
-                                            }, 5000)
-                                        }}
-                                        loading='lazy'
-                                        src={profileUploads[filename].url}
-                                        alt={filename}
-                                    />
-                                </a>
-                            </div>
-                        </Box>)}
+                        {Object.keys(profileUploads).map((filename: string, i) => <ProfileUploadForm
+                            key={filename}
+                            filename={filename}
+                            uploadInfo={profileUploads[filename]}
+                            uploadHooks={formUploadList}
+                            onUpdate={(newProfileUpload, validationMessage) => {
+                                setProfileData((oldData) => {
+                                    const updatedData = {...oldData};
+                                    if (newProfileUpload) {
+                                        updatedData.uploads[filename] = {
+                                            ...(oldData.uploads[filename] || {}),
+                                            ...(newProfileUpload || {})
+                                        } as UserProfileUpload
+                                    } else {
+                                        delete updatedData.uploads[filename];
+                                    }
+                                    return updatedData;
+                                });
+                                if (validationMessage) {
+                                    setStatus('error');
+                                    setMessage(validationMessage)
+                                } else {
+                                    setStatus('unsaved');
+                                }
+                            }}
+                        />)}
                     </Stack>
                 </fieldset>
 
@@ -384,17 +362,20 @@ function ProfileForm({
                 <Button type="submit"
                         variant="contained"
                         color="primary"
-                        disabled={status !== 'unsaved'}
+                        disabled={!['unsaved', 'error'].includes(status)}
                         onClick={(e) => {
-                            if (!formInfo.isValidated || !formUploads.isValidated) {
-                                const firstError = formInfo.firstError || formUploads.firstError;
-                                if (!firstError)
-                                    throw new Error("First error missing");
-                                window.setTimeout(() => {
-                                    setMessage(firstError.message);
-                                    setStatus('error')
-                                }, 50)
-                            }
+                            e.preventDefault();
+                            handleSubmit()
+                            // if (!formInfo.isValidated) {
+                            //     const firstError = formInfo.firstError;
+                            //     if (!firstError)
+                            //         throw new Error("First error missing");
+                            //     // window.setTimeout(() => {
+                            //     //     // TODO: Set message while avoiding rerender
+                            //     //     setMessage(firstError.message);
+                            //     //     setStatus('error')
+                            //     // }, 50)
+                            // }
                         }}
                 >
                     Update Profile
@@ -405,6 +386,94 @@ function ProfileForm({
 }
 
 export default ProfileForm;
+
+interface ProfileUploadFormProps {
+    filename: string,
+    uploadInfo: UserProfileUpload,
+    uploadHooks: { [filename: string]: FormHookObject }
+
+    onUpdate(formData?: FormFieldValues, validationMessage?: string): void
+}
+
+function ProfileUploadForm({
+                               filename,
+                               uploadInfo,
+                               uploadHooks,
+                               onUpdate
+                           }: ProfileUploadFormProps) {
+
+    const formUpload = useFormHook(uploadInfo as unknown as FormFieldValues, onUpdate);
+    uploadHooks[filename] = formUpload;
+    return <Box
+
+        key={filename}
+    >
+        <div className='grid sm:grid-cols-2 gap-x-8'>
+            <Stack spacing={2}>
+                <TextField
+                    required
+                    helperText="Title this image"
+                    placeholder='Title this image...'
+                    {...formUpload.setupInput(`title`, "Title", validateRequired)}
+                />
+                <TextField
+                    required
+                    multiline
+                    minRows={4}
+                    helperText="Describe this image"
+                    placeholder='Describe this image...'
+                    {...formUpload.setupInput(`description`, "Description", validateRequired)}
+                    slotProps={{
+                        htmlInput: {
+                            maxLength: 600,
+                        },
+                        inputLabel: {
+                            shrink: true
+                        }
+                    }}
+                />
+                <div>
+                    <Button variant="outlined" color="secondary"
+                            sx={{float: 'right'}}
+                            onClick={async () => {
+                                console.log("Deleting file: ", filename)
+                                const response = await fetch(
+                                    `/api/profile/upload/delete`,
+                                    {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            filename
+                                        }),
+                                    },
+                                );
+                                const {message} = await response.json();
+                                onUpdate(undefined, message)
+                            }}>
+                        Delete Image
+                    </Button>
+                </div>
+            </Stack>
+            <a
+                href={uploadInfo.url}
+                target='_blank'
+            >
+                <img
+                    onError={(e: any) => {
+                        setTimeout(() => {
+                            e.target.src += '?&'
+                        }, 5000)
+                    }}
+                    loading='lazy'
+                    src={uploadInfo.url}
+                    alt={filename}
+                />
+            </a>
+        </div>
+    </Box>
+}
 
 
 const LIST_STATES = {

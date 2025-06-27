@@ -1,7 +1,7 @@
 import {del} from '@vercel/blob';
 import {NextRequest, NextResponse} from 'next/server';
 import {decryptSession} from "@util/session";
-import {fetchProfileData, getImageUploadBlobPath} from "@app/api/profile/profileUtil";
+import {getImageUploadBlobPath} from "@app/api/profile/profileUtil";
 
 interface FileDeleteParams {
     filename: string
@@ -23,11 +23,12 @@ export async function POST(request: NextRequest) {
     console.log("Deleting file: ", `${imagePath}/${filename}`);
     await del(`${imagePath}/${filename}`);
 
-    const profileData = await fetchProfileData(session.email);
-    delete profileData.uploads[filename];
+    // const profileData = await fetchProfileData(session.email);
+    // delete profileData.uploads[filename];
 
     return NextResponse.json({
-        profileData,
+        message: "File deleted successfully: " + filename,
+        // profileData,
         // blob
     });
 

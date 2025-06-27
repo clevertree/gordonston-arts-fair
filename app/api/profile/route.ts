@@ -25,7 +25,7 @@ export async function GET(
         })
 
     } catch (error: any) {
-        console.log(error)
+        console.error(error)
         return Response.json(error, {
             status: 400,
         })
@@ -52,12 +52,15 @@ export async function POST(
         const putResult = await redisClient.set(profileHash, JSON.stringify(updatedProfileData));
 
         console.log("Updated user profile:", putResult)
-        return Response.json({message: "Updated user profile successfully"}, {
+        return Response.json({
+            message: "Updated user profile successfully",
+            updatedProfileData,
+        }, {
             status: 200,
         })
 
     } catch (error: any) {
-        console.log(error)
+        console.error(error)
         return Response.json(error, {
             status: 400,
         })

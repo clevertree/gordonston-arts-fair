@@ -18,7 +18,7 @@ export async function POST(
 
         const count = await redisClient.exists(redisLoginKey);
         if (count >= 1) {
-            console.log('User already exists:', email);
+            console.error('User already exists:', email);
             return Response.json({error: "User already exists with this email. Please log in or reset your password"}, {
                 status: 401,
             })
@@ -46,7 +46,7 @@ export async function POST(
         })
 
     } catch (error: any) {
-        console.log(error)
+        console.error(error)
         return Response.json({error: error.message}, {
             status: 400,
         })

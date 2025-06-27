@@ -12,7 +12,7 @@ export async function POST(
 
         const storedCode = await redisClient.get(redisPasswordResetKey);
         if (!storedCode || (storedCode !== code)) {
-            console.log('Invalid reset request:', email, storedCode, code);
+            console.error('Invalid reset request:', email, storedCode, code);
             return Response.json({error: "Invalid reset request"}, {
                 status: 401,
             })
@@ -26,14 +26,14 @@ export async function POST(
         const redisLoginKey = 'user:' + email.toLowerCase() + ":login";
         await redisClient.set(redisLoginKey, hashedPassword);
 
-        console.log("Password was reset: ", email)
+        console.error("Password was reset: ", email)
 
         return Response.json({message: "Password was reset successfully. Please Log in"}, {
             status: 200,
         })
 
     } catch (error: any) {
-        console.log(error)
+        console.error(error)
         return Response.json(error, {
             status: 400,
         })

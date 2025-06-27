@@ -13,7 +13,7 @@ export async function POST(
 
         const count = await redisClient.exists(redisLoginKey);
         if (count === 0) {
-            console.log('User is not registered:', email);
+            console.error('User is not registered:', email);
             return Response.json({error: "Invalid email/password combination. Please try again or register before logging in"}, {
                 status: 401,
             })
@@ -23,7 +23,7 @@ export async function POST(
         const passwordHash = await redisClient.get(redisLoginKey);
         const passwordResult = passwordHash && await bcrypt.compare(password, passwordHash);
         if (!passwordResult) {
-            console.log('Password is invalid:', email);
+            console.error('Password is invalid:', email);
             return Response.json({error: "Invalid email/password combination. Please try again or register before logging in"}, {
                 status: 401,
             })
@@ -36,7 +36,7 @@ export async function POST(
         })
 
     } catch (error: any) {
-        console.log(error)
+        console.error(error)
         return Response.json(error, {
             status: 400,
         })

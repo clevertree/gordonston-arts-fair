@@ -18,7 +18,7 @@ export async function POST(
             const redisPasswordResetKey = 'user:' + email.toLowerCase() + ":reset-password";
             await redisClient.set(redisPasswordResetKey, resetCode, {EX: 60 * 15})
 
-            console.log("Password reset request: ", email, resetCode)
+            console.error("Password reset request: ", email, resetCode)
 
             // Send the registration email
             const url = `${process.env.NEXT_PUBLIC_METADATA_URL}/password/validate/${email}/${resetCode}`;
@@ -37,7 +37,7 @@ export async function POST(
         })
 
     } catch (error: any) {
-        console.log(error)
+        console.error(error)
         return Response.json(error, {
             status: 400,
         })
