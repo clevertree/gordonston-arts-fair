@@ -1,8 +1,9 @@
 'use client';
 
 import {MutableRefObject, useRef} from "react";
+import {validateByType, ValidationCallback, ValidationType} from "@components/FormFields/validation";
 
-interface InputProps {
+export interface FormFieldProps {
     name: string,
     label: string,
     value: string,
@@ -33,6 +34,7 @@ export interface FirstError {
     fieldName: string
 }
 
+
 export interface FormHookObject {
     fieldRefs: MutableRefObject<FormFieldRefs>,
     isValidated: boolean,
@@ -43,11 +45,11 @@ export interface FormHookObject {
 
     setupInput(fieldName: string,
                label?: string,
-               validate?: ValidationCallback | ValidationCallback[]
-    ): InputProps,
+               validate?: (ValidationType | ValidationCallback)
+                   | (ValidationType | ValidationCallback)[]
+    ): FormFieldProps,
 }
 
-export type ValidationCallback = (value: string, labelOrFieldName: string) => string | undefined
 export type FormDataUpdateCallback = (formData: any) => any;
 
 
@@ -86,7 +88,7 @@ export function useFormHook(
         if (!label)
             label = fieldName;
 
-        const props: InputProps = {
+        const props: FormFieldProps = {
             name: fieldName,
             label,
             focusRef: (input: HTMLElement | null) => {
@@ -96,7 +98,7 @@ export function useFormHook(
                     delete fieldRefs.current[fieldName];
                 }
             },
-            value: formData[fieldName] || '', // TODO: wrap TextField to deal with defaultValue
+            value: formData[fieldName] || '',
             onUpdate: (value: string | undefined) => {
                 if (value !== formData[fieldName]) {
                     setFieldValue(fieldName, value);
@@ -107,10 +109,15 @@ export function useFormHook(
         // Validation
         if (validate) {
             let message: string | undefined;
-            const validateList: ValidationCallback[] = Array.isArray(validate) ? validate : [validate];
+            const validateList: (ValidationType | ValidationCallback)[] = Array.isArray(validate) ? validate : [validate];
             const value: string = formData[fieldName] || "";
             for (const validationCallback of validateList) {
-                message = validationCallback(value, label || fieldName)
+                const labelOrFieldName = label || fieldName;
+                if (typeof validationCallback === 'string') {
+                    message = validateByType(validationCallback, value, labelOrFieldName)
+                } else {
+                    message = validationCallback(value, labelOrFieldName)
+                }
                 if (message)
                     break;
             }
@@ -141,29 +148,3 @@ export function useFormHook(
     return formHookObject;
 }
 
-export const validateRequired: ValidationCallback = function (value, labelOrFieldName) {
-    if (!value)
-        return `${labelOrFieldName} is a required field`;
-    return undefined;
-}
-
-export const validatePhone: ValidationCallback = function (phoneNumber, labelOrFieldName) {
-    if (!phoneNumber)
-        return phoneNumber;
-    const match = phoneNumber.match(/(\d{3})-(\d{3})-(\d{4})/);
-    if (!match)
-        return "Please enter a valid " + (labelOrFieldName || "Phone Number")
-    return undefined;
-}
-
-export function formatPhone(phoneNumber: string | undefined) {
-    if (!phoneNumber)
-        return phoneNumber;
-    const match = phoneNumber
-        .replace(/\D/g, '')
-        .match(/(\d{3})(\d{1,3})?(\d{1,4})?/);
-    if (!match)
-        return phoneNumber
-    const [, a, b, c] = match;
-    return a + (b ? '-' + b + (c ? '-' + c : '') : '');
-}

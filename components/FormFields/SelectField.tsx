@@ -1,15 +1,9 @@
-import type {SelectProps} from "@mui/material";
+import type {SelectProps as MUISelectProps} from "@mui/material";
 import {FormControl, FormHelperText, InputLabel, Select as MUISelect} from "@mui/material";
 import React from "react";
+import {FormFieldProps} from "@components/FormFields/formFieldHooks";
 
-type SelectFieldProps = SelectProps & {
-    helperText?: string
-    helperTextError?: boolean
-
-    focusRef(e: HTMLElement | null): void,
-    onUpdate(value: string | undefined): void
-}
-
+type SelectFieldProps = MUISelectProps & FormFieldProps
 export default function SelectField({
                                         helperText,
                                         helperTextError,
@@ -37,4 +31,3 @@ export default function SelectField({
         }}>{helperText}</FormHelperText>}
     </FormControl>
 }
-// TODO: override helper text color

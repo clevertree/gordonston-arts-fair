@@ -1,19 +1,15 @@
 import {TextField as MUITextField, TextFieldProps as MUITextFieldProps} from "@mui/material";
 import React, {useEffect, useState} from "react";
+import {FormFieldProps} from "@components/FormFields/formFieldHooks";
+import {formatByType, FormatCallback, FormatType, FormatValue} from "@components/FormFields/formatting";
 
-type TextFieldValue = string | undefined;
-
-type TextFieldProps = MUITextFieldProps & {
-    autoFormat?: (value: TextFieldValue) => TextFieldValue
-    helperTextError?: boolean
-
-    focusRef(e: HTMLElement | null): void
-    onUpdate(value: string | undefined): void
+type TextFieldProps = MUITextFieldProps & FormFieldProps & {
+    autoFormat?: FormatType | FormatCallback
 }
 
 export default function TextField({
                                       value: formValue,
-                                      autoFormat = ((s: TextFieldValue) => s),
+                                      autoFormat = ((s: FormatValue) => s),
                                       focusRef,
                                       onUpdate,
                                       helperTextError,
@@ -37,7 +33,21 @@ export default function TextField({
         value={value}
         {...props}
         onChange={e => {
-            setValue(autoFormat(e.target.value));
+            let value;
+            if (typeof autoFormat === 'string') {
+                value = formatByType(autoFormat, e.target.value);
+
+            } else {
+                value = autoFormat(e.target.value);
+            }
+            setValue(value);
+            if (typeof value === 'string') {
+                e.target.value = value;
+            }
+            if (e.target !== document.activeElement) {
+                // Detect autofill
+                onUpdate(value)
+            }
             if (props.onChange) props.onChange(e);
         }}
         onBlur={e => {
@@ -46,4 +56,3 @@ export default function TextField({
         }}
     />
 }
-// TODO: override helper text color

@@ -3,15 +3,7 @@
 import React, {useEffect, useState} from 'react';
 import {Box, Button, MenuItem, Stack, Typography} from '@mui/material';
 import {UserProfile, UserProfileUpload} from "@util/profile";
-import {SelectField, TextField} from "@components/FormFields/";
-import {
-    formatPhone,
-    FormFieldValues,
-    FormHookObject,
-    useFormHook,
-    validatePhone,
-    validateRequired
-} from "@components/FormFields/formHooks";
+import {FormFieldValues, FormHookObject, SelectField, TextField, useFormHook} from "@components/FormFields";
 
 interface ProfileFormProps {
     redirectNoSessionURL: string
@@ -74,8 +66,6 @@ function ProfileForm({
                 return;
             }
         }
-
-        // TODO: validate file upload fields
 
         // Submit to server
         try {
@@ -155,12 +145,12 @@ function ProfileForm({
                 <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
                     <TextField
                         helperText="Please enter your first name"
-                        {...formInfo.setupInput('firstName', 'First Name', validateRequired)}
+                        {...formInfo.setupInput('firstName', 'First Name', 'required')}
                         required
                     />
                     <TextField
                         helperText="Please enter your first name"
-                        {...formInfo.setupInput('lastName', 'Last Name', [validateRequired, validateRequired])}
+                        {...formInfo.setupInput('lastName', 'Last Name', 'required')}
                         required
                     />
                     <TextField
@@ -171,14 +161,14 @@ function ProfileForm({
                 <fieldset disabled={status === 'updating'} className='grid md:grid-cols-3 gap-4'>
                     <TextField
                         helperText="Primary Phone (i.e. home)"
-                        {...formInfo.setupInput('phone', "Primary Phone", validatePhone)}
-                        autoFormat={formatPhone}
+                        {...formInfo.setupInput('phone', "Primary Phone", ['required', 'phone'])}
+                        autoFormat='phone'
                         required
                     />
                     <TextField
                         helperText="Contact Phone (i.e. cell)"
-                        {...formInfo.setupInput('phone2', "Contact Phone", validatePhone)}
-                        autoFormat={formatPhone}
+                        {...formInfo.setupInput('phone2', "Contact Phone", 'phone')}
+                        autoFormat='phone'
                     />
                     <TextField
                         helperText="Artist Website"
@@ -189,19 +179,19 @@ function ProfileForm({
                     <TextField
                         helperText="Enter your Address"
                         placeholder='123 Art st.'
-                        {...formInfo.setupInput('address', "Address")}
+                        {...formInfo.setupInput('address', "Address", 'required')}
                         required
                     />
                     <TextField
                         helperText="Enter your city name"
                         placeholder='Savannah'
-                        {...formInfo.setupInput('city', "City")}
+                        {...formInfo.setupInput('city', "City", 'required')}
                         required
                     />
 
                     <SelectField
                         helperText="Enter your state"
-                        {...formInfo.setupInput('state', "State", validateRequired)}
+                        {...formInfo.setupInput('state', "State", 'required')}
                     >
                         <MenuItem disabled value=''>Select a state</MenuItem>
                         {Object.entries(LIST_STATES).map(([state, name]) => (
@@ -215,7 +205,7 @@ function ProfileForm({
                     <TextField
                         helperText="Enter your zipcode"
                         placeholder='31404'
-                        {...formInfo.setupInput('zip', "Zipcode")}
+                        {...formInfo.setupInput('zip', "Zipcode", 'required')}
                         required
                     />
                 </fieldset>
@@ -226,7 +216,7 @@ function ProfileForm({
                     <SelectField
                         fullWidth
                         helperText="Select an exhibit category"
-                        {...formInfo.setupInput('category', "Category", validateRequired)}
+                        {...formInfo.setupInput('category', "Category", 'required')}
                     >
                         <MenuItem disabled value=''>Select a category</MenuItem>
                         {LIST_CATEGORIES.map(category => (
@@ -366,16 +356,6 @@ function ProfileForm({
                         onClick={(e) => {
                             e.preventDefault();
                             handleSubmit()
-                            // if (!formInfo.isValidated) {
-                            //     const firstError = formInfo.firstError;
-                            //     if (!firstError)
-                            //         throw new Error("First error missing");
-                            //     // window.setTimeout(() => {
-                            //     //     // TODO: Set message while avoiding rerender
-                            //     //     setMessage(firstError.message);
-                            //     //     setStatus('error')
-                            //     // }, 50)
-                            // }
                         }}
                 >
                     Update Profile
@@ -414,7 +394,7 @@ function ProfileUploadForm({
                     required
                     helperText="Title this image"
                     placeholder='Title this image...'
-                    {...formUpload.setupInput(`title`, "Title", validateRequired)}
+                    {...formUpload.setupInput(`title`, "Title", 'required')}
                 />
                 <TextField
                     required
@@ -422,7 +402,7 @@ function ProfileUploadForm({
                     minRows={4}
                     helperText="Describe this image"
                     placeholder='Describe this image...'
-                    {...formUpload.setupInput(`description`, "Description", validateRequired)}
+                    {...formUpload.setupInput(`description`, "Description", 'required')}
                     slotProps={{
                         htmlInput: {
                             maxLength: 600,
