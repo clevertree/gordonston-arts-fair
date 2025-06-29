@@ -19,7 +19,7 @@ export async function POST(
             })
         }
 
-        // Get user from database
+        // Fetch user from the  database
         const passwordHash = await redisClient.get(redisLoginKey);
         const passwordResult = passwordHash && await bcrypt.compare(password, passwordHash);
         if (!passwordResult) {

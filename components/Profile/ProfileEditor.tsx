@@ -1,56 +1,40 @@
 'use client'
 
-import React, {useEffect, useState} from 'react';
-import {Box, Button, MenuItem, Stack, Typography} from '@mui/material';
+import React, {useState} from 'react';
+import {Alert, Box, Button, MenuItem, Stack, Typography} from '@mui/material';
 import {UserProfile, UserProfileUpload} from "@util/profile";
 import {FormFieldValues, FormHookObject, SelectField, TextField, useFormHook} from "@components/FormFields";
+import type {AlertColor} from "@mui/material/Alert";
 
-interface ProfileFormProps {
-    redirectNoSessionURL: string
+interface ProfileEditorProps {
+    userProfile: UserProfile,
+
+    updateProfile(newUserProfile: UserProfile): Promise<UserProfile>
+
+    uploadFile(filename: string, file: File): Promise<UserProfile>
+
+    deleteFile(filename: string): Promise<void>
 }
 
-function ProfileForm({
-                         redirectNoSessionURL
-                     }: ProfileFormProps) {
-    const [status, setStatus] = useState<'loading' | 'loaded' | 'unsaved' | 'updating' | 'updated' | 'error'>('loading');
-    const [message, setMessage] = useState('');
-    const [profileData, setProfileData] = useState<UserProfile>({info: {}, uploads: {}})
+function ProfileEditor({
+                           userProfile: userProfileServer,
+                           updateProfile,
+                           uploadFile,
+                           deleteFile
+                       }: ProfileEditorProps) {
+    const [status, setStatus] = useState<'ready' | 'unsaved' | 'updating' | 'updated' | 'error'>('ready');
+    const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
+    const [userProfileClient, setUserProfileClient] = useState<UserProfile>(userProfileServer)
     // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
     // const formRef = useRef<HTMLFormElement>();
-    const {uploads: profileUploads = {}, info: profileInfo = {}} = profileData;
+    const {uploads: profileUploads = {}, info: profileInfo = {}} = userProfileClient;
     const formUploadList: { [filename: string]: FormHookObject } = {}
 
     const formInfo = useFormHook(profileInfo as FormFieldValues, (formData) => {
-        setProfileData(oldData => ({...oldData, info: formData}));
-        if (status !== 'error')
-            setStatus('unsaved');
+        setUserProfileClient(oldData => ({...oldData, info: formData}));
+        handleFormChange();
         // setMessage('')
     }, status === 'error');
-
-    useEffect(() => {
-        fetch('/api/profile', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        })
-            .then(response => response.json())
-            .then(async ({profileData, isProfileComplete}) => {
-                // if (profileData.category && !categoryList.includes(profileData.category)) {
-                //     setCategoryList([...categoryList, profileData.category])
-                // }
-                if (profileData) {
-                    setProfileData(profileData)
-                    setStatus('loaded')
-                } else {
-                    setStatus('error')
-                    setMessage('Unable to load profile. Please log in')
-                    setTimeout(() => {
-                        document.location.href = redirectNoSessionURL || '/login'
-                    }, 3000)
-                }
-            })
-    }, [redirectNoSessionURL]);
 
     const handleSubmit = async () => {
         // Validation
@@ -62,7 +46,7 @@ function ProfileForm({
                 inputElm.scrollIntoView({behavior: 'smooth', block: 'center'}); // Optional: Add smooth scrolling
                 inputElm.focus()
                 setStatus('error');
-                setMessage(message)
+                setMessage(['error', message])
                 return;
             }
         }
@@ -71,51 +55,25 @@ function ProfileForm({
         try {
             // const {profileData} = validateForm(formRef.current);
             setStatus('updating');
-            setMessage('');
-
-            const response = await fetch('/api/profile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(profileData),
-            })
-            // Check if the response was successful (e.g., status code 200-299)
-            const {error, message, updatedProfileData} = await response.json();
-            if (!response.ok) {
-                setMessage(error || `HTTP error! status: ${response.status}`);
-                setStatus('error');
-                debugger;
-            } else {
-                setStatus('updated');
-                setMessage(message)
-                if (!updatedProfileData)
-                    throw new Error("Invalid updatedProfileData");
-                setProfileData(updatedProfileData)
-            }
+            setMessage(['info', 'Submitting form...']);
+            const updatedUserProfile = await updateProfile(userProfileClient);
+            setStatus('updated');
+            setMessage(['success', 'User profile updated successfully']);
+            setUserProfileClient(updatedUserProfile)
         } catch (e: any) {
             console.error(e);
             setStatus('error');
-            setMessage(e.message)
+            setMessage(['error', e.message])
         }
     };
 
     function handleFormChange() {
         switch (status) {
-            // case 'error':
-            // case 'updated':
-            case 'loaded':
-                // setMessage('');
+            case 'ready':
+                setMessage(['warning', 'Click "Update Profile" to save changes']);
                 setStatus('unsaved');
                 break;
         }
-    }
-
-
-    if (status === "loading") {
-        return <Box>
-            Loading Profile Form...
-        </Box>
     }
 
 
@@ -279,31 +237,24 @@ function ProfileForm({
                                 multiple={true}
                                 accept="image/*"
                                 onChange={async e => {
-                                    setMessage('');
-                                    setStatus('updating')
+                                    e.stopPropagation();
                                     const input = e.target;
-                                    let count = 0;
-                                    let updatedProfileData: UserProfile | null = null
                                     if (input && input.files) {
+                                        let count = 0;
+                                        let updatedProfileData: UserProfile | null = null
+                                        setStatus('updating')
+                                        setMessage(['info', `Uploading ${input.files.length} files...`]);
                                         for (const file of input.files) {
                                             console.log("Uploading file: ", file)
-                                            const response = await fetch(
-                                                `/api/profile/upload?filename=${file.name}&mimetype=${file.type}`,
-                                                {
-                                                    method: 'POST',
-                                                    body: file,
-                                                },
-                                            );
-                                            const {profileData} = await response.json();
-                                            updatedProfileData = profileData;
+                                            updatedProfileData = await uploadFile(file.name, file)
                                             count++;
                                         }
-                                    }
-                                    setMessage(count + " file" + (count === 1 ? '' : 's') + ' have been uploaded')
-                                    setStatus('updated')
-                                    e.target.value = '';
-                                    if (updatedProfileData) {
-                                        setProfileData(updatedProfileData);
+                                        setMessage(['success', count + " file" + (count === 1 ? '' : 's') + ' have been uploaded'])
+                                        setStatus('updated')
+                                        e.target.value = '';
+                                        if (updatedProfileData) {
+                                            setUserProfileClient(updatedProfileData);
+                                        }
                                     }
                                 }}
                             />
@@ -322,33 +273,22 @@ function ProfileForm({
                             filename={filename}
                             uploadInfo={profileUploads[filename]}
                             uploadHooks={formUploadList}
-                            onUpdate={(newProfileUpload, validationMessage) => {
-                                setProfileData((oldData) => {
-                                    const updatedData = {...oldData};
-                                    if (newProfileUpload) {
-                                        updatedData.uploads[filename] = {
-                                            ...(oldData.uploads[filename] || {}),
-                                            ...(newProfileUpload || {})
-                                        } as UserProfileUpload
-                                    } else {
-                                        delete updatedData.uploads[filename];
-                                    }
-                                    return updatedData;
+                            deleteFile={deleteFile}
+                            onFileDeleted={() => {
+                                setUserProfileClient((oldData) => {
+                                    const uploads = {...oldData.uploads};
+                                    delete uploads[filename];
+                                    setMessage(['success', "File deleted successfully: " + filename])
+                                    return {...oldData, uploads};
                                 });
-                                if (validationMessage) {
-                                    setStatus('error');
-                                    setMessage(validationMessage)
-                                } else {
-                                    setStatus('unsaved');
-                                }
+
                             }}
                         />)}
                     </Stack>
                 </fieldset>
-
-                {message && <Typography variant="caption" color={status === 'error' ? "red" : "blue"} align="center">
-                    {message}
-                </Typography>}
+                {message && message[1] && <Alert severity={message[0]}>
+                    {message[1]}
+                </Alert>}
                 <Button type="submit"
                         variant="contained"
                         color="primary"
@@ -365,24 +305,27 @@ function ProfileForm({
     );
 }
 
-export default ProfileForm;
+export default ProfileEditor;
 
 interface ProfileUploadFormProps {
     filename: string,
     uploadInfo: UserProfileUpload,
-    uploadHooks: { [filename: string]: FormHookObject }
+    uploadHooks: { [filename: string]: FormHookObject },
 
-    onUpdate(formData?: FormFieldValues, validationMessage?: string): void
+    onFileDeleted(): void,
+
+    deleteFile(filename: string): Promise<void>
 }
 
 function ProfileUploadForm({
                                filename,
                                uploadInfo,
                                uploadHooks,
-                               onUpdate
+                               onFileDeleted,
+                               deleteFile
                            }: ProfileUploadFormProps) {
 
-    const formUpload = useFormHook(uploadInfo as unknown as FormFieldValues, onUpdate);
+    const formUpload = useFormHook(uploadInfo as unknown as FormFieldValues, onFileDeleted);
     uploadHooks[filename] = formUpload;
     return <Box
 
@@ -417,20 +360,8 @@ function ProfileUploadForm({
                             sx={{float: 'right'}}
                             onClick={async () => {
                                 console.log("Deleting file: ", filename)
-                                const response = await fetch(
-                                    `/api/profile/upload/delete`,
-                                    {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify({
-                                            filename
-                                        }),
-                                    },
-                                );
-                                const {message} = await response.json();
-                                onUpdate(undefined, message)
+                                await deleteFile(filename)
+                                onFileDeleted()
                             }}>
                         Delete Image
                     </Button>

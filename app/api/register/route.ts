@@ -28,6 +28,9 @@ export async function POST(
         const hashedPassword = await bcrypt.hash(password, 10);
         await redisClient.set(redisLoginKey, hashedPassword);
 
+        const redisCreatedKey = 'user:' + email.toLowerCase() + ":createdAt";
+        await redisClient.set(redisCreatedKey, new Date().toISOString());
+
         console.log("Registered a new user: ", email)
 
         // Create the user session

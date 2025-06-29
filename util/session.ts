@@ -1,6 +1,7 @@
 import 'server-only'
 import {JWTPayload, jwtVerify, SignJWT} from 'jose'
 import {cookies} from "next/headers";
+import {HttpError} from "@app/api/httpError";
 
 interface SessionPayload extends JWTPayload {
     email: string,
@@ -56,4 +57,11 @@ export async function login(sessionID: string) {
 export async function decryptSession() {
     const cookie = (await cookies()).get('session')?.value
     return await decrypt(cookie) as SessionPayload;
+}
+
+export async function validateSession() {
+    const session = await decryptSession();
+    if(!session)
+        throw HttpError.Unauthorized("Unauthorized - Please login");
+    return session;
 }
