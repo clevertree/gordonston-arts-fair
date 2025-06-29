@@ -1,6 +1,8 @@
 import React from 'react';
 import {Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from '@mui/material';
 import {UserProfile, UserProfileInfo} from "@util/profile";
+import ReloadingImage from "@components/Image/ReloadingImage";
+import Link from "next/link";
 
 interface ProfileViewProps {
     userProfile: UserProfile,
@@ -23,6 +25,7 @@ function ProfileView({userProfile}: ProfileViewProps) {
         category: "Category",
     }
     const profileInfoFields = Object.keys(profileInfoLabels) as (keyof UserProfileInfo)[];
+    const uploadList = Object.values(profileUploads);
 
 
     return (
@@ -64,6 +67,51 @@ function ProfileView({userProfile}: ProfileViewProps) {
                                 </TableCell>
                                 <TableCell>
                                     {profileInfo[profileInfoField]}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+            <Typography variant="h6" id='step1'>
+                Uploaded files
+            </Typography>
+
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow sx={{
+                            backgroundColor: '#1976d2',
+                            '& th': {
+                                fontWeight: 'bold',
+                                color: 'white',
+                                padding: '0.5rem'
+                            }
+                        }}>
+                            <TableCell colSpan={2}>File uploads</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {uploadList.map(({title, description, url}) => (
+                            <TableRow key={url + title}>
+                                <TableCell component="th" scope="row" sx={{verticalAlign: 'top'}}>
+                                    <Typography variant="h6">
+                                        {title}
+                                    </Typography>
+                                    {description && <Typography variant="body2">
+                                        {description}
+                                    </Typography>}
+                                </TableCell>
+                                <TableCell sx={{position: 'relative', width: '20rem', height: '20rem'}}>
+                                    {url && <Link href={url} target='_blank' rel='noreferrer'>
+                                        <ReloadingImage
+                                            loading='lazy'
+                                            src={url}
+                                            alt={title}
+                                            fill
+                                        />
+                                    </Link>}
                                 </TableCell>
                             </TableRow>
                         ))}

@@ -26,24 +26,6 @@ export default function FloatingDiv({
         finalChildren = children.props.children
     }
 
-    function onScroll(): void {
-        const navElm = refContainer.current
-        if (!navElm) return
-
-        const {top, height} = navElm.getBoundingClientRect()
-
-        if (!isFloating) {
-            if (top < 0) {
-                setIsFloating(true)
-                setContainerHeight(`${height}px`)
-            }
-        } else if (isFloating) {
-            if (top > 0) {
-                setIsFloating(false)
-                setContainerHeight('inherit')
-            }
-        }
-    }
 
     function scrollToTop(): void {
         window.scroll({
@@ -51,14 +33,32 @@ export default function FloatingDiv({
             left: 0,
             behavior: 'smooth'
         })
-        history.pushState("", document.title, window.location.pathname)
+        history.pushState({}, document.title, window.location.pathname)
     }
 
     useEffect(() => {
         window.addEventListener('scroll', onScroll)
         onScroll()
         return () => window.removeEventListener('scroll', onScroll)
-    }, [isFloating]) // Added isFloating as dependency since it's used in onScroll
+
+        function onScroll(): void {
+            const navElm = refContainer.current
+            if (!navElm) return
+
+            const {top, height} = navElm.getBoundingClientRect()
+            if (!isFloating) {
+                if (top < 0) {
+                    setIsFloating(true)
+                    setContainerHeight(`${height}px`)
+                }
+            } else if (isFloating) {
+                if (top >= 0) {
+                    setIsFloating(false)
+                    setContainerHeight('inherit')
+                }
+            }
+        }
+    }, [isFloating]) // Added isFloating as a dependency since it's used in onScroll
 
     const Container: ElementType = containerElm || 'div'
 

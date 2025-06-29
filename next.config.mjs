@@ -15,6 +15,9 @@ const nextConfig = {
         serverActions: {
             bodySizeLimit: '10mb'
         }
+    },
+    images: {
+        remotePatterns: [new URL('https://*.public.blob.vercel-storage.com/**')]
     }
 }
 

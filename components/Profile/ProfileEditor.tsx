@@ -1,10 +1,26 @@
 'use client'
 
 import React, {useState} from 'react';
-import {Alert, Box, Button, MenuItem, Stack, Typography} from '@mui/material';
+import {
+    Alert,
+    Box,
+    Button,
+    MenuItem,
+    Paper,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography
+} from '@mui/material';
 import {UserProfile, UserProfileUpload} from "@util/profile";
 import {FormFieldValues, FormHookObject, SelectField, TextField, useFormHook} from "@components/FormFields";
 import type {AlertColor} from "@mui/material/Alert";
+import Link from "next/link";
+import ReloadingImage from "@components/Image/ReloadingImage";
 
 interface ProfileEditorProps {
     userProfile: UserProfile,
@@ -268,24 +284,48 @@ function ProfileEditor({
                 </Typography>
 
                 <fieldset disabled={status === 'updating'}>
-                    <Stack spacing={2}>
-                        {Object.keys(profileUploads).map((filename: string, i) => <ProfileUploadForm
-                            key={filename}
-                            filename={filename}
-                            uploadInfo={profileUploads[filename]}
-                            uploadHooks={formUploadList}
-                            deleteFile={deleteFile}
-                            onFileDeleted={() => {
-                                setUserProfileClient((oldData) => {
-                                    const uploads = {...oldData.uploads};
-                                    delete uploads[filename];
-                                    setMessage(['success', "File deleted successfully: " + filename])
-                                    return {...oldData, uploads};
-                                });
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow sx={{
+                                    backgroundColor: '#1976d2',
+                                    '& th': {
+                                        fontWeight: 'bold',
+                                        color: 'white',
+                                        padding: '0.5rem'
+                                    }
+                                }}>
+                                    <TableCell colSpan={2}>File uploads</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {Object.keys(profileUploads).map((filename: string, i) => <ProfileUploadForm
+                                    key={filename}
+                                    filename={filename}
+                                    uploadInfo={profileUploads[filename]}
+                                    uploadHooks={formUploadList}
+                                    deleteFile={deleteFile}
+                                    onUpdate={(upload) => {
+                                        setUserProfileClient((oldData) => {
+                                            const uploads = {...oldData.uploads};
+                                            delete uploads.url;
+                                            uploads[filename] = upload;
+                                            return {...oldData, uploads};
+                                        });
+                                    }}
+                                    onFileDeleted={() => {
+                                        setUserProfileClient((oldData) => {
+                                            const uploads = {...oldData.uploads};
+                                            delete uploads[filename];
+                                            setMessage(['success', "File deleted successfully: " + filename])
+                                            return {...oldData, uploads};
+                                        });
 
-                            }}
-                        />)}
-                    </Stack>
+                                    }}
+                                />)}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </fieldset>
                 {message && message[1] && <Alert severity={message[0]}>
                     {message[1]}
@@ -313,6 +353,8 @@ interface ProfileUploadFormProps {
     uploadInfo: UserProfileUpload,
     uploadHooks: { [filename: string]: FormHookObject },
 
+    onUpdate(upload: UserProfileUpload): void,
+
     onFileDeleted(): void,
 
     deleteFile(filename: string): Promise<void>
@@ -322,17 +364,17 @@ function ProfileUploadForm({
                                filename,
                                uploadInfo,
                                uploadHooks,
+                               onUpdate,
                                onFileDeleted,
                                deleteFile
                            }: ProfileUploadFormProps) {
 
-    const formUpload = useFormHook(uploadInfo as unknown as FormFieldValues, onFileDeleted);
+    const formUpload = useFormHook(uploadInfo as unknown as FormFieldValues, onUpdate);
     uploadHooks[filename] = formUpload;
-    return <Box
-
+    return <TableRow
         key={filename}
     >
-        <div className='grid sm:grid-cols-2 gap-x-8'>
+        <TableCell component="th" scope="row" sx={{verticalAlign: 'top'}}>
             <Stack spacing={2}>
                 <TextField
                     required
@@ -341,7 +383,6 @@ function ProfileUploadForm({
                     {...formUpload.setupInput(`title`, "Title", 'required')}
                 />
                 <TextField
-                    required
                     multiline
                     minRows={4}
                     helperText="Describe this image"
@@ -360,6 +401,8 @@ function ProfileUploadForm({
                     <Button variant="outlined" color="secondary"
                             sx={{float: 'right'}}
                             onClick={async () => {
+                                if (!window.confirm("Are you sure you want to permanently delete this file: " + filename))
+                                    return;
                                 console.log("Deleting file: ", filename)
                                 await deleteFile(filename)
                                 onFileDeleted()
@@ -368,23 +411,22 @@ function ProfileUploadForm({
                     </Button>
                 </div>
             </Stack>
-            <a
-                href={uploadInfo.url}
-                target='_blank'
-            >
-                <img
-                    onError={(e: any) => {
-                        setTimeout(() => {
-                            e.target.src += '?&'
-                        }, 5000)
-                    }}
+        </TableCell>
+        <TableCell sx={{position: 'relative', width: '20rem', height: '20rem'}}>
+            {uploadInfo.url && <Link href={uploadInfo.url} target='_blank' rel='noreferrer'>
+                <ReloadingImage
                     loading='lazy'
                     src={uploadInfo.url}
                     alt={filename}
+                    width={300}
+                    height={300}
+                    style={{
+                        height: 'auto'
+                    }}
                 />
-            </a>
-        </div>
-    </Box>
+            </Link>}
+        </TableCell>
+    </TableRow>
 }
 
 
