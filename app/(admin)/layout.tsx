@@ -9,16 +9,16 @@ export const metadata: Metadata = {
     description: "Created by Ari Asulin",
 };
 
-export default function ArtistLayout({
-                                         children,
-                                     }: Readonly<{
+export default function AdminLayout({
+                                        children,
+                                    }: Readonly<{
     children: React.ReactNode;
 }>) {
     return <>
         <header>
             <FloatingDiv className='flex flex-wrap justify-evenly bg-black color-white gap-x-3 relative p-1 z-10'>
                 <Link href='/'>Home</Link>
-                <Link href='/profile'>Profile</Link>
+                <Link href='/user'>User list</Link>
                 <Link href='/logout'>Log out</Link>
             </FloatingDiv>
         </header>

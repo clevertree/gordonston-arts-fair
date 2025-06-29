@@ -32,11 +32,12 @@ export async function loginAction(email: string, password: string): Promise<Acti
     }
 
     await startSession(email)
+    const isAdmin = !!(await redisClient.get(`user:${email.toLowerCase()}:admin`));
 
     return {
         status: 'success',
         message: "Login successful. Redirecting...",
-        redirectURL: "/profile"
+        redirectURL: isAdmin ? "/user" : "/profile"
     }
 }
 

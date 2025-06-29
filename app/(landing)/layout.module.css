@@ -22,15 +22,6 @@
     animation-timing-function: linear;
 }
 
-.article {
-    max-width: 64rem;
-    padding: 1rem;
-    margin: auto;
-    display: flex;
-    flex-direction: column;
-    z-index: 2;
-}
-
 .heroContent {
     display: flex;
     flex-direction: column;

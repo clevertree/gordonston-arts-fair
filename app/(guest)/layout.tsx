@@ -1,9 +1,8 @@
 import type {Metadata} from "next";
 import React, {Suspense} from "react";
 import Link from "next/link";
-import styles from "./layout.module.css"
 import FloatingDiv from "@components/FloatingDiv/FloatingDiv";
-import {CircularProgress} from "@mui/material";
+import {SuspenseContent} from "@app/suspenseContent";
 
 export const metadata: Metadata = {
     title: "Gordonston Art Fair",
@@ -17,16 +16,15 @@ export default function ArtistLayout({
 }>) {
     return <>
         <header>
-            <FloatingDiv className='flex flex-wrap justify-evenly bg-gray-300 text-sm italic gap-x-3 relative p-1 z-10'>
+            <FloatingDiv className='flex flex-wrap justify-evenly bg-black color-white gap-x-3 relative p-1 z-10'>
                 <Link href='/'>Home</Link>
                 <Link href='/register'>Register</Link>
                 <Link href='/login'>Log in</Link>
                 <Link href='/password'>Reset Password</Link>
             </FloatingDiv>
         </header>
-        <article className={styles.article}>
-
-            <Suspense fallback={<CircularProgress/>}>
+        <article className='max-w-screen-lg flex flex-col z-[2] m-auto p-4'>
+            <Suspense fallback={<SuspenseContent/>}>
                 {children}
             </Suspense>
         </article>

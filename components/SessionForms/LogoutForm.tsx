@@ -13,7 +13,7 @@ function LogoutForm({
                         logoutAction
                     }: LogoutFormProps) {
     const [status, setStatus] = useState<'ready' | 'submitting'>('ready');
-    const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
+    const [message, setMessage] = useState<[AlertColor, string]>(['warning', 'Please submit this form to log out.']);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 

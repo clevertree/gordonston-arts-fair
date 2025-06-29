@@ -1,5 +1,3 @@
-'use client';
-
 import {
     Alert,
     Box,
@@ -29,20 +27,20 @@ export default function AdminUsersPage({userList}: AdminUserListProps) {
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
-                        <TableRow sx={(theme) => ({
-                            backgroundColor: theme.palette.primary.main,
+                        <TableRow sx={{
+                            backgroundColor: '#1976d2',
                             '& th': {
                                 fontWeight: 'bold',
-                                color: theme.palette.common.white,
+                                color: 'white',
                                 padding: '0.5rem'
                             }
-                        })}>
+                        }}>
                             <TableCell>Email</TableCell>
                             <TableCell align="center">Admin</TableCell>
-                            <TableCell align="right">Created</TableCell>
-                            <TableCell align="right">Name</TableCell>
-                            <TableCell align="right">Images</TableCell>
-                            <TableCell align="right">Edit</TableCell>
+                            <TableCell align="center">Created</TableCell>
+                            <TableCell align="center">Name</TableCell>
+                            <TableCell align="center">Images</TableCell>
+                            <TableCell align="center">Edit</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -52,12 +50,12 @@ export default function AdminUsersPage({userList}: AdminUserListProps) {
                                 sx={{'&:last-child td, &:last-child th': {border: 0}}}
                             >
                                 <TableCell component="th" scope="row">
-                                    <Link href={`/admin/user/${email}`}>{email}</Link>
+                                    <Link href={`/user/${email}`}>{email}</Link>
                                 </TableCell>
                                 <TableCell align="center">
                                     {isAdmin ? '✅ Admin' : '👤 User'}
                                 </TableCell>
-                                <TableCell align="right">
+                                <TableCell align="center">
                                     {createdAt
                                         ? new Date(createdAt).toLocaleDateString()
                                         : 'N/A'
@@ -69,8 +67,8 @@ export default function AdminUsersPage({userList}: AdminUserListProps) {
                                 <TableCell align="center">
                                     {Object.keys(profile?.uploads || {}).length}
                                 </TableCell>
-                                <TableCell>
-                                    <Link href={`/admin/user/${email}`}>✎</Link>
+                                <TableCell align="center">
+                                    <Link href={`/user/${email}`}>✎</Link>
                                 </TableCell>
                             </TableRow>
                         ))}

@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react';
 import {Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from '@mui/material';
 import {UserProfile, UserProfileInfo} from "@util/profile";
@@ -47,14 +45,14 @@ function ProfileView({userProfile}: ProfileViewProps) {
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
-                        <TableRow sx={(theme) => ({
-                            backgroundColor: theme.palette.primary.main,
+                        <TableRow sx={{
+                            backgroundColor: '#1976d2',
                             '& th': {
                                 fontWeight: 'bold',
-                                color: theme.palette.common.white,
+                                color: 'white',
                                 padding: '0.5rem'
                             }
-                        })}>
+                        }}>
                             <TableCell colSpan={2}>Profile</TableCell>
                         </TableRow>
                     </TableHead>
