@@ -295,7 +295,8 @@ function ProfileEditor({
                                         padding: '0.5rem'
                                     }
                                 }}>
-                                    <TableCell colSpan={2}>File uploads</TableCell>
+                                    <TableCell colSpan={2}>File
+                                        uploads: {Object.keys(profileUploads).length}</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>

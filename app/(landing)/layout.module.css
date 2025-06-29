@@ -1,11 +1,3 @@
-.heroContainer {
-    /*position: relative;*/
-    /*height: 34em;*/
-    /*width: 100%;*/
-    /*left: 0;*/
-    /*margin: 0;*/
-    /*overflow: hidden;*/
-}
 
 .heroBackgroundImg {
     /*background: url("/img/PXL_20220613_225011729.MP6_-scaled.jpg") bottom;*/
@@ -18,14 +10,14 @@
     animation-timing-function: linear;
 }
 
-.heroContent {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    /*color: var(--foreground-inverted-color);*/
-    position: relative;
-    z-index: 3;
-}
+/*.heroContent {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    align-items: center;*/
+/*    !*color: var(--foreground-inverted-color);*!*/
+/*    position: relative;*/
+/*    z-index: 3;*/
+/*}*/
 
 
 @keyframes backgroundScroll {

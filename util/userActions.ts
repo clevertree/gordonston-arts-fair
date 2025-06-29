@@ -18,23 +18,25 @@ export async function listUsersAsAdmin() {
 
     // Get all users by scanning for keys matching the pattern 'user:*:login'
     const users: UserList = [];
-    for await (const [key] of redisClient.scanIterator({
+    for await (const keys of redisClient.scanIterator({
         MATCH: 'user:*:login',
-        COUNT: 100
+        COUNT: 10,
+        TYPE: 'string'
     })) {
-        console.log('key', key);
-        const email = key.split(':')[1];
-        const isAdmin = !!(await redisClient.get(`user:${email}:admin`));
-        const createdAt = await redisClient.get(`user:${email}:createdAt`) || undefined;
-        const profileDataString = await redisClient.get(`user:${email}:profile`);
-        const profile: UserProfile = profileDataString ? JSON.parse(profileDataString) : undefined;
+        for (const key of keys) {
+            const email = key.split(':')[1];
+            const isAdmin = !!(await redisClient.get(`user:${email}:admin`));
+            const createdAt = await redisClient.get(`user:${email}:createdAt`) || undefined;
+            const profileDataString = await redisClient.get(`user:${email}:profile`);
+            const profile: UserProfile = profileDataString ? JSON.parse(profileDataString) : undefined;
 
-        users.push({
-            email,
-            isAdmin,
-            createdAt,
-            profile
-        });
+            users.push({
+                email,
+                isAdmin,
+                createdAt,
+                profile
+            });
+        }
     }
 
     return users;

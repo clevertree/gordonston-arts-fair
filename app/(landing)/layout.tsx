@@ -51,7 +51,8 @@ export default function RootLayout({
                 {children}
             </Suspense>
         </article>
-        <footer className={styles.footer}>
+        <footer
+            className='w-full text-[color:var(--foreground-inverted-color)] bg-[color:var(--background-inverted-color)] m-auto'>
             <DateLocationApply/>
 
             <div className='p-4 pb-6 text-center'>

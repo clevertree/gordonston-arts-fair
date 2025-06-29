@@ -28,8 +28,9 @@ export default function ArtistLayout({
                 {children}
             </Suspense>
         </article>
-        <footer>
-            <div className='p-4 pb-6'>
+        <footer
+            className='w-full text-[color:var(--foreground-inverted-color)] bg-[color:var(--background-inverted-color)] m-auto'>
+            <div className='p-4 pb-6 text-center'>
                 For help submitting your Artist Profile please contact the admin at{' '}
                 <Link href='mailto:admin@gordonstonartfair.com'>admin@gordonstonartfair.com</Link>
             </div>

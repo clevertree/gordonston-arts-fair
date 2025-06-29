@@ -89,7 +89,7 @@ function ProfileView({userProfile}: ProfileViewProps) {
                                 padding: '0.5rem'
                             }
                         }}>
-                            <TableCell colSpan={2}>File uploads</TableCell>
+                            <TableCell colSpan={2}>File uploads: {uploadList.length}</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>

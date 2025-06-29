@@ -53,11 +53,11 @@ export default function AdminUsersPage({userList}: AdminUserListProps) {
                                     <Link href={`/user/${email}`}>{email}</Link>
                                 </TableCell>
                                 <TableCell align="center">
-                                    {isAdmin ? '✅ Admin' : '👤 User'}
+                                    {isAdmin ? '🔑 Admin' : '🎨 Artist'}
                                 </TableCell>
                                 <TableCell align="center">
                                     {createdAt
-                                        ? new Date(createdAt).toLocaleDateString()
+                                        ? new Date(createdAt).toLocaleString()
                                         : 'N/A'
                                     }
                                 </TableCell>

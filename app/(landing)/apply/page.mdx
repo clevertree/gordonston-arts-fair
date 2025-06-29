@@ -1,0 +1,117 @@
+import {formatToLocal, getTimeSpan} from "../../../util/date";
+import RegisterForm from "../../../components/SessionForms/RegisterForm";
+import {registerAction} from "../../../util/sessionActions";
+import {Stack} from "@mui/material";
+import Link from "next/link";
+
+export const metadata = {
+    title: 'Apply to Gordonston Art Fair',
+}
+
+export {formatToLocal};
+export const eventDate = new Date(process.env.NEXT_PUBLIC_EVENT_DATE);
+export const eventDayBeforeDate = new Date(eventDate.getTime() - 1000 * 60 * 60 * 24);
+export const registrationOpenDate = new Date(process.env.NEXT_PUBLIC_REGISTRATION_OPEN_DATE);
+export const registrationTimeUntil = getTimeSpan(new Date(), registrationOpenDate);
+export const registrationEndDate = new Date(process.env.NEXT_PUBLIC_REGISTRATION_END_DATE);
+export const registrationFee = process.env.NEXT_PUBLIC_REGISTRATION_FEE;
+export const registrationFeeDate = process.env.NEXT_PUBLIC_REGISTRATION_FEE_DATE;
+export const boothFee = process.env.NEXT_PUBLIC_BOOTH_FEE;
+
+
+<h2 className='m-auto text-[color:var(--gold-color)] italic'>Artist Registration</h2>
+
+This event takes place on **{formatToLocal(eventDate)}**.
+Registration for this event opens in {registrationTimeUntil}
+on **{formatToLocal(registrationEndDate)}**.
+
+* * *
+
+Welcome to a Gordonston tradition, the hosting of juried local and regional artists and artisans in the beautiful setting of the Juliette Gordon Low Park in Savannah’s historic Gordonston neighborhood.
+
+Only online applications will be accepted.
+The registration fee is ${registrationFee}.00.
+If accepted, the booth fee is ${boothFee}.00.
+
+Application deadline is {formatToLocal(registrationEndDate)};
+however, artists will be informed in a timely manner
+whether they have been selected so that they may plan accordingly.
+Although the deadline is {formatToLocal(registrationEndDate, false, false)},
+spaces may fill up before that time.
+We will close/extend submissions at our discretion.
+We will keep artists on a waitlist in the event spaces become available.
+
+## Location
+
+<address>
+    <a href='https://maps.app.goo.gl/bzvrR3X1hCpNhFjB6'>
+        Juliette Gordon Low Park<br/>
+        10 Edgewood Rd<br/>
+        Savannah, GA 31404
+    </a>
+</address>
+
+## Exhibitor Information
+
+Each exhibitor display space will be 12’x12’. Spaces will be allocated at the discretion of the Art Fair organizers. Requests will be considered and met whenever possible. Electrical service is not available.
+
+Acceptance is based upon the quality and originality of the work as well as on booth presentation.
+
+To ensure a balanced and varied selection of exhibitors, we will limit the number of exhibitors accepted in any single media or genre.
+
+*   All work must be original fine art or handmade craft created by the exhibiting artist, limited reproductions of original work are acceptable.
+*   Artists must exhibit and be present with their work for the duration of the event. No dealers or agents are allowed.
+*   Artists may only display work approved by the Jury. The committee reserves the right to ask exhibitors to remove objectional items. Our festival is a family-friendly event.
+*   Artists are responsible for providing their own tent, tables, display racks, etc.
+*   Tents and displays must be secured (stakes allowed) and able to withstand strong winds and all-weather conditions – we are a rain or shine event.
+*   Artist booths must remain open for the duration of the event. No early teardowns
+*   Artist vehicles must be off the park grounds
+by 7:00 pm on {formatToLocal(eventDayBeforeDate, true, false)}
+and by 9:30 am on {formatToLocal(eventDate, true, false)}
+and are not permitted to return until after 4:00 pm on Saturday.
+It is required that to avoid congestion, artists completely tear down
+their booths before bringing in vehicles for load-in.
+
+## More Information
+
+More information about the show and artist amenities can be found
+[here on our website](https://gordonstonartfair.com/#artist-amenities).
+
+## Terms & Conditions
+
+As an entrant to The Gordonston Art Fair, I accept the decision of the Jury of Selection as final and will exhibit per regulations if selected. I will also allow my work to be used for advertising purposes by The Gordonston Art Fair Association.
+
+I hereby release The Gordonston Art Fair Association, its members,
+art festival director, and associates from any responsibility,
+personal liability (injury),
+loss damage or legal action that may arise or occur to me, my goods,
+my property or to the public from any condition whatsoever during the preparation,
+set-up, tear-down and duration of the art fair under this agreement.
+I am solely responsible for the selling of my items and any other conduct
+of my business. I am solely responsible for my person and my property during
+said event. This application for entry constitutes an agreement on my part that
+I accept the above statements as detailed. I also confirm that the work entered
+and exhibited is created by me and that the work I bring will be similar to the
+images I submitted in quality and style.  I further attest that I have read,
+accept and agree to abide by all the rules and regulations outlined on the
+Gordonstonartfair.com "Exhibitor Information" and "Application Process" pages.
+I understand that if I am accepted for the festival, my booth fee is due within
+30 days of acceptance. I also understand that I, as the artist,
+must be present for the duration of the event.
+
+By registering as an artist,
+I accept and agree to the terms and conditions above.
+
+## Register
+
+<RegisterForm registerAction={registerAction}/>
+
+<Stack sx={{margin: 'auto'}} direction='column'>
+    <Link href='/login'>Click here to log in as an Artist</Link>
+    <Link href='/password'>Click here to reset your password</Link>
+</Stack>
+
+If you have problems with this registration system and need assistance
+or have any questions related to the actual show or its jurying process,
+please contact the show organizer by
+email at [admin@gordonstonartfair.com](mailto:admin@gordonstonartfair.com).

@@ -23,18 +23,36 @@ export function getTimeSpan(startDate: Date, endDate: Date) {
     if (weeks > 0) {
         result.push(`${weeks} week${weeks !== 1 ? 's' : ''}`);
     }
-    if (days > 0 || result.length === 0) { // Include days even if zero if no other units
-        result.push(`${days} day${days !== 1 ? 's' : ''}`);
+    if (days > 0 || result.length === 0) { // Always include days
+        result.push(`${result.length > 0 ? ' and ' : ''}${days} day${days !== 1 ? 's' : ''}`);
     }
     return result.join(', ');
 }
 
-export function formatToLocal(date: Date, options: Intl.DateTimeFormatOptions = {}) {
-    return date.toLocaleDateString('EN', {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        ...options
-    });
+export function formatToLocal(date: Date, showDayName = true, showYear = true) {
+    const day = date.getDate();
+    const month = date.toLocaleString('default', {month: 'long'});
+    const year = date.getFullYear();
+    const ordinalSuffix = getOrdinalSuffix(day);
+
+    const weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const dayName = weekday[date.getDay()];
+
+    return (showDayName ? `${dayName}, ` : '') +
+        `${month} ${day}${ordinalSuffix}`
+        + (showYear ? `, ${year}` : '');
+}
+
+function getOrdinalSuffix(day: number) {
+    if (day > 3 && day < 21) return 'th'; // Handles 11th, 12th, 13th
+    switch (day % 10) {
+        case 1:
+            return 'st';
+        case 2:
+            return 'nd';
+        case 3:
+            return 'rd';
+        default:
+            return 'th';
+    }
 }

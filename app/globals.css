@@ -41,17 +41,6 @@ body {
 }
 
 
-footer {
-    width: 100%;
-    color: var(--foreground-inverted-color);
-    background-color: var(--background-inverted-color);
-    margin: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-
 .inverted-color {
     color: var(--foreground-inverted-color);
     background-color: var(--background-inverted-color);
