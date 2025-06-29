@@ -1,6 +1,7 @@
 import PasswordResetValidationForm from "@components/SessionForms/PasswordResetValidationForm";
 import Link from "next/link";
 import {Stack} from "@mui/material";
+import {passwordResetValidateAction} from "@util/sessionActions";
 
 export const metadata = {
     title: 'Artist Registration: Set a new password',
@@ -11,16 +12,16 @@ export default async function PasswordResetValidationPage({
                                                           }: {
     params: Promise<{ email: string, code: string }>
 }) {
-    const {email, code} = await params
+    const {email, code} = await params;
 
     return (
         <>
             <h2 className='m-auto text-[color:var(--gold-color)] italic'>Artist Registration</h2>
 
             <PasswordResetValidationForm
+                passwordResetValidateAction={passwordResetValidateAction}
                 email={email.replace('%40', '@')}
                 code={code}
-                redirectURL='/login'
             />
 
             <Stack sx={{margin: 'auto'}} direction='column'>

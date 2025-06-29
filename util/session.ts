@@ -1,7 +1,7 @@
 import 'server-only'
 import {JWTPayload, jwtVerify, SignJWT} from 'jose'
 import {cookies} from "next/headers";
-import {HttpError} from "@app/api/httpError";
+import {HttpError} from "@util/exception/httpError";
 
 interface SessionPayload extends JWTPayload {
     email: string,
@@ -30,11 +30,11 @@ export async function decrypt(session: string | undefined = '') {
     }
 }
 
-export async function login(sessionID: string) {
+export async function startSession(email: string) {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
     const sessionData: SessionPayload = {
-        email: sessionID,
+        email,
         // expiresAt
     };
 
@@ -61,7 +61,7 @@ export async function decryptSession() {
 
 export async function validateSession() {
     const session = await decryptSession();
-    if(!session)
+    if (!session)
         throw HttpError.Unauthorized("Unauthorized - Please login");
     return session;
 }

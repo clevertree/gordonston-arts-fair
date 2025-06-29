@@ -22,7 +22,7 @@ function ProfileEditor({
                            uploadFile,
                            deleteFile
                        }: ProfileEditorProps) {
-    const [status, setStatus] = useState<'ready' | 'unsaved' | 'updating' | 'updated' | 'error'>('ready');
+    const [status, setStatus] = useState<'ready' | 'unsaved' | 'updating' | 'error'>('ready');
     const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
     const [userProfileClient, setUserProfileClient] = useState<UserProfile>(userProfileServer)
     // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
@@ -57,7 +57,7 @@ function ProfileEditor({
             setStatus('updating');
             setMessage(['info', 'Submitting form...']);
             const updatedUserProfile = await updateProfile(userProfileClient);
-            setStatus('updated');
+            setStatus('ready');
             setMessage(['success', 'User profile updated successfully']);
             setUserProfileClient(updatedUserProfile)
         } catch (e: any) {
@@ -204,7 +204,7 @@ function ProfileEditor({
                         minRows={4}
                         helperText="Describe your exhibit"
                         placeholder='Information about my exhibit...'
-                        {...formInfo.setupInput('description', "Description")}
+                        {...formInfo.setupInput('description', "Description", 'required')}
                         required
                         slotProps={{
                             htmlInput: {
@@ -250,7 +250,7 @@ function ProfileEditor({
                                             count++;
                                         }
                                         setMessage(['success', count + " file" + (count === 1 ? '' : 's') + ' have been uploaded'])
-                                        setStatus('updated')
+                                        setStatus('ready')
                                         e.target.value = '';
                                         if (updatedProfileData) {
                                             setUserProfileClient(updatedProfileData);
@@ -345,7 +345,7 @@ function ProfileUploadForm({
                     minRows={4}
                     helperText="Describe this image"
                     placeholder='Describe this image...'
-                    {...formUpload.setupInput(`description`, "Description", 'required')}
+                    {...formUpload.setupInput(`description`, "Description")}
                     slotProps={{
                         htmlInput: {
                             maxLength: 600,

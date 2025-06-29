@@ -1,47 +1,32 @@
 'use client'
 
 import React, {useState} from 'react';
-import {Box, Button, TextField, Typography} from '@mui/material';
+import {Alert, Box, Button, TextField, Typography} from '@mui/material';
+import type {AlertColor} from "@mui/material/Alert";
+import {ActionResponse} from "@util/sessionActions";
 
 interface LoginFormProps {
-    redirectURL: string,
+    loginAction(email: string, password: string): Promise<ActionResponse>
 }
 
 function LoginForm({
-                       redirectURL
+                       loginAction
                    }: LoginFormProps) {
     const [status, setStatus] = useState<'loaded' | 'submitting' | 'submitted' | 'error'>('loaded');
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const handleSubmit = async (event: any) => {
         event.preventDefault();
-        setMessage('');
-        setStatus('submitting')
+        setStatus('submitting');
+        setMessage(['info', 'Submitting login form...']);
 
-        const loginRequest = {
-            email,
-            password
-        }
         try {
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(loginRequest),
-            })
-            // Check if the response was successful (e.g., status code 200-299)
-            const responseData = await response.json();
-            if (!response.ok) {
-                setStatus('error')
-                setMessage(responseData.error || `HTTP error! status: ${response.status}`);
-            } else {
-                setStatus('submitted')
-                setMessage(responseData.message);
-                document.location.href = redirectURL;
-            }
+            const {message, redirectURL} = await loginAction(email, password);
+            setStatus('submitted');
+            setMessage(['success', message]);
+            document.location.href = redirectURL;
         } catch (e: any) {
             setStatus('error')
             setMessage(e.message)
@@ -66,9 +51,9 @@ function LoginForm({
             <Typography variant="h6" align="center">
                 Artist Login
             </Typography>
-            {message && <Typography variant="caption" color={status === 'error' ? "red" : "blue"} align="center">
-                {message}
-            </Typography>}
+            {message && message[1] && <Alert severity={message[0]}>
+                {message[1]}
+            </Alert>}
             <TextField
                 label="Email Address"
                 variant="outlined"

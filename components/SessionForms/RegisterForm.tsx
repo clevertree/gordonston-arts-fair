@@ -1,48 +1,33 @@
 'use client'
 
 import React, {useState} from 'react';
-import {Box, Button, TextField, Typography} from '@mui/material';
+import {Alert, Box, Button, TextField, Typography} from '@mui/material';
+import type {AlertColor} from "@mui/material/Alert";
+import {ActionResponse} from "@util/sessionActions";
 
 interface RegisterFormProps {
-    redirectURL: string
+    registerAction(email: string, password: string): Promise<ActionResponse>
 }
 
 function RegisterForm({
-                          redirectURL
+                          registerAction
                       }: RegisterFormProps) {
 
     const [status, setStatus] = useState<'loaded' | 'submitting' | 'submitted' | 'error'>('loaded');
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const handleSubmit = async (event: any) => {
         event.preventDefault();
         setStatus('submitting');
-        setMessage('');
+        setMessage(['info', 'Submitting form...']);
 
-        const registerRequest = {
-            email,
-            password
-        }
         try {
-            const response = await fetch('/api/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(registerRequest),
-            })
-            const responseData = await response.json();
-            // Check if the response was successful (e.g., status code 200-299)
-            if (!response.ok) {
-                setStatus('error');
-                setMessage(responseData.error || `HTTP error! status: ${response.status}`);
-            } else {
-                setStatus('submitted');
-                document.location.href = responseData.redirectURL || redirectURL;
-                setMessage(responseData.message || `Registration was successful`);
-            }
+            const {message, redirectURL} = await registerAction(email, password);
+            setStatus('submitted');
+            setMessage(['info', message]);
+            document.location.href = redirectURL;
         } catch (e: any) {
             setStatus('error');
             setMessage(e.message);
@@ -67,9 +52,9 @@ function RegisterForm({
             <Typography variant="h6" align="center">
                 Register an Artist Account
             </Typography>
-            {message && <Typography variant="caption" color={status === 'error' ? "red" : "blue"} align="center">
-                {message}
-            </Typography>}
+            {message && message[1] && <Alert severity={message[0]}>
+                {message[1]}
+            </Alert>}
             <TextField
                 label="Email Address"
                 variant="outlined"

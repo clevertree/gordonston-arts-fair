@@ -1,41 +1,31 @@
 'use client'
 
 import React, {useState} from 'react';
-import {Box, Button, TextField, Typography} from '@mui/material';
+import {Alert, Box, Button, TextField, Typography} from '@mui/material';
+import type {AlertColor} from "@mui/material/Alert";
+import {ActionResponse} from "@util/sessionActions";
 
-function PasswordResetForm() {
+interface PasswordResetFormProps {
+    passwordResetAction(email: string): Promise<ActionResponse>
+}
+
+function PasswordResetForm({passwordResetAction}: PasswordResetFormProps) {
     const [status, setStatus] = useState<'loaded' | 'submitting' | 'submitted' | 'error'>('loaded');
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
     const [email, setEmail] = useState('');
 
     const handleSubmit = async (event: any) => {
         event.preventDefault();
-        setMessage('');
-        setStatus('submitting')
+        setStatus('submitting');
+        setMessage(['info', 'Submitting password reset form...']);
 
-        const resetRequest = {
-            email,
-        }
         try {
-            const response = await fetch('/api/password', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(resetRequest),
-            })
-            // Check if the response was successful (e.g., status code 200-299)
-            const responseData = await response.json();
-            if (!response.ok) {
-                setStatus('error')
-                setMessage(responseData.error || `HTTP error! status: ${response.status}`);
-            } else {
-                setStatus('submitted')
-                setMessage(responseData.message)
-            }
+            const {message} = await passwordResetAction(email);
+            setStatus('submitted');
+            setMessage(['success', message]);
         } catch (e: any) {
             setStatus('error')
-            setMessage(e.message)
+            setMessage(['error', e.message])
         }
     };
 
@@ -57,9 +47,9 @@ function PasswordResetForm() {
             <Typography variant="h6" align="center">
                 Submit Password Reset Request
             </Typography>
-            {message && <Typography variant="caption" color={status === 'error' ? "red" : "blue"} align="center">
-                {message}
-            </Typography>}
+            {message && message[1] && <Alert severity={message[0]}>
+                {message[1]}
+            </Alert>}
             <TextField
                 label="Email Address"
                 variant="outlined"

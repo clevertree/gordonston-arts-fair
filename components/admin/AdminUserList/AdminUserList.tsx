@@ -1,56 +1,25 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import {UserResult} from "@app/api/apiTypes";
+import {
+    Alert,
+    Box,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography
+} from '@mui/material';
 import Link from "next/link";
+import {UserResult} from "@util/userActions";
 
-export default function AdminUsersPage() {
-    const [users, setUsers] = useState<UserResult[]>([]);
+interface AdminUserListProps {
+    userList: UserResult[]
+}
 
-    const [status, setStatus] = useState<'loading' | 'loaded'| 'error'>('loading');
-    const [message, setMessage] = useState('');
-
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                setStatus('loading');
-                const response = await fetch('/api/admin/user');
-                const data = await response.json();
-                if (!response.ok) {
-                    setStatus('error');
-                    setMessage(data.message || 'Failed to fetch users');
-                } else {
-                    setUsers(data.users);
-                    setStatus('loaded');
-                    setMessage('');
-                }
-            } catch (err) {
-                setStatus('error');
-                setMessage(err instanceof Error ? err.message : 'An error occurred');
-            }
-        };
-
-        fetchUsers().then();
-    }, []);
-
-    if (status === "loading") {
-        return (
-            <Box p={4}>
-                <Typography>Loading users...</Typography>
-            </Box>
-        );
-    }
-
-    if (status === 'error') {
-        return (
-            <Box p={4}>
-                <Typography color="error">Error: {message}</Typography>
-            </Box>
-        );
-    }
-
+export default function AdminUsersPage({userList}: AdminUserListProps) {
     return (
         <Box p={4}>
             <Typography variant="h4" gutterBottom>
@@ -77,10 +46,10 @@ export default function AdminUsersPage() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {users.map(({email, isAdmin, createdAt, profile}) => (
+                        {userList.map(({email, isAdmin, createdAt, profile}) => (
                             <TableRow
                                 key={email}
-                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                sx={{'&:last-child td, &:last-child th': {border: 0}}}
                             >
                                 <TableCell component="th" scope="row">
                                     <Link href={`/admin/user/${email}`}>{email}</Link>
@@ -95,7 +64,7 @@ export default function AdminUsersPage() {
                                     }
                                 </TableCell>
                                 <TableCell align="center">
-                                    {profile?.info?.firstName||'N/A'} {profile?.info?.lastName || 'N/A'}
+                                    {profile?.info?.firstName || 'N/A'} {profile?.info?.lastName || 'N/A'}
                                 </TableCell>
                                 <TableCell align="center">
                                     {Object.keys(profile?.uploads || {}).length}
@@ -109,12 +78,10 @@ export default function AdminUsersPage() {
                 </Table>
             </TableContainer>
 
-            {users.length === 0 && (
-                <Box mt={2}>
-                    <Typography color="text.secondary">
-                        No users found.
-                    </Typography>
-                </Box>
+            {userList.length === 0 && (
+                <Alert severity='warning'>
+                    No users found.
+                </Alert>
             )}
         </Box>
     );

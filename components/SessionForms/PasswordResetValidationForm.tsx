@@ -1,50 +1,39 @@
 'use client'
 
 import React, {useState} from 'react';
-import {Box, Button, TextField, Typography} from '@mui/material';
+import {Alert, Box, Button, TextField, Typography} from '@mui/material';
+import {ActionResponse} from "@util/sessionActions";
+import type {AlertColor} from "@mui/material/Alert";
 
 interface PasswordResetValidationFormProps {
     email: string,
     code: string,
-    redirectURL: string
+
+    passwordResetValidateAction(email: string, code: string, password: string): Promise<ActionResponse>
 }
 
-function PasswordResetValidationForm({email, code, redirectURL}: PasswordResetValidationFormProps) {
+function PasswordResetValidationForm({
+                                         email,
+                                         code,
+                                         passwordResetValidateAction
+                                     }: PasswordResetValidationFormProps) {
     const [status, setStatus] = useState<'loaded' | 'submitting' | 'submitted' | 'error'>('loaded');
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
     const [password, setPassword] = useState('');
 
     const handleSubmit = async (event: any) => {
         event.preventDefault();
-        setMessage('');
-        setStatus('submitting')
+        setStatus('submitting');
+        setMessage(['info', 'Submitting password reset form...']);
 
-        const resetRequest = {
-            email,
-            code,
-            password
-        }
         try {
-            const response = await fetch('/api/password/validate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(resetRequest),
-            })
-            // Check if the response was successful (e.g., status code 200-299)
-            const responseData = await response.json();
-            if (!response.ok) {
-                setStatus('error')
-                setMessage(responseData.error || `HTTP error! status: ${response.status}`);
-            } else {
-                setStatus('submitted')
-                setMessage(responseData.message)
-                document.location.href = redirectURL;
-            }
+            const {message, redirectURL} = await passwordResetValidateAction(email, code, password);
+            setStatus('submitted');
+            setMessage(['success', message]);
+            document.location.href = redirectURL;
         } catch (e: any) {
             setStatus('error')
-            setMessage(e.message)
+            setMessage(['error', e.message])
         }
     };
 
@@ -66,9 +55,9 @@ function PasswordResetValidationForm({email, code, redirectURL}: PasswordResetVa
             <Typography variant="h6" align="center">
                 Set a new password
             </Typography>
-            {message && <Typography variant="caption" color={status === 'error' ? "red" : "blue"} align="center">
-                {message}
-            </Typography>}
+            {message && message[1] && <Alert severity={message[0]}>
+                {message[1]}
+            </Alert>}
             <TextField
                 label="Password"
                 variant="outlined"

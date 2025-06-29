@@ -1,17 +1,20 @@
 import AdminUserList from "@components/admin/AdminUserList/AdminUserList";
-import {validateSession} from "@util/session";
+
+import {validateAdminSession} from "@util/sessionActions";
+import {listUsersAsAdmin} from "@util/userActions";
 
 export const metadata = {
     title: 'Admin User List',
 }
 
 export default async function PasswordResetValidationPage() {
-    const session = await validateSession()
+    await validateAdminSession();
+    const userList = await listUsersAsAdmin()
     return (
         <>
             <h2 className='m-auto text-[color:var(--gold-color)] italic'>Artist Profile</h2>
 
-            <AdminUserList/>
+            <AdminUserList userList={userList}/>
         </>
     );
 }
