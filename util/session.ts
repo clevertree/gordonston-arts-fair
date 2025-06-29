@@ -26,7 +26,7 @@ export async function decrypt(session: string | undefined = '') {
         })
         return payload
     } catch (error) {
-        console.error('Failed to verify session')
+        throw HttpError.Unauthorized("Failed to verify session - Please login");
     }
 }
 
@@ -50,8 +50,11 @@ export async function startSession(email: string) {
         sameSite: 'strict',
         path: '/',
     });
+}
 
-    // return sessionData;
+export async function endSession() {
+    const cookieStore = await cookies()
+    cookieStore.delete('session');
 }
 
 export async function decryptSession() {

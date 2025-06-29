@@ -1,4 +1,4 @@
-.container {
+.heroContainer {
     position: relative;
     height: 34em;
     width: 100%;
@@ -7,7 +7,7 @@
     /*overflow: hidden;*/
 }
 
-.backgroundImg {
+.heroBackgroundImg {
     /*background: url("/img/PXL_20220613_225011729.MP6_-scaled.jpg") bottom;*/
     /*background-size: 120vh;*/
     position: absolute;
@@ -22,11 +22,24 @@
     animation-timing-function: linear;
 }
 
-.content {
+.article {
+    max-width: 64rem;
+    padding: 1rem;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+}
+
+.heroContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     /*color: var(--foreground-inverted-color);*/
     position: relative;
     z-index: 3;
 }
+
 
 @keyframes backgroundScroll {
     from {
@@ -39,7 +52,7 @@
     to {
         object-position: 100% 100%;
         /*background-size: 300vh;*/
-        /*top: -1000px;*/
+        /*top: -100vh;*/
         /*left: 0;*/
         /*right: -400px;*/
     }

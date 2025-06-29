@@ -10,22 +10,25 @@ interface PasswordResetFormProps {
 }
 
 function PasswordResetForm({passwordResetAction}: PasswordResetFormProps) {
-    const [status, setStatus] = useState<'loaded' | 'submitting' | 'submitted' | 'error'>('loaded');
+    const [status, setStatus] = useState<'ready' | 'submitting'>('ready');
     const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
     const [email, setEmail] = useState('');
 
     const handleSubmit = async (event: any) => {
         event.preventDefault();
         setStatus('submitting');
-        setMessage(['info', 'Submitting password reset form...']);
+        setMessage(['info', 'Submitting password reset request form...']);
 
         try {
-            const {message} = await passwordResetAction(email);
-            setStatus('submitted');
-            setMessage(['success', message]);
+            const {status, message, redirectURL} = await passwordResetAction(email);
+            setMessage([status, message]);
+            if (redirectURL)
+                document.location.href = redirectURL;
+
         } catch (e: any) {
-            setStatus('error')
-            setMessage(['error', e.message])
+            setMessage(['error', e.message]);
+        } finally {
+            setStatus('ready')
         }
     };
 
@@ -51,13 +54,14 @@ function PasswordResetForm({passwordResetAction}: PasswordResetFormProps) {
                 {message[1]}
             </Alert>}
             <TextField
+                required
                 label="Email Address"
                 variant="outlined"
                 type='email'
                 value={email}
                 onChange={(e) => {
                     setEmail(e.target.value)
-                    setStatus('loaded')
+                    setStatus('ready')
                 }}
                 fullWidth
                 slotProps={{
@@ -67,7 +71,7 @@ function PasswordResetForm({passwordResetAction}: PasswordResetFormProps) {
                 }}
                 helperText="Enter the email you wish to send a reset request to"
             />
-            <Button type="submit" variant="contained" color="primary" disabled={status !== 'loaded'}>
+            <Button type="submit" variant="contained" color="primary" disabled={status === 'submitting'}>
                 Submit request
             </Button>
         </Box>

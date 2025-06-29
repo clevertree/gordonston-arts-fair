@@ -1,17 +1,17 @@
 'use client'
 
 import React, {useState} from 'react';
-import {Alert, Box, Button, TextField, Typography} from '@mui/material';
+import {Alert, Box, Button, Typography} from '@mui/material';
 import type {AlertColor} from "@mui/material/Alert";
 import {ActionResponse} from "@util/sessionActions";
 
-interface LoginFormProps {
-    loginAction(email: string, password: string): Promise<ActionResponse>
+interface LogoutFormProps {
+    logoutAction(email: string, password: string): Promise<ActionResponse>
 }
 
-function LoginForm({
-                       loginAction
-                   }: LoginFormProps) {
+function LogoutForm({
+                        logoutAction
+                    }: LogoutFormProps) {
     const [status, setStatus] = useState<'ready' | 'submitting'>('ready');
     const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
     const [email, setEmail] = useState('');
@@ -20,11 +20,11 @@ function LoginForm({
     const handleSubmit = async (event: any) => {
         event.preventDefault();
         setStatus('submitting');
-        setMessage(['info', 'Submitting log in form...']);
+        setMessage(['info', 'Submitting logout form...']);
 
         try {
-            const {status, message, redirectURL} = await loginAction(email, password);
-            setMessage([status, message]);
+            const {message, redirectURL} = await logoutAction(email, password);
+            setMessage(['success', message]);
             if (redirectURL)
                 document.location.href = redirectURL;
 
@@ -51,43 +51,17 @@ function LoginForm({
             }}
         >
             <Typography variant="h6" align="center">
-                Artist Login
+                Artist Logout
             </Typography>
             {message && message[1] && <Alert severity={message[0]}>
                 {message[1]}
             </Alert>}
-            <TextField
-                required
-                label="Email Address"
-                variant="outlined"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                fullWidth
-                slotProps={{
-                    inputLabel: {
-                        shrink: true
-                    }
-                }}
-            />
-            <TextField
-                label="Password"
-                variant="outlined"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                fullWidth
-                slotProps={{
-                    inputLabel: {
-                        shrink: true
-                    }
-                }}
-            />
             <Button type="submit" variant="contained" color="primary"
                     disabled={status === 'submitting'}>
-                Login
+                Logout
             </Button>
         </Box>
     );
 }
 
-export default LoginForm;
+export default LogoutForm;

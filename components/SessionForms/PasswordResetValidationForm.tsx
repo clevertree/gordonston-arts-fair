@@ -17,7 +17,7 @@ function PasswordResetValidationForm({
                                          code,
                                          passwordResetValidateAction
                                      }: PasswordResetValidationFormProps) {
-    const [status, setStatus] = useState<'loaded' | 'submitting' | 'submitted' | 'error'>('loaded');
+    const [status, setStatus] = useState<'ready' | 'submitting' | 'submitted' | 'error'>('ready');
     const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
     const [password, setPassword] = useState('');
 
@@ -27,13 +27,16 @@ function PasswordResetValidationForm({
         setMessage(['info', 'Submitting password reset form...']);
 
         try {
-            const {message, redirectURL} = await passwordResetValidateAction(email, code, password);
+            const {status, message, redirectURL} = await passwordResetValidateAction(email, code, password);
             setStatus('submitted');
-            setMessage(['success', message]);
-            document.location.href = redirectURL;
+            setMessage([status, message]);
+            if (redirectURL)
+                document.location.href = redirectURL;
+
         } catch (e: any) {
-            setStatus('error')
-            setMessage(['error', e.message])
+            setMessage(['error', e.message]);
+        } finally {
+            setStatus('ready')
         }
     };
 
@@ -59,6 +62,7 @@ function PasswordResetValidationForm({
                 {message[1]}
             </Alert>}
             <TextField
+                required
                 label="Password"
                 variant="outlined"
                 type="password"
@@ -71,8 +75,7 @@ function PasswordResetValidationForm({
                     }
                 }}
             />
-            <Button type="submit" variant="contained" color="primary"
-                    disabled={status !== 'loaded' && status !== 'error'}>
+            <Button type="submit" variant="contained" color="primary" disabled={status === 'submitting'}>
                 Reset Password
             </Button>
         </Box>

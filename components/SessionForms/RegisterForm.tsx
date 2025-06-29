@@ -13,7 +13,7 @@ function RegisterForm({
                           registerAction
                       }: RegisterFormProps) {
 
-    const [status, setStatus] = useState<'loaded' | 'submitting' | 'submitted' | 'error'>('loaded');
+    const [status, setStatus] = useState<'ready' | 'submitting'>('ready');
     const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -24,13 +24,15 @@ function RegisterForm({
         setMessage(['info', 'Submitting form...']);
 
         try {
-            const {message, redirectURL} = await registerAction(email, password);
-            setStatus('submitted');
-            setMessage(['info', message]);
-            document.location.href = redirectURL;
+            const {status, message, redirectURL} = await registerAction(email, password);
+            setMessage([status, message]);
+            if (redirectURL)
+                document.location.href = redirectURL;
+
         } catch (e: any) {
-            setStatus('error');
-            setMessage(e.message);
+            setMessage(['error', e.message]);
+        } finally {
+            setStatus('ready')
         }
     };
 
@@ -56,6 +58,7 @@ function RegisterForm({
                 {message[1]}
             </Alert>}
             <TextField
+                required
                 label="Email Address"
                 variant="outlined"
                 type='email'
@@ -69,6 +72,7 @@ function RegisterForm({
                 }}
             />
             <TextField
+                required
                 label="Password"
                 variant="outlined"
                 type="password"
@@ -83,7 +87,7 @@ function RegisterForm({
             />
 
             <Button type="submit" variant="contained" color="primary"
-                    disabled={status !== 'loaded' && status !== 'error'}>
+                    disabled={status === 'submitting'}>
                 Register
             </Button>
         </Box>

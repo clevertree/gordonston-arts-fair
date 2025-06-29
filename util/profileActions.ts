@@ -39,7 +39,6 @@ export async function fetchProfile(email: string) {
 export async function updateProfile(email: string, newUserProfile: UserProfile) {
     const redisClient = await getRedisClient();
     const profileHash = `user:${email.toLowerCase()}:profile`;
-    debugger;
     const profileString = await redisClient.get(profileHash);
     const oldUserProfile = profileString ? JSON.parse(profileString) : {};
     const updatedUserProfile: UserProfile = {...oldUserProfile, ...newUserProfile}
@@ -48,16 +47,14 @@ export async function updateProfile(email: string, newUserProfile: UserProfile) 
 }
 
 
-export async function uploadFile(email: string, filename: string, file: File) {
+export async function uploadFile(email: string, file: File) {
     const imagePath = 'profile/' + email.toLowerCase() + '/uploads';
-    console.log("Uploading file: ", filename);
-    const upload = await put(`${imagePath}/${file.name}`, file, {
+    console.log("Uploading file: ", file.name);
+    return await put(`${imagePath}/${file.name}`, file, {
         access: 'public',
         contentType: file.type,
         allowOverwrite: true
     });
-
-    return await fetchProfile(email);
 }
 
 export async function deleteFile(email: string, filename: string) {

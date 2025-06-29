@@ -11,7 +11,7 @@ interface ProfileEditorProps {
 
     updateProfile(newUserProfile: UserProfile): Promise<UserProfile>
 
-    uploadFile(filename: string, file: File): Promise<UserProfile>
+    uploadFile(file: File): Promise<UserProfile>
 
     deleteFile(filename: string): Promise<void>
 }
@@ -189,13 +189,14 @@ function ProfileEditor({
                         >{profileInfo.category}</MenuItem>}
                     </SelectField>
                     <Button
+                        variant="text"
                         onClick={(e) => {
                             const category = prompt("Please enter a custom art category") || '';
                             if (category) {
                                 formInfo.setFieldValue('category', category);
                             }
                         }}>
-                        Custom Category
+                        Add a custom category
                     </Button>
                 </fieldset>
                 <fieldset disabled={status === 'updating'}>
@@ -246,7 +247,7 @@ function ProfileEditor({
                                         setMessage(['info', `Uploading ${input.files.length} files...`]);
                                         for (const file of input.files) {
                                             console.log("Uploading file: ", file)
-                                            updatedProfileData = await uploadFile(file.name, file)
+                                            updatedProfileData = await uploadFile(file)
                                             count++;
                                         }
                                         setMessage(['success', count + " file" + (count === 1 ? '' : 's') + ' have been uploaded'])
