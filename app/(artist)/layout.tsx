@@ -16,7 +16,7 @@ export default function ArtistLayout({
 }>) {
     return <>
         <header>
-            <FloatingDiv className='flex flex-wrap justify-evenly bg-black color-white gap-x-3 relative p-1 z-10'>
+            <FloatingDiv className='flex flex-wrap justify-evenly bg-black color-white gap-x-3 relative p-1'>
                 <Link href='/'>Home</Link>
                 <Link href='/profile'>Profile</Link>
                 <Link href='/logout'>Log out</Link>

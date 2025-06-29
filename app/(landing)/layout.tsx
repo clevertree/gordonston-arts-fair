@@ -21,7 +21,7 @@ export default function RootLayout({
     const eventDateString = formatToLocal(new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`));
     return <>
         <header>
-            <FloatingDiv className='flex flex-wrap justify-evenly bg-black color-white gap-x-3 relative p-1 z-10'>
+            <FloatingDiv className='flex flex-wrap justify-evenly bg-black color-white gap-x-3 relative p-1'>
                 <Link href='/'>Home</Link>
                 <Link href='/#gordonston-history'>Gordonston</Link>
                 <Link href='/#exhibitor-information'>Exhibitors</Link>
@@ -29,19 +29,19 @@ export default function RootLayout({
                 <Link href='/#volunteering'>Volunteer</Link>
                 <Link href='/#faq'>FAQ</Link>
             </FloatingDiv>
-            <div className={styles.heroContainer}>
+            <div className='relative'>
                 <Image
                     alt="Hero Image Background: Gates of Gordonston"
                     src="/img/PXL_20220613_225011729.MP6_-scaled.jpg"
                     layout='fill'
                     objectFit='cover'
                     className={styles.heroBackgroundImg}/>
-                <div className='flex flex-col items-center relative z-10 opacity-90'>
-                    <div className="pt-8 md:pt-24"/>
-                    <h1 className='text-[color:var(--gold-color)] font-bold italic drop-shadow-white'>Gordonston</h1>
-                    <h2 className='text-white text-4xl md:text-6xl drop-shadow-white uppercase'>Art Fair</h2>
-                    <h3 className='text-white md:text-2xl font-bold drop-shadow-white'>{eventDateString}</h3>
-                    <div className="pt-12 md:pt-24"/>
+                <div className='flex flex-col items-center relative z-10 sm:opacity-90 sm:pb-12'>
+                    <div className="pt-8 md:pt-12"/>
+                    <h1 className='text-[color:var(--gold-color)] font-bold italic px-3 py-1 rounded-t-3xl bg-[#000A]'>Gordonston</h1>
+                    <h2 className='text-white text-4xl md:text-6xl px-3 py-1 rounded-t-2xl bg-[#000A]'>ART FAIR</h2>
+                    <h3 className='text-white md:text-2xl font-bold px-3 py-1 rounded-3xl bg-[#000A]'>{eventDateString}</h3>
+                    <div className="pt-12 md:pt-12"/>
                     <DateLocationApply className='bg-white'/>
                 </div>
             </div>

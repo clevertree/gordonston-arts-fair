@@ -1,23 +1,19 @@
 .heroContainer {
-    position: relative;
-    height: 34em;
-    width: 100%;
-    left: 0;
-    margin: 0;
+    /*position: relative;*/
+    /*height: 34em;*/
+    /*width: 100%;*/
+    /*left: 0;*/
+    /*margin: 0;*/
     /*overflow: hidden;*/
 }
 
 .heroBackgroundImg {
     /*background: url("/img/PXL_20220613_225011729.MP6_-scaled.jpg") bottom;*/
     /*background-size: 120vh;*/
-    position: absolute;
-    height: 36em;
-    object-position: center bottom;
-    /*top: 0;*/
-    /*left: 0;*/
-    /*right: 0;*/
+    /*position: absolute;*/
     /*height: 36em;*/
-    z-index: 2;
+    /*object-position: center bottom;*/
+    /*z-index: 2;*/
     animation: backgroundScroll 50s infinite alternate-reverse;
     animation-timing-function: linear;
 }
