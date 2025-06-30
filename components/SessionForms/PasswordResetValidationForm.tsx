@@ -11,7 +11,11 @@ interface PasswordResetValidationFormProps {
   email: string,
   code: string,
 
-  passwordResetValidateAction(email: string, code: string, password: string): Promise<ActionResponse>
+  passwordResetValidateAction(
+    email: string,
+    code: string,
+    password: string
+  ): Promise<ActionResponse>
 }
 
 function PasswordResetValidationForm({
@@ -29,10 +33,9 @@ function PasswordResetValidationForm({
     setMessage(['info', 'Submitting password reset form...']);
 
     try {
-      const { status, message, redirectURL } = await passwordResetValidateAction(email, code, password);
-      setStatus('submitted');
-      setMessage([status, message]);
-      if (redirectURL) document.location.href = redirectURL;
+      const response = await passwordResetValidateAction(email, code, password);
+      setMessage([response.status, response.message]);
+      if (response.redirectURL) document.location.href = response.redirectURL;
     } catch (e: any) {
       setMessage(['error', e.message]);
     } finally {
@@ -59,9 +62,9 @@ function PasswordResetValidationForm({
         Set a new password
       </Typography>
       {message && message[1] && (
-      <Alert severity={message[0]}>
-        {message[1]}
-      </Alert>
+        <Alert severity={message[0]}>
+          {message[1]}
+        </Alert>
       )}
       <TextField
         required

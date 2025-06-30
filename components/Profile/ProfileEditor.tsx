@@ -57,32 +57,26 @@ function ProfileEditor({
   const handleSubmit = async () => {
     // Validation
     const allForms = [formInfo, ...Object.values(formUploadList)];
-    for (const form of allForms) {
+    for (let i = 0; i < allForms.length; i++) {
+      const form = allForms[i];
       if (!form.isValidated && form.firstError) {
-        const { getRef, message } = form.firstError;
+        const { getRef, message: firstErrorMessage } = form.firstError;
         const inputElm = getRef();
         inputElm.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Optional: Add smooth scrolling
         inputElm.focus();
         setStatus('error');
-        setMessage(['error', message]);
+        setMessage(['error', firstErrorMessage]);
         return;
       }
     }
 
     // Submit to server
-    try {
-      // const {profileData} = validateForm(formRef.current);
-      setStatus('updating');
-      setMessage(['info', 'Submitting form...']);
-      const updatedUserProfile = await updateProfile(userProfileClient);
-      setStatus('ready');
-      setMessage(['success', 'User profile updated successfully']);
-      setUserProfileClient(updatedUserProfile);
-    } catch (e: any) {
-      console.error(e);
-      setStatus('error');
-      setMessage(['error', e.message]);
-    }
+    setStatus('updating');
+    setMessage(['info', 'Submitting form...']);
+    const updatedUserProfile = await updateProfile(userProfileClient);
+    setStatus('ready');
+    setMessage(['success', 'User profile updated successfully']);
+    setUserProfileClient(updatedUserProfile);
   };
 
   function handleFormChange() {
@@ -90,6 +84,8 @@ function ProfileEditor({
       case 'ready':
         setMessage(['warning', 'Click "Update Profile" to save changes']);
         setStatus('unsaved');
+        break;
+      default:
         break;
     }
   }
@@ -205,18 +201,19 @@ function ProfileEditor({
               </MenuItem>
             ))}
             {profileInfo.category && !LIST_CATEGORIES.includes(profileInfo.category) && (
-              <MenuItem
-                key={profileInfo.category}
-                value={profileInfo.category}
-              >
-                {profileInfo.category}
-              </MenuItem>
+            <MenuItem
+              key={profileInfo.category}
+              value={profileInfo.category}
+            >
+              {profileInfo.category}
+            </MenuItem>
             )}
           </SelectField>
           <Button
             variant="text"
-            onClick={(e) => {
-              const category = prompt('Please enter a custom art category') || '';
+            onClick={() => {
+              // eslint-disable-next-line no-alert
+              const category = window.prompt('Please enter a custom art category') || '';
               if (category) {
                 formInfo.setFieldValue('category', category);
               }
@@ -272,11 +269,10 @@ function ProfileEditor({
                     let updatedProfileData: UserProfile | null = null;
                     setStatus('updating');
                     setMessage(['info', `Uploading ${input.files.length} files...`]);
-                    for (const file of input.files) {
-                      console.log('Uploading file: ', file);
+                    await Promise.all(Array.from(input.files).map(async (file) => {
                       updatedProfileData = await uploadFile(file);
-                      count++;
-                    }
+                      count += 1;
+                    }));
                     setMessage(['success', `${count} file${count === 1 ? '' : 's'} have been uploaded`]);
                     setStatus('ready');
                     e.target.value = '';
@@ -302,12 +298,14 @@ function ProfileEditor({
                   className="bg-green-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2"
                 >
                   <TableCell colSpan={2}>
-                    File uploads: {Object.keys(profileUploads).length}
+                    File uploads:
+                    {' '}
+                    {Object.keys(profileUploads).length}
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {Object.keys(profileUploads).map((filename: string, i) => (
+                {Object.keys(profileUploads).map((filename: string) => (
                   <ProfileUploadForm
                     key={filename}
                     filename={filename}
@@ -315,21 +313,21 @@ function ProfileEditor({
                     uploadHooks={formUploadList}
                     deleteFile={deleteFile}
                     onUpdate={(upload) => {
-                        setUserProfileClient((oldData) => {
-                          const uploads = { ...oldData.uploads };
-                          delete uploads.url;
-                          uploads[filename] = upload;
-                          return { ...oldData, uploads };
-                        });
-                      }}
+                      setUserProfileClient((oldData) => {
+                        const uploads = { ...oldData.uploads };
+                        delete uploads.url;
+                        uploads[filename] = upload;
+                        return { ...oldData, uploads };
+                      });
+                    }}
                     onFileDeleted={() => {
-                        setUserProfileClient((oldData) => {
-                          const uploads = { ...oldData.uploads };
-                          delete uploads[filename];
-                          setMessage(['success', `File deleted successfully: ${filename}`]);
-                          return { ...oldData, uploads };
-                        });
-                      }}
+                      setUserProfileClient((oldData) => {
+                        const uploads = { ...oldData.uploads };
+                        delete uploads[filename];
+                        setMessage(['success', `File deleted successfully: ${filename}`]);
+                        return { ...oldData, uploads };
+                      });
+                    }}
                   />
                 ))}
               </TableBody>
@@ -337,9 +335,9 @@ function ProfileEditor({
           </TableContainer>
         </fieldset>
         {message && message[1] && (
-          <Alert severity={message[0]}>
-            {message[1]}
-          </Alert>
+        <Alert severity={message[0]}>
+          {message[1]}
+        </Alert>
         )}
         <Button
           type="submit"
@@ -381,6 +379,7 @@ function ProfileUploadForm({
   deleteFile
 }: ProfileUploadFormProps) {
   const formUpload = useFormHook(uploadInfo as unknown as FormFieldValues, onUpdate);
+  // eslint-disable-next-line no-param-reassign
   uploadHooks[filename] = formUpload;
   return (
     <TableRow
@@ -415,8 +414,10 @@ function ProfileUploadForm({
               color="secondary"
               sx={{ float: 'right' }}
               onClick={async () => {
-                if (!window.confirm(`Are you sure you want to permanently delete this file: ${filename}`)) return;
-                console.log('Deleting file: ', filename);
+                // eslint-disable-next-line no-alert
+                if (!window.confirm(
+                  `Are you sure you want to permanently delete this file: ${filename}`
+                )) return;
                 await deleteFile(filename);
                 onFileDeleted();
               }}

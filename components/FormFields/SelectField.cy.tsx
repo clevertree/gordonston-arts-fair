@@ -8,16 +8,17 @@ describe('<SelectField />', () => {
   });
   it('renders', () => {
     // see: https://on.cypress.io/mounting-react
-    cy.mount(<SelectField
-      name="test"
-      label="TEST"
-      focusRef={cy.stub()}
-      onUpdate={cy.stub()}
-      value="Item1"
-    >
-      <MenuItem>Item1</MenuItem>
-      <MenuItem>Item2</MenuItem>
-             </SelectField>);
+    cy.mount((
+      <SelectField
+        name="test"
+        label="TEST"
+        focusRef={cy.stub()}
+        onUpdate={cy.stub()}
+        value="Item1"
+      >
+        <MenuItem>Item1</MenuItem>
+        <MenuItem>Item2</MenuItem>
+      </SelectField>));
     cy.checkA11y();
   });
 });

@@ -22,9 +22,9 @@ function PasswordResetForm({ passwordResetAction }: PasswordResetFormProps) {
     setMessage(['info', 'Submitting password reset request form...']);
 
     try {
-      const { status, message, redirectURL } = await passwordResetAction(email);
-      setMessage([status, message]);
-      if (redirectURL) document.location.href = redirectURL;
+      const response = await passwordResetAction(email);
+      setMessage([response.status, response.message]);
+      if (response.redirectURL) document.location.href = response.redirectURL;
     } catch (e: any) {
       setMessage(['error', e.message]);
     } finally {
@@ -51,9 +51,9 @@ function PasswordResetForm({ passwordResetAction }: PasswordResetFormProps) {
         Submit Password Reset Request
       </Typography>
       {message && message[1] && (
-      <Alert severity={message[0]}>
-        {message[1]}
-      </Alert>
+        <Alert severity={message[0]}>
+          {message[1]}
+        </Alert>
       )}
       <TextField
         required

@@ -27,7 +27,9 @@ interface UserStatusEditorAdminProps {
 
 const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
-export default function UserStatusEditorAdmin({ userStatus, updateUserStatus }: UserStatusEditorAdminProps) {
+export default function UserStatusEditorAdmin({
+  userStatus, updateUserStatus
+}: UserStatusEditorAdminProps) {
   const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
 
   return (
@@ -35,8 +37,8 @@ export default function UserStatusEditorAdmin({ userStatus, updateUserStatus }: 
       <form
         action={async (formData) => {
           const status = formData.get('status') as UserProfileStatus;
-          const { message } = await updateUserStatus(status);
-          setMessage(['success', message]);
+          const { message: updateMessage } = await updateUserStatus(status);
+          setMessage(['success', updateMessage]);
         }}
         method="POST"
       >
@@ -48,9 +50,9 @@ export default function UserStatusEditorAdmin({ userStatus, updateUserStatus }: 
           Status
         </Typography>
         {message && message[1] && (
-          <Alert severity={message[0]}>
-            {message[1]}
-          </Alert>
+        <Alert severity={message[0]}>
+          {message[1]}
+        </Alert>
         )}
 
         <TableContainer component={Paper}>
@@ -73,12 +75,13 @@ export default function UserStatusEditorAdmin({ userStatus, updateUserStatus }: 
                     defaultValue={userStatus}
                   >
                     {profileStatuses.map((status) => (
-                        <MenuItem
-                            key={status}
-                            value={status}
-                          >{status}
-                          </MenuItem>
-                      ))}
+                      <MenuItem
+                        key={status}
+                        value={status}
+                      >
+                        {status}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </TableCell>
               </TableRow>

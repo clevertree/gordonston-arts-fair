@@ -100,20 +100,20 @@ function ProfileView({ userProfile, userStatus }: ProfileViewProps) {
                   </Typography>
                   {description && (
                   <Typography variant="body2">
-                        {description}
-                      </Typography>
+                    {description}
+                  </Typography>
                   )}
                 </TableCell>
                 <TableCell sx={{ position: 'relative', width: '20rem', height: '20rem' }}>
                   {url && (
                   <Link href={url} target="_blank" rel="noreferrer">
-                        <ReloadingImage
-                          loading="lazy"
-                          src={url}
-                          alt={title}
-                          fill
-                        />
-                      </Link>
+                    <ReloadingImage
+                      loading="lazy"
+                      src={url}
+                      alt={title}
+                      fill
+                    />
+                  </Link>
                   )}
                 </TableCell>
               </TableRow>

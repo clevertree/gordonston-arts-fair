@@ -25,9 +25,9 @@ function RegisterForm({
     setMessage(['info', 'Submitting form...']);
 
     try {
-      const { status, message, redirectURL } = await registerAction(email, password);
-      setMessage([status, message]);
-      if (redirectURL) document.location.href = redirectURL;
+      const response = await registerAction(email, password);
+      setMessage([response.status, response.message]);
+      if (response.redirectURL) document.location.href = response.redirectURL;
     } catch (e: any) {
       setMessage(['error', e.message]);
     } finally {
@@ -54,9 +54,9 @@ function RegisterForm({
         Register an Artist Account
       </Typography>
       {message && message[1] && (
-      <Alert severity={message[0]}>
-        {message[1]}
-      </Alert>
+        <Alert severity={message[0]}>
+          {message[1]}
+        </Alert>
       )}
       <TextField
         required

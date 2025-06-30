@@ -8,7 +8,7 @@ import type { AlertColor } from '@mui/material/Alert';
 import { ActionResponse } from '@util/sessionActions';
 
 interface LogoutFormProps {
-  logoutAction(email: string, password: string): Promise<ActionResponse>
+  logoutAction(): Promise<ActionResponse>
 }
 
 function LogoutForm({
@@ -16,8 +16,6 @@ function LogoutForm({
 }: LogoutFormProps) {
   const [status, setStatus] = useState<'ready' | 'submitting'>('ready');
   const [message, setMessage] = useState<[AlertColor, string]>(['warning', 'Please submit this form to log out.']);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
@@ -25,9 +23,9 @@ function LogoutForm({
     setMessage(['info', 'Submitting logout form...']);
 
     try {
-      const { message, redirectURL } = await logoutAction(email, password);
-      setMessage(['success', message]);
-      if (redirectURL) document.location.href = redirectURL;
+      const response = await logoutAction();
+      setMessage([response.status, response.message]);
+      if (response.redirectURL) document.location.href = response.redirectURL;
     } catch (e: any) {
       setMessage(['error', e.message]);
     } finally {
@@ -54,9 +52,9 @@ function LogoutForm({
         Artist Logout
       </Typography>
       {message && message[1] && (
-      <Alert severity={message[0]}>
-        {message[1]}
-      </Alert>
+        <Alert severity={message[0]}>
+          {message[1]}
+        </Alert>
       )}
       <Button
         type="submit"

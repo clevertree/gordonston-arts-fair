@@ -34,7 +34,7 @@ export default function FloatingDiv({
       left: 0,
       behavior: 'smooth'
     });
-    history.pushState({}, document.title, window.location.pathname);
+    window.history.pushState({}, document.title, window.location.pathname);
   }
 
   useEffect(() => {

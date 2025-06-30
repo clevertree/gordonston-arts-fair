@@ -13,7 +13,7 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 // eslint-disable-next-line import/no-extraneous-dependencies
-import {MountReturn} from "cypress/react18";
+import {MountReturn} from "cypress/react";
 
 declare global {
     namespace Cypress {

@@ -45,10 +45,10 @@ export default async function AdminUserManagementPage({
             <>
               <UserStatusEditorAdmin
                 userStatus={status}
-                updateUserStatus={async (status) => {
+                updateUserStatus={async (newStatus) => {
                   'use server';
 
-                  return updateUserStatus(emailFormatted, status);
+                  return updateUserStatus(emailFormatted, newStatus);
                 }}
               />
               <ProfileView userProfile={profile} userStatus={status} />

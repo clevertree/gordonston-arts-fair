@@ -1,12 +1,12 @@
 export type ValidationType = 'required' | 'phone';
 export type ValidationCallback = (value: string, labelOrFieldName: string) => string | undefined;
 
-export const validateRequired: ValidationCallback = function (value, labelOrFieldName) {
+export const validateRequired: ValidationCallback = (value, labelOrFieldName) => {
   if (!value) return `${labelOrFieldName} is a required field`;
   return undefined;
 };
 
-export const validatePhone: ValidationCallback = function (phoneNumber, labelOrFieldName) {
+export const validatePhone: ValidationCallback = (phoneNumber, labelOrFieldName) => {
   if (!phoneNumber) return phoneNumber;
   const match = phoneNumber.match(/(\d{3})-(\d{3})-(\d{4})/);
   if (!match) return `Please enter a valid ${labelOrFieldName || 'Phone Number'}`;
@@ -19,6 +19,7 @@ export function validateByType(type: ValidationType, value: string, labelOrField
       return validatePhone(value, labelOrFieldName);
     case 'required':
       return validateRequired(value, labelOrFieldName);
+    default:
+      throw new Error(`Invalid validation type: ${type}`);
   }
-  throw new Error(`Invalid validation type: ${type}`);
 }

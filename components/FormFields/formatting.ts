@@ -16,6 +16,7 @@ export function formatByType(type: FormatType, value: string | undefined) {
   switch (type) {
     case 'phone':
       return formatPhone(value);
+    default:
+      throw new Error(`Invalid format type: ${type}`);
   }
-  throw new Error(`Invalid format type: ${type}`);
 }

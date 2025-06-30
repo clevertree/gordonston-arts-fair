@@ -60,8 +60,8 @@ export default function UserListAdmin({ userList }: AdminUserListProps) {
                 </TableCell>
                 <TableCell align="center">
                   {createdAt
-                      ? new Date(createdAt).toLocaleString()
-                      : 'N/A'}
+                    ? new Date(createdAt).toLocaleString()
+                    : 'N/A'}
                 </TableCell>
                 <TableCell align="center">
                   {Object.keys(profile?.uploads || {}).length}
