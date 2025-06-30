@@ -53,8 +53,10 @@ export async function startSession(email: string) {
 }
 
 export async function endSession() {
+    const session = await decryptSession();
     const cookieStore = await cookies()
     cookieStore.delete('session');
+    return session;
 }
 
 export async function decryptSession() {
