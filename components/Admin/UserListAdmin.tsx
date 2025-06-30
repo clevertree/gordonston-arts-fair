@@ -17,11 +17,13 @@ interface AdminUserListProps {
     userList: UserResult[]
 }
 
-export default function AdminUsersPage({userList}: AdminUserListProps) {
+const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
+
+export default function UserListAdmin({userList}: AdminUserListProps) {
     return (
-        <Box p={4}>
+        <Box className='flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]'>
             <Typography variant="h4" gutterBottom>
-                User Management
+                {USER_LABEL} Management
             </Typography>
 
             <TableContainer component={Paper}>

@@ -1,3 +1,5 @@
+export type UserProfileStatus = 'unregistered' | 'registered' | 'submitted' | 'approved' | 'denied' | 'paid';
+
 export interface UserProfile {
     info: UserProfileInfo,
     uploads: {

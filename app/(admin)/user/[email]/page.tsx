@@ -2,12 +2,15 @@ import {Alert, Stack} from "@mui/material";
 import Link from "next/link";
 
 import ProfileView from "@components/Profile/ProfileView";
-import {getUserInfoAsAdmin} from "@util/userActions";
+import {fetchUserResult} from "@util/userActions";
 import {validateAdminSession} from "@util/sessionActions";
+import UserStatusEditorAdmin from "@components/Admin/UserStatusEditorAdmin";
 
 export const metadata = {
     title: 'Manage an Artist',
 }
+
+const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
 export default async function PasswordResetValidationPage({
                                                               params,
@@ -18,7 +21,7 @@ export default async function PasswordResetValidationPage({
 
     const {email} = await params;
     const emailFormatted = email.replace('%40', '@');
-    const {profile} = await getUserInfoAsAdmin(emailFormatted);
+    const {profile, status} = await fetchUserResult(emailFormatted);
 
     return <>
         <h2 className='m-auto text-[color:var(--gold-color)] italic'>Manage an Artist</h2>
@@ -29,12 +32,16 @@ export default async function PasswordResetValidationPage({
                 href="/user"
                 className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
             >
-                ← Back to Users List
+                ← Back to {USER_LABEL} List
             </Link>
 
             {profile
-                ? <ProfileView userProfile={profile}/>
-                : <Alert severity='error'>User profile not found for {emailFormatted}</Alert>}
+                ? <>
+                    <UserStatusEditorAdmin userStatus={status}/>
+                    <ProfileView userProfile={profile} userStatus={status}/>
+                </>
+                : <Alert severity='error'>{USER_LABEL} profile not found for {emailFormatted}</Alert>}
+
 
         </Stack>
     </>

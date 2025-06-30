@@ -11,7 +11,10 @@ export async function fetchProfile(email: string) {
 
     // Get profile data
     const profilePath = `user:${email.toLowerCase()}:profile`;
-    const profileData = (await redisClient.json.get(profilePath)) as unknown as UserProfile;
+    const profileData = (await redisClient.json.get(profilePath)) as unknown as UserProfile || {
+        uploads: {},
+        status: "registered"
+    };
 
     // Get uploaded images
     const imagePath = 'profile/' + email.toLowerCase() + '/uploads';

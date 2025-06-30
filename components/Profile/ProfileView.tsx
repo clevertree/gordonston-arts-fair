@@ -1,14 +1,26 @@
 import React from 'react';
-import {Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from '@mui/material';
-import {UserProfile, UserProfileInfo} from "@util/profile";
+import {
+    Alert,
+    Box,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography
+} from '@mui/material';
+import {UserProfile, UserProfileInfo, UserProfileStatus} from "@util/profile";
 import ReloadingImage from "@components/Image/ReloadingImage";
 import Link from "next/link";
 
 interface ProfileViewProps {
     userProfile: UserProfile,
+    userStatus: UserProfileStatus
 }
 
-function ProfileView({userProfile}: ProfileViewProps) {
+function ProfileView({userProfile, userStatus}: ProfileViewProps) {
     const {uploads: profileUploads = {}, info: profileInfo = {}} = userProfile;
 
     const profileInfoLabels: {
@@ -29,18 +41,7 @@ function ProfileView({userProfile}: ProfileViewProps) {
 
 
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                minWidth: '100%',
-                gap: 2,
-                margin: 'auto',
-                padding: 3,
-                border: '1px solid #ccc',
-                borderRadius: 4,
-            }}
-        >
+        <Box className='flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]'>
             <Typography variant="h6" id='step1'>
                 Contact Information
             </Typography>
@@ -60,6 +61,16 @@ function ProfileView({userProfile}: ProfileViewProps) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
+                        <TableRow>
+                            <TableCell component="th" scope="row">
+                                Status
+                            </TableCell>
+                            <TableCell>
+                                <Alert severity={userStatus === 'paid' ? 'success' : 'info'}>
+                                    {userStatus || "N/A"}
+                                </Alert>
+                            </TableCell>
+                        </TableRow>
                         {profileInfoFields.map((profileInfoField) => (
                             <TableRow key={profileInfoField}>
                                 <TableCell component="th" scope="row">
