@@ -1,0 +1,162 @@
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,100;0,300;0,400;0,500;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,700;1,800;1,900&family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-color: rgb(29, 29, 29);
+  --background-color: white;
+  --link-color: #000042;
+  --link-color-inverted: #e8e8e8;
+  --link-color-visited: #272727;
+  --link-color-visited-inverted: #d4d4d4;
+  --gold-color: #946900;
+  --gold-color-bright: #eaac00;
+  --foreground-inverted-color: #f3f3f3;
+  --background-inverted-color: black;
+  font-size: 17px;
+  font-family: "Alegreya Sans", sans-serif;
+  font-weight: 400;
+}
+
+/*@media (prefers-color-scheme: dark) {*/
+/*    :root {*/
+/*        --foreground-rgb: 255, 255, 255;*/
+/*        --background-start-rgb: 0, 0, 0;*/
+/*        --background-end-rgb: 0, 0, 0;*/
+/*    }*/
+/*}*/
+
+/* Style invalid required inputs when in focus */
+input:required:focus:invalid {
+  border-color: red; /* Example: change border color for invalid input */
+}
+
+html {
+  /*font-size: 10px;*/
+
+  scroll-behavior: smooth;
+}
+
+body {
+  color: var(--foreground-color);
+  background: var(--background-color);
+}
+
+header {
+  //color: var(--foreground-inverted-color);
+  background: var(--background-inverted-color);
+}
+
+
+/* unvisited link */
+a:link {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+/* visited link */
+a:visited {
+  color: var(--link-color-visited);
+}
+
+/* mouse over link */
+a:hover {
+  color: hotpink;
+}
+
+/* selected link */
+a:active {
+  color: blue;
+}
+
+.header-container {
+  display: flex;
+  padding: 0.25rem;
+  flex-wrap: wrap;
+  column-gap: 0.75rem;
+  justify-content: space-evenly;
+  background-color: #000000;
+  color: var(--foreground-color);
+
+  /* unvisited link */
+  a:link {
+    color: var(--link-color-inverted);
+  }
+
+  /* visited link */
+  a:visited {
+    color: var(--link-color-visited-inverted);
+  }
+}
+
+.footer-container {
+  display: flex;
+  padding: 0.25rem;
+  flex-wrap: wrap;
+  column-gap: 0.75rem;
+  justify-content: space-evenly;
+  background-color: #000000;
+  color: var(--foreground-inverted-color);
+
+  /* unvisited link */
+  a:link {
+    color: var(--link-color-inverted);
+  }
+
+  /* visited link */
+  a:visited {
+    color: var(--link-color-visited-inverted);
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  article {
+    max-width: 1000px;
+  }
+}
+
+/** Anchor Links **/
+
+:target {
+  scroll-margin-top: 24px;
+}
+
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+ul {
+  list-style: disclosure-closed;
+  margin-left: 16px;
+}
+
+p {
+  text-align: justify;
+  font-style: normal;
+  margin: 10px 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "EB Garamond", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  white-space: break-spaces;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+h2 {
+  font-size: 1.4rem;
+}

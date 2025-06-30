@@ -1,0 +1,29 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+#npx standard --fix
+#yarn lint
+#yarn test:coverage
+echo "Starting eslint"
+npm run lint
+
+echo "Kill existing server"
+lsof -t -i:3001 | xargs kill -9
+
+
+echo "Building project"
+npm run build
+
+echo "Starting server"
+npx next start -p 3001 &
+SERVER_PID=$!
+echo "Server started with PID: $SERVER_PID"
+
+echo "Running component tests"
+npx cypress run --component
+
+export NODE_ENV=test;
+echo "Running E2E tests"
+npx cypress run --e2e --config baseUrl=http://localhost:3001
+echo "Testing complete"
+kill $SERVER_PID

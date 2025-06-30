@@ -1,3 +1,165 @@
 {
-  "extends": "next/core-web-vitals"
+  "env": {
+    "browser": true,
+    "es2020": true,
+    "cypress/globals": true
+  },
+  "globals": {
+    "cy": true
+  },
+  "extends": [
+    "airbnb",
+    "airbnb-typescript",
+    "next",
+    "next/core-web-vitals",
+    "plugin:jsx-a11y/recommended",
+    "plugin:cypress/recommended"
+  ],
+  "ignorePatterns": [
+    "node_modules/",
+    "**/vendor/*.js",
+    "**/dist/*.js",
+    "**/build/*.js",
+    "cypress"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 12,
+    "sourceType": "module",
+    "project": [
+      "./tsconfig.json"
+    ]
+  },
+  "plugins": [
+    "testing-library",
+    "jsx-a11y",
+    "cypress"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "*.test.js",
+        "*.test.jsx"
+      ]
+    }
+  ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    },
+    "import/parsers": {
+      "@typescript-eslint/parser": [
+        ".ts",
+        ".tsx"
+      ],
+      "@babel/eslint-parser": [
+        ".js",
+        ".jsx"
+      ]
+    },
+    "import/resolver": {
+      "typescript": {},
+      "node": {
+        "moduleDirectory": [
+          "node_modules",
+          "."
+        ],
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".ts",
+          ".tsx"
+        ]
+      },
+      "alias": {
+        "map": [
+          [
+            "@",
+            "./src"
+          ]
+        ],
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".ts",
+          ".tsx"
+        ]
+      }
+    },
+    "import/ignore": [
+      "node_modules",
+      ".(json|css)$"
+    ]
+  },
+  "rules": {
+    "@typescript-eslint/no-use-before-define": "off",
+    "@typescript-eslint/comma-dangle": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-unused-expressions": "warn",
+    "@typescript-eslint/semi": "warn",
+    "@typescript-eslint/no-shadow": "warn",
+    "@typescript-eslint/space-before-function-paren": "warn",
+    "@next/next/no-img-element": "off",
+    "semi": [
+      "warn",
+      "always"
+    ],
+    "max-len": "warn",
+    "import/no-cycle": "warn",
+    "no-continue": "warn",
+    "no-restricted-syntax": "warn",
+    "no-restricted-exports": "warn",
+    "no-restricted-imports": "warn",
+    "no-param-reassign": "warn",
+    "no-underscore-dangle": "warn",
+    "no-plusplus": [
+      "error",
+      {
+        "allowForLoopAfterthoughts": true
+      }
+    ],
+    "no-nested-ternary": "warn",
+    "object-curly-newline": "warn",
+    "import/extensions": "warn",
+    "import/prefer-default-export": "off",
+    "cypress/no-assigning-return-values": "error",
+    "cypress/no-unnecessary-waiting": "error",
+    "cypress/assertion-before-screenshot": "warn",
+    "cypress/no-force": "warn",
+    "cypress/no-async-tests": "error",
+    "cypress/no-pause": "error",
+    "linebreak-style": 0,
+    "jsx-a11y/img-redundant-alt": "warn",
+    "jsx-a11y/anchor-has-content": "warn",
+    "jsx-a11y/anchor-is-valid": "warn",
+    "jsx-a11y/click-events-have-key-events": "warn",
+    "jsx-a11y/interactive-supports-focus": "warn",
+    "jsx-a11y/no-static-element-interactions": "warn",
+    "react/default-props-match-prop-types": "warn",
+    "react/react-in-jsx-scope": "off",
+    "react/no-this-in-sfc": "warn",
+    "react/forbid-prop-types": "warn",
+    "react/no-array-index-key": "warn",
+    "react/no-danger": "off",
+    "react/jsx-no-constructed-context-values": "warn",
+    "react/jsx-closing-bracket-location": "warn",
+    "react/jsx-wrap-multilines": "warn",
+    "react/jsx-closing-tag-location": "warn",
+    "react/jsx-filename-extension": [
+      2,
+      {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".ts",
+          ".tsx"
+        ]
+      }
+    ],
+    "react/jsx-props-no-spreading": "off",
+    "react/require-default-props": "off"
+  }
 }

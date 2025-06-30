@@ -1,34 +1,32 @@
-import PasswordResetValidationForm from "@components/SessionForms/PasswordResetValidationForm";
-import Link from "next/link";
-import {Stack} from "@mui/material";
-import {passwordResetValidateAction} from "@util/sessionActions";
+import PasswordResetValidationForm from '@components/SessionForms/PasswordResetValidationForm';
+import Link from 'next/link';
+import { Stack } from '@mui/material';
+import { passwordResetValidateAction } from '@util/sessionActions';
 
 export const metadata = {
-    title: 'Artist Registration: Set a new password',
-}
+  title: 'Artist Registration: Set a new password',
+};
 
 export default async function PasswordResetValidationPage({
-                                                              params,
-                                                          }: {
-    params: Promise<{ email: string, code: string }>
+  params,
+}: {
+  params: Promise<{ email: string, code: string }>
 }) {
-    const {email, code} = await params;
+  const { email, code } = await params;
 
-    return (
-        <>
-            <h2 className='m-auto text-[color:var(--gold-color)] italic'>Artist Registration</h2>
+  return (
+    <>
+      <h2 className="m-auto text-[color:var(--gold-color)] italic">Artist Registration</h2>
 
-            <PasswordResetValidationForm
-                passwordResetValidateAction={passwordResetValidateAction}
-                email={email.replace('%40', '@')}
-                code={code}
-            />
+      <PasswordResetValidationForm
+        passwordResetValidateAction={passwordResetValidateAction}
+        email={email.replace('%40', '@')}
+        code={code}
+      />
 
-            <Stack sx={{margin: 'auto'}} direction='column'>
-                <Link href='/login'>Click here to log in as an Artist</Link>
-            </Stack>
-        </>
-    );
+      <Stack sx={{ margin: 'auto' }} direction="column">
+        <Link href="/login">Click here to log in as an Artist</Link>
+      </Stack>
+    </>
+  );
 }
-
-

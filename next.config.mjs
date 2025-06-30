@@ -10,6 +10,7 @@ const withMDX = generated({
 const nextConfig = {
     // Configure `pageExtensions` to include MDX files
     pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+    
     // Optionally, add any other Next.js config below
     experimental: {
         serverActions: {
