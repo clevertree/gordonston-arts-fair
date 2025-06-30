@@ -30,8 +30,9 @@ export default function AdminLayout({
         <footer
             className='w-full text-[color:var(--foreground-inverted-color)] bg-[color:var(--background-inverted-color)] m-auto'>
             <div className='p-4 pb-6 text-center'>
-                For help submitting your Artist Profile please contact the admin at{' '}
-                <Link href='mailto:admin@gordonstonartfair.com'>admin@gordonstonartfair.com</Link>
+                For administration support please email or text Ari Asulin at{' '}
+                <Link href='mailto:ari@asu.edu'>ari@asu.edu</Link> or {' '}
+                <Link href='tel:602-632-6729'>602-632-6729</Link>
             </div>
         </footer>
     </>;

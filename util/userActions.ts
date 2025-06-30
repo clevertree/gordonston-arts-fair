@@ -7,7 +7,7 @@ export type UserResult = {
     email: string;
     isAdmin: boolean;
     createdAt?: string;
-    profile: UserProfile
+    profile?: UserProfile
 };
 
 export type UserList = UserResult[];
@@ -25,10 +25,9 @@ export async function listUsersAsAdmin() {
     })) {
         for (const key of keys) {
             const email = key.split(':')[1];
-            const isAdmin = !!(await redisClient.get(`user:${email}:admin`));
-            const createdAt = await redisClient.get(`user:${email}:createdAt`) || undefined;
-            const profileDataString = await redisClient.get(`user:${email}:profile`);
-            const profile: UserProfile = profileDataString ? JSON.parse(profileDataString) : undefined;
+            const isAdmin = !!(await redisClient.get(`user:${email.toLowerCase()}:admin`));
+            const createdAt = await redisClient.get(`user:${email.toLowerCase()}:createdAt`) || undefined;
+            const profile = (await redisClient.json.get(`user:${email.toLowerCase()}:profile`)) as unknown as UserProfile;
 
             users.push({
                 email,
@@ -49,8 +48,7 @@ export async function getUserInfoAsAdmin(email: string): Promise<UserResult> {
 
     const isAdmin = !!(await redisClient.get(`user:${email.toLowerCase()}:admin`));
     const createdAt = await redisClient.get(`user:${email.toLowerCase()}:createdAt`) || undefined;
-    const profileDataString = await redisClient.get(`user:${email.toLowerCase()}:profile`);
-    const profile: UserProfile = profileDataString ? JSON.parse(profileDataString) : undefined;
+    const profile = (await redisClient.json.get(`user:${email.toLowerCase()}:profile`)) as unknown as UserProfile;
 
     return {
         email,

@@ -12,7 +12,7 @@ export default async function PasswordResetValidationPage() {
     const userList = await listUsersAsAdmin()
     return (
         <>
-            <h2 className='m-auto text-[color:var(--gold-color)] italic'>Artist Profile</h2>
+            <h2 className='m-auto text-[color:var(--gold-color)] italic'>Manage Artists</h2>
 
             <AdminUserList userList={userList}/>
         </>

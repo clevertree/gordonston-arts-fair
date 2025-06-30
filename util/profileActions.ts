@@ -3,6 +3,7 @@
 import {getRedisClient} from "@util/redis";
 import {UserProfile} from "@util/profile";
 import {del, list, put} from "@vercel/blob";
+import {RedisJSON} from "@redis/json/dist/lib/commands";
 
 export async function fetchProfile(email: string) {
     // Get redis client
@@ -10,8 +11,7 @@ export async function fetchProfile(email: string) {
 
     // Get profile data
     const profilePath = `user:${email.toLowerCase()}:profile`;
-    const profileString = await redisClient.get(profilePath);
-    const profileData: UserProfile = profileString ? JSON.parse(profileString) : {};
+    const profileData = (await redisClient.json.get(profilePath)) as unknown as UserProfile;
 
     // Get uploaded images
     const imagePath = 'profile/' + email.toLowerCase() + '/uploads';
@@ -39,10 +39,9 @@ export async function fetchProfile(email: string) {
 export async function updateProfile(email: string, newUserProfile: UserProfile) {
     const redisClient = await getRedisClient();
     const profileHash = `user:${email.toLowerCase()}:profile`;
-    const profileString = await redisClient.get(profileHash);
-    const oldUserProfile = profileString ? JSON.parse(profileString) : {};
-    const updatedUserProfile: UserProfile = {...oldUserProfile, ...newUserProfile}
-    await redisClient.set(profileHash, JSON.stringify(updatedUserProfile));
+    const oldUserProfile = (await redisClient.json.get(profileHash)) as unknown as UserProfile;
+    const updatedUserProfile = {...oldUserProfile, ...newUserProfile} as unknown as RedisJSON
+    await redisClient.json.set(profileHash, "$", updatedUserProfile);
     return updatedUserProfile;
 }
 
