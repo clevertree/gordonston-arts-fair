@@ -5,8 +5,9 @@ import Image from "next/image";
 import {ImageProps} from "next/dist/shared/lib/get-img-props";
 
 
-export default function ReloadingImage(props: ImageProps) {
+export default function ReloadingImage({alt, ...props}: ImageProps) {
     return <Image
+        alt={alt}
         onError={(e: any) => {
             'use client'
             setTimeout(() => {

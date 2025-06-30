@@ -40,8 +40,8 @@ export async function updateProfile(email: string, newUserProfile: UserProfile) 
     const redisClient = await getRedisClient();
     const profileHash = `user:${email.toLowerCase()}:profile`;
     const oldUserProfile = (await redisClient.json.get(profileHash)) as unknown as UserProfile;
-    const updatedUserProfile = {...oldUserProfile, ...newUserProfile} as unknown as RedisJSON
-    await redisClient.json.set(profileHash, "$", updatedUserProfile);
+    const updatedUserProfile: UserProfile = {...oldUserProfile, ...newUserProfile}
+    await redisClient.json.set(profileHash, "$", updatedUserProfile as unknown as RedisJSON);
     return updatedUserProfile;
 }
 
