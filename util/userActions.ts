@@ -38,17 +38,20 @@ export async function fetchUserResult(email: string): Promise<UserResult> {
     const emailLC = email.toLowerCase();
     // Get Redis client
     const redisClient = await getRedisClient();
-
-    const isAdmin = !!(await redisClient.get(`user:${emailLC}:admin`));
-    const status = (await redisClient.json.get(`user:${emailLC}:status`)) as UserProfileStatus;
-    const createdAt = await redisClient.get(`user:${emailLC}:createdAt`) || undefined;
-    const profile = (await redisClient.json.get(`user:${emailLC}:profile`)) as unknown as UserProfile;
-
-    return {
-        email,
-        isAdmin,
-        status,
-        createdAt,
-        profile
+    try {
+        const isAdmin = !!(await redisClient.get(`user:${emailLC}:admin`));
+        const status = (await redisClient.get(`user:${emailLC}:status`)) as UserProfileStatus;
+        const createdAt = await redisClient.get(`user:${emailLC}:createdAt`) || undefined;
+        const profile = (await redisClient.json.get(`user:${emailLC}:profile`)) as unknown as UserProfile;
+        return {
+            email,
+            isAdmin,
+            status,
+            createdAt,
+            profile
+        }
+    } catch (e: any) {
+        throw Error("Error fetching user: " + e.message);
     }
 }
+

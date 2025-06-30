@@ -5,16 +5,17 @@ import ProfileView from "@components/Profile/ProfileView";
 import {fetchUserResult} from "@util/userActions";
 import {validateAdminSession} from "@util/sessionActions";
 import UserStatusEditorAdmin from "@components/Admin/UserStatusEditorAdmin";
+import {updateUserStatus} from "@util/profileActions";
 
-export const metadata = {
-    title: 'Manage an Artist',
-}
+// export const metadata = {
+//     title: 'Manage an Artist',
+// }
 
 const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
-export default async function PasswordResetValidationPage({
-                                                              params,
-                                                          }: {
+export default async function AdminUserManagementPage({
+                                                          params,
+                                                      }: {
     params: Promise<{ email: string }>
 }) {
     await validateAdminSession();
@@ -37,7 +38,11 @@ export default async function PasswordResetValidationPage({
 
             {profile
                 ? <>
-                    <UserStatusEditorAdmin userStatus={status}/>
+                    <UserStatusEditorAdmin userStatus={status}
+                                           updateUserStatus={async (status) => {
+                                               'use server'
+                                               return await updateUserStatus(emailFormatted, status);
+                                           }}/>
                     <ProfileView userProfile={profile} userStatus={status}/>
                 </>
                 : <Alert severity='error'>{USER_LABEL} profile not found for {emailFormatted}</Alert>}

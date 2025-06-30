@@ -21,7 +21,7 @@ export async function loginAction(email: string, password: string): Promise<Acti
     const errorMessage = "Invalid email/password combination. Please try again or register before logging in";
     if (count === 0) {
         // Add an error log entry
-        await addLogEntry(email, 'log-in-error', "Invalid email")
+        await addAccessLogEntry(email, 'log-in-error', "Invalid email")
         return {
             message: errorMessage,
             status: 'error'
@@ -33,7 +33,7 @@ export async function loginAction(email: string, password: string): Promise<Acti
     const passwordResult = passwordHash && await bcrypt.compare(password, passwordHash);
     if (!passwordResult) {
         // Add an error log entry
-        await addLogEntry(email, 'log-in-error', "Invalid password")
+        await addAccessLogEntry(email, 'log-in-error', "Invalid password")
         return {
             message: errorMessage,
             status: 'error'
@@ -44,7 +44,7 @@ export async function loginAction(email: string, password: string): Promise<Acti
     const isAdmin = !!(await redisClient.get(`user:${email.toLowerCase()}:admin`));
 
     // Add a log entry
-    await addLogEntry(email, 'log-in', "")
+    await addAccessLogEntry(email, 'log-in', "")
 
 
     return {
@@ -58,7 +58,7 @@ export async function logoutAction(): Promise<ActionResponse> {
     const oldSession = await endSession();
 
     // Add a log entry
-    await addLogEntry(oldSession.email, 'log-out', "")
+    await addAccessLogEntry(oldSession.email, 'log-out', "")
 
     return {
         status: 'success',
@@ -74,7 +74,7 @@ export async function registerAction(email: string, password: string): Promise<A
     const count = await redisClient.exists(redisLoginKey);
     if (count >= 1) {
         // Add an error log entry
-        await addLogEntry(email, 'register-error', "User already exists")
+        await addAccessLogEntry(email, 'register-error', "User already exists")
         console.error('User already exists:', email);
         return {
             message: "User already exists with this email. Please log in or reset your password",
@@ -95,7 +95,7 @@ export async function registerAction(email: string, password: string): Promise<A
     await startSession(email);
 
     // Add a log entry
-    await addLogEntry(email, 'registered', "")
+    await addAccessLogEntry(email, 'registered', "")
 
     // Send the registration email
     await sendMail({
@@ -119,7 +119,7 @@ export async function passwordResetAction(email: string): Promise<ActionResponse
     const count = await redisClient.exists(redisLoginKey);
     if (count === 0) {
         // Add a log entry
-        await addLogEntry(email, 'log-in-error', "User not found for password reset")
+        await addAccessLogEntry(email, 'log-in-error', "User not found for password reset")
         return {
             message: "User not found for password reset: " + email,
             status: 'error',
@@ -143,7 +143,7 @@ export async function passwordResetAction(email: string): Promise<ActionResponse
     })
 
     // Add a log entry
-    await addLogEntry(email, 'password-reset', "")
+    await addAccessLogEntry(email, 'password-reset', "")
 
     return {
         status: 'success',
@@ -160,7 +160,7 @@ export async function passwordResetValidateAction(email: string, code: string, p
     if (!storedCode || (storedCode !== code)) {
         console.error('Invalid reset request:', email, storedCode, code);
         // Add an error log entry
-        await addLogEntry(email, 'log-in-error', "Invalid reset request")
+        await addAccessLogEntry(email, 'log-in-error', "Invalid reset request")
         return {
             message: "Invalid reset request",
             status: 'error',
@@ -179,7 +179,7 @@ export async function passwordResetValidateAction(email: string, code: string, p
     console.log("Password was reset: ", email)
 
     // Add a log entry
-    await addLogEntry(email, 'password-reset', "Password was reset")
+    await addAccessLogEntry(email, 'password-reset', "Password was reset")
 
     return {
         status: 'success',
@@ -195,16 +195,17 @@ export async function validateAdminSession() {
     const adminCheck = await redisClient.get(redisAdminKey);
     if (!adminCheck)
         throw HttpError.Unauthorized("Unauthorized - Admin access required");
+    return session;
 }
 
-type LogActionType = 'log-in'
+type AccessLogActionType = 'log-in'
     | 'log-in-error'
     | 'registered'
     | 'register-error'
     | 'log-out'
     | 'password-reset'
 
-export async function addLogEntry(email: string, action: LogActionType, message: string) {
+export async function addAccessLogEntry(email: string, action: AccessLogActionType, message: string) {
     const redisClient = await getRedisClient();
 
     // Add a log entry

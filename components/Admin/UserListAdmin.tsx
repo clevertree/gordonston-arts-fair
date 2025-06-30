@@ -29,30 +29,27 @@ export default function UserListAdmin({userList}: AdminUserListProps) {
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
-                        <TableRow sx={{
-                            backgroundColor: '#1976d2',
-                            '& th': {
-                                fontWeight: 'bold',
-                                color: 'white',
-                                padding: '0.5rem'
-                            }
-                        }}>
-                            <TableCell>Email</TableCell>
+                        <TableRow className='bg-blue-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2'>
+                            <TableCell align="center">Email</TableCell>
+                            <TableCell align="center">Name</TableCell>
                             <TableCell align="center">Admin</TableCell>
                             <TableCell align="center">Created</TableCell>
-                            <TableCell align="center">Name</TableCell>
                             <TableCell align="center">Images</TableCell>
+                            <TableCell align="center">Status</TableCell>
                             <TableCell align="center">Edit</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {userList.map(({email, isAdmin, createdAt, profile}) => (
+                        {userList.map(({email, isAdmin, createdAt, profile, status}) => (
                             <TableRow
                                 key={email}
                                 sx={{'&:last-child td, &:last-child th': {border: 0}}}
                             >
-                                <TableCell component="th" scope="row">
+                                <TableCell align='center' scope="row">
                                     <Link href={`/user/${email}`}>{email}</Link>
+                                </TableCell>
+                                <TableCell align="center">
+                                    {getFullName(profile?.info?.firstName, profile?.info?.lastName)}
                                 </TableCell>
                                 <TableCell align="center">
                                     {isAdmin ? '🔑 Admin' : '🎨 Artist'}
@@ -64,10 +61,10 @@ export default function UserListAdmin({userList}: AdminUserListProps) {
                                     }
                                 </TableCell>
                                 <TableCell align="center">
-                                    {profile?.info?.firstName || 'N/A'} {profile?.info?.lastName || 'N/A'}
+                                    {Object.keys(profile?.uploads || {}).length}
                                 </TableCell>
                                 <TableCell align="center">
-                                    {Object.keys(profile?.uploads || {}).length}
+                                    {status || 'N/A'}
                                 </TableCell>
                                 <TableCell align="center">
                                     <Link href={`/user/${email}`}>✎</Link>
@@ -85,4 +82,11 @@ export default function UserListAdmin({userList}: AdminUserListProps) {
             )}
         </Box>
     );
+}
+
+function getFullName(firstName?: string, lastName?: string) {
+    if (firstName && lastName) return `${firstName} ${lastName}`;
+    if (firstName) return firstName;
+    if (lastName) return lastName;
+    return 'N/A';
 }

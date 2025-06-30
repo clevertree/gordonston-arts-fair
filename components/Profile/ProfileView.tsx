@@ -49,14 +49,7 @@ function ProfileView({userProfile, userStatus}: ProfileViewProps) {
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
-                        <TableRow sx={{
-                            backgroundColor: '#1976d2',
-                            '& th': {
-                                fontWeight: 'bold',
-                                color: 'white',
-                                padding: '0.5rem'
-                            }
-                        }}>
+                        <TableRow className='bg-blue-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2'>
                             <TableCell colSpan={2}>Profile</TableCell>
                         </TableRow>
                     </TableHead>
@@ -92,14 +85,7 @@ function ProfileView({userProfile, userStatus}: ProfileViewProps) {
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
-                        <TableRow sx={{
-                            backgroundColor: '#1976d2',
-                            '& th': {
-                                fontWeight: 'bold',
-                                color: 'white',
-                                padding: '0.5rem'
-                            }
-                        }}>
+                        <TableRow className='bg-green-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2'>
                             <TableCell colSpan={2}>File uploads: {uploadList.length}</TableCell>
                         </TableRow>
                     </TableHead>

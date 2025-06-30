@@ -1,9 +1,10 @@
 'use server'
 
 import {getRedisClient} from "@util/redis";
-import {UserProfile} from "@util/profile";
+import {UserProfile, UserProfileStatus} from "@util/profile";
 import {del, list, put} from "@vercel/blob";
 import {RedisJSON} from "@redis/json/dist/lib/commands";
+import {validateAdminSession} from "@util/sessionActions";
 
 export async function fetchProfile(email: string) {
     // Get redis client
@@ -58,6 +59,27 @@ export async function uploadFile(email: string, file: File) {
         allowOverwrite: true
     });
 }
+
+export async function updateUserStatus(email: string, newStatus: UserProfileStatus) {
+    const adminSession = await validateAdminSession();
+    const redisClient = await getRedisClient();
+    const profileHash = `user:${email.toLowerCase()}:status`;
+    await redisClient.set(profileHash, newStatus);
+
+    // Add a log entry
+    const redisAccessLogKey = 'user:' + email.toLowerCase() + ":status-log";
+    await redisClient.zAdd(redisAccessLogKey, [
+        {
+            value: newStatus + ":" + adminSession.email.toLowerCase(),
+            score: new Date().getTime()
+        }
+    ])
+
+    return {
+        message: "Status updated successfully",
+    }
+}
+
 
 export async function deleteFile(email: string, filename: string) {
     const imagePath = 'profile/' + email.toLowerCase() + '/uploads';

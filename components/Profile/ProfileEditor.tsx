@@ -287,16 +287,10 @@ function ProfileEditor({
                     <TableContainer component={Paper}>
                         <Table>
                             <TableHead>
-                                <TableRow sx={{
-                                    backgroundColor: '#1976d2',
-                                    '& th': {
-                                        fontWeight: 'bold',
-                                        color: 'white',
-                                        padding: '0.5rem'
-                                    }
-                                }}>
-                                    <TableCell colSpan={2}>File
-                                        uploads: {Object.keys(profileUploads).length}</TableCell>
+                                <TableRow
+                                    className='bg-green-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2'>
+                                    <TableCell colSpan={2}>
+                                        File uploads: {Object.keys(profileUploads).length}</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -511,5 +505,54 @@ const LIST_CATEGORIES = [
     "Conceptual Art", // Art focused on ideas and concepts
     "Street Art", //  Art created in public spaces
     "Fine Craft", //  Contemporary crafts
-    "Traditional Crafts" //  Country and traditional crafts
-];
+    "Traditional Crafts", //  Country and traditional crafts
+    "Graphics",
+    "Wood",
+    "Fibers/Textiles",
+    "Leather",
+    "Ceramic",
+    "Glass",
+    "Metalsmithing",
+    "Ceramics/Enamel",
+    "Metal",
+    "Traditional Acrylic/Oil",
+    "Conceptual Acrylic/Oil",
+    "Watercolor",
+    "Graphics/Drawing",
+    "Multiple Images (digital & photography)",
+    "Whimsical",
+    "Clay",
+    "Wearable Fibers",
+    "Furniture",
+    "Non-Wearable Fibers",
+    "Photo",
+    "Stone",
+    "Oil on Canvas",
+    "Pastel",
+    "Iron",
+    "Fiber",
+    "Apparel",
+    "Drawings/Pastels",
+    "Traditional Photography",
+    "Digital Photography",
+    "Homemade - Describe your product in the Comments field.",
+    "Other - Describe your product in the Comments field.",
+    "Fine Art (watercolor, acrylic, oils, pencil)",
+    "Food Vendor",
+    "Soaps/Lotions",
+    "Food Truck",
+    "Fine Art",
+    "Antiques",
+    "Vintage Décor",
+    "Woodworking",
+    "Art",
+    "Crafts",
+    "Clothing",
+    "Plants",
+    "Fine Art (e.g., Dry-Wet Media, Pastel, Pencil, Oil, Digital, Mixed Media)",
+    "Fine Craft (Glass)",
+    "Fine Craft (Metal)",
+    "Fine Craft (Wood)",
+    "Fine Craft (Ceramics/Pottery)",
+    "Fine Craft (Fiber/Clothing)"
+]

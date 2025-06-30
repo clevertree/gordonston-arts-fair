@@ -1,4 +1,21 @@
-export type UserProfileStatus = 'unregistered' | 'registered' | 'submitted' | 'approved' | 'denied' | 'paid';
+export type UserProfileStatus =
+    'unregistered'
+    | 'registered'
+    | 'submitted'
+    | 'approved'
+    | 'standby'
+    | 'declined'
+    | 'paid';
+
+export const profileStatuses: UserProfileStatus[] = [
+    'unregistered',
+    'registered',
+    'submitted',
+    'approved',
+    'standby',
+    'declined',
+    'paid'
+]
 
 export interface UserProfile {
     info: UserProfileInfo,
