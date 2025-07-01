@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import React, { Suspense } from 'react';
 import DateLocationApply from '@fragments/date-location-apply.mdx';
-import { formatToLocal } from '@util/date';
+import { formatDate } from '@util/date';
 import FloatingDiv from '@components/FloatingDiv/FloatingDiv';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -18,7 +18,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const eventDateString = formatToLocal(new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`));
+  const eventDateString = formatDate(new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`));
   return (
     <>
       <header>

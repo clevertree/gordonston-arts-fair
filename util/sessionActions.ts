@@ -211,16 +211,11 @@ type AccessLogActionType = 'log-in'
 export async function addAccessLogEntry(
   email: string,
   action: AccessLogActionType,
-  message: string
+  message?: string
 ) {
   const redisClient = await getRedisClient();
 
   // Add a log entry
-  const redisAccessLogKey = `user:${email.toLowerCase()}:log:access`;
-  await redisClient.zAdd(redisAccessLogKey, [
-    {
-      value: `${action}:${message}`,
-      score: new Date().getTime()
-    }
-  ]);
+  const redisAccessLogKey = `user:${email.toLowerCase()}:log`;
+  await redisClient.hSet(redisAccessLogKey, new Date().getTime(), `access:${action}${message ? `:${message}` : ''}`);
 }

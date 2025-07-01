@@ -18,6 +18,7 @@ import React, { useRef, useState } from 'react';
 import { UserProfileStatus } from '@util/profile';
 import type { AlertColor } from '@mui/material/Alert';
 import Mail from 'nodemailer/lib/mailer';
+import { useRouter } from 'next/navigation';
 import { templateList } from '../../template';
 import SelectField from '../FormFields/SelectField';
 
@@ -39,6 +40,7 @@ export default function SendEmailAdmin({
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
 
   return (
     <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
@@ -54,7 +56,8 @@ export default function SendEmailAdmin({
           });
           setStatus('ready');
           setMessage([success ? 'success' : 'error', updateMessage]);
-          formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          router.refresh(); // Refresh the current route
         }}
         method="POST"
       >
