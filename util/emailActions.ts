@@ -3,6 +3,7 @@
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 import { getRedisClient } from '@util/redis';
+import { EmailTemplate } from '../email';
 
 const { SMTP_SERVER_HOST } = process.env;
 const { SMTP_SERVER_USERNAME } = process.env;
@@ -19,6 +20,15 @@ const transporter = nodemailer.createTransport({
     pass: SMTP_SERVER_PASSWORD,
   },
 });
+
+export async function sendTemplateMail(email: string, template: EmailTemplate, props: any = {}) {
+  return sendMail({
+    to: email,
+    html: template.htmlBody(props),
+    text: template.textBody(props),
+    subject: template.subject
+  });
+}
 
 export async function sendMail(options: Mail.Options) {
   const email = `${options.to}`;
@@ -40,8 +50,8 @@ export async function sendMail(options: Mail.Options) {
     return { success: false, message: `Unable to send email: ${error.message}` };
   }
 
-  const testMode = process.env.TEST_MODE === 'false';
-  if (testMode) {
+  const testMode = process.env.TEST_MODE !== 'false';
+  if (!testMode) {
     const info = await transporter.sendMail({
       from: EMAIL_ADMIN,
       bcc: EMAIL_BCC,

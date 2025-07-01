@@ -43,7 +43,7 @@ export default function UserStatusEditorAdmin({
           const { message: updateMessage } = await updateUserStatus(status);
           setMessage(['success', updateMessage]);
           formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          router.refresh(); // Refresh the current route
+          router.refresh(); // Refresh the current page
         }}
         method="POST"
       >
