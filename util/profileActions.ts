@@ -68,7 +68,7 @@ export async function updateUserStatus(email: string, newStatus: UserProfileStat
 
   // Add a log entry
   const redisAccessLogKey = `user:${email.toLowerCase()}:log`;
-  await redisClient.hSet(redisAccessLogKey, new Date().getTime(), `status:${newStatus}:${adminSession.email.toLowerCase()}`);
+  await redisClient.hSet(redisAccessLogKey, new Date().getTime(), `status:${newStatus}:by=${adminSession.email.toLowerCase()}`);
 
   return {
     message: 'Status updated successfully',

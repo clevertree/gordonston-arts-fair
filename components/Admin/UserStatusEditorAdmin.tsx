@@ -58,11 +58,7 @@ export default function UserStatusEditorAdmin({
             <TableHead>
               <TableRow className="bg-blue-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
                 <TableCell colSpan={2}>
-                  Manage
-                  {' '}
-                  {USER_LABEL}
-                  {' '}
-                  Status
+                  {`Manage ${USER_LABEL} Status`}
                 </TableCell>
               </TableRow>
             </TableHead>

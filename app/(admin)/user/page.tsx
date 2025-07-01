@@ -15,9 +15,7 @@ export default async function PasswordResetValidationPage() {
   return (
     <>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">
-        Manage
-        {USER_LABEL}
-        s
+        {`Manage ${USER_LABEL}s`}
       </h1>
 
       <AdminUserList userList={userList} />

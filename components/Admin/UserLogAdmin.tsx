@@ -14,11 +14,7 @@ export default async function UserLogAdmin({ logs, email }: AdminUserLogProps) {
   return (
     <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
       <Typography component="h2" gutterBottom>
-        {USER_LABEL}
-        {' '}
-        Logs:
-        {' '}
-        {email}
+        {`${USER_LABEL} Logs: ${email}`}
       </Typography>
 
       <TableContainer component={Paper}>

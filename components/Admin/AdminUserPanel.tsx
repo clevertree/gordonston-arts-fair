@@ -12,6 +12,7 @@ import UserLogAdmin from '@components/Admin/UserLogAdmin';
 import React from 'react';
 
 const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
+
 interface AdminUserPanelProps {
   profile?: UserProfile,
   userStatus: UserProfileStatus,
@@ -20,6 +21,7 @@ interface AdminUserPanelProps {
   logs: LogEntry[]
 
 }
+
 export default async function AdminUserPanel(props: AdminUserPanelProps) {
   // const [logs, setLogs] = useState(props.logs);
   const {
@@ -32,11 +34,7 @@ export default async function AdminUserPanel(props: AdminUserPanelProps) {
         href="/user"
         className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
       >
-        ← Back to
-        {' '}
-        {USER_LABEL}
-        {' '}
-        List
+        {`← Back to ${USER_LABEL} List`}
       </Link>
 
       {profile

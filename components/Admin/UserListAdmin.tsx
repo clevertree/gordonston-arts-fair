@@ -26,9 +26,7 @@ export default async function UserListAdmin({ userList }: AdminUserListProps) {
   return (
     <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
       <Typography variant="h4" gutterBottom>
-        {USER_LABEL}
-        {' '}
-        Management
+        {`${USER_LABEL} Management`}
       </Typography>
 
       <TableContainer component={Paper}>
