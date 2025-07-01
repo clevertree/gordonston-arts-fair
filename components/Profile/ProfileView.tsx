@@ -84,7 +84,7 @@ function ProfileView({ userProfile, userStatus }: ProfileViewProps) {
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow className="bg-green-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
+            <TableRow className="bg-green-700 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
               <TableCell colSpan={2}>
                 File uploads:
                 {uploadList.length}
