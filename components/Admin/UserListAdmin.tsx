@@ -1,3 +1,5 @@
+'use server';
+
 import {
   Alert,
   Box,
@@ -12,6 +14,7 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { UserResult } from '@util/userActions';
+import { getFullName, getStatusName } from '@util/profile';
 
 interface AdminUserListProps {
   userList: UserResult[]
@@ -19,7 +22,7 @@ interface AdminUserListProps {
 
 const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
-export default function UserListAdmin({ userList }: AdminUserListProps) {
+export default async function UserListAdmin({ userList }: AdminUserListProps) {
   return (
     <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
       <Typography variant="h4" gutterBottom>
@@ -67,7 +70,7 @@ export default function UserListAdmin({ userList }: AdminUserListProps) {
                   {Object.keys(profile?.uploads || {}).length}
                 </TableCell>
                 <TableCell align="center">
-                  {status || 'N/A'}
+                  {getStatusName(status)}
                 </TableCell>
                 <TableCell align="center">
                   <Link href={`/user/${email}`}>✎</Link>
@@ -85,11 +88,4 @@ export default function UserListAdmin({ userList }: AdminUserListProps) {
       )}
     </Box>
   );
-}
-
-function getFullName(firstName?: string, lastName?: string) {
-  if (firstName && lastName) return `${firstName} ${lastName}`;
-  if (firstName) return firstName;
-  if (lastName) return lastName;
-  return 'N/A';
 }

@@ -75,11 +75,16 @@ export default function FloatingDiv({
         {finalChildren}
       </div>
       <div
+        role="button"
+        tabIndex={0}
         className={clsx(
           styles.bottomText,
           !isFloating && styles.bottomTextHidden
         )}
         onClick={scrollToTop}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') scrollToTop();
+        }}
       >
         Back to top
       </div>

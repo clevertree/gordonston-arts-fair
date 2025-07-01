@@ -17,7 +17,7 @@ export default function AdminLayout({
   return (
     <>
       <header>
-        <FloatingDiv className="nav-container">
+        <FloatingDiv className="header-container">
           <Link href="/">Home</Link>
           <Link href="/user">User list</Link>
           <Link href="/logout">Log out</Link>

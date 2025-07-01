@@ -12,11 +12,10 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  Typography
+  TableRow
 } from '@mui/material';
 import React, { useState } from 'react';
-import { profileStatuses, UserProfileStatus } from '@util/profile';
+import { getStatusName, profileStatuses, UserProfileStatus } from '@util/profile';
 import type { AlertColor } from '@mui/material/Alert';
 
 interface UserStatusEditorAdminProps {
@@ -42,13 +41,6 @@ export default function UserStatusEditorAdmin({
         }}
         method="POST"
       >
-        <Typography variant="h4" gutterBottom>
-          Manage
-          {' '}
-          {USER_LABEL}
-          {' '}
-          Status
-        </Typography>
         {message && message[1] && (
         <Alert severity={message[0]}>
           {message[1]}
@@ -59,7 +51,13 @@ export default function UserStatusEditorAdmin({
           <Table>
             <TableHead>
               <TableRow className="bg-blue-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
-                <TableCell colSpan={2}>Status</TableCell>
+                <TableCell colSpan={2}>
+                  Manage
+                  {' '}
+                  {USER_LABEL}
+                  {' '}
+                  Status
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -79,21 +77,25 @@ export default function UserStatusEditorAdmin({
                         key={status}
                         value={status}
                       >
-                        {status}
+                        {getStatusName(status)}
                       </MenuItem>
                     ))}
                   </Select>
                 </TableCell>
               </TableRow>
+              <TableRow>
+                <TableCell align="right" colSpan={2}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                  >
+                    Update Status
+                  </Button>
+                </TableCell>
+              </TableRow>
             </TableBody>
           </Table>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-          >
-            Update Status
-          </Button>
         </TableContainer>
       </form>
     </Box>

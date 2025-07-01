@@ -36,19 +36,19 @@ export default function TextField({
       value={value}
       {...props}
       onChange={(e) => {
-        let value;
+        let newValue;
         if (typeof autoFormat === 'string') {
-          value = formatByType(autoFormat, e.target.value);
+          newValue = formatByType(autoFormat, e.target.value);
         } else {
-          value = autoFormat(e.target.value);
+          newValue = autoFormat(e.target.value);
         }
-        setValue(value);
-        if (typeof value === 'string') {
-          e.target.value = value;
+        setValue(newValue);
+        if (typeof newValue === 'string') {
+          e.target.value = newValue;
         }
         if (e.target !== document.activeElement) {
           // Detect autofill
-          onUpdate(value);
+          onUpdate(newValue);
         }
         if (props.onChange) props.onChange(e);
       }}

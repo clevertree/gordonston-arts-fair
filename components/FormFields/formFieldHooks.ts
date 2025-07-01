@@ -13,7 +13,7 @@ export interface FormFieldProps {
   slotProps?: any,
   required?: boolean,
 
-  focusRef(e: HTMLElement | null): void,
+  focusRef?: (e: HTMLElement | null) => void,
 
   onUpdate(value: string | undefined): void
 }
@@ -79,11 +79,9 @@ export function useFormHook(
     label?: string,
     validate?: ValidationCallback | ValidationCallback[]
   ) {
-    if (!label) label = fieldName;
-
     const props: FormFieldProps = {
       name: fieldName,
-      label,
+      label: label || fieldName,
       focusRef: (input: HTMLElement | null) => {
         if (input) {
           fieldRefs.current[fieldName] = input.querySelector('[tabindex="0"]') || input;
@@ -102,9 +100,12 @@ export function useFormHook(
     // Validation
     if (validate) {
       let message: string | undefined;
-      const validateList: (ValidationType | ValidationCallback)[] = Array.isArray(validate) ? validate : [validate];
+      const validateList: (ValidationType | ValidationCallback)[] = Array.isArray(validate)
+        ? validate
+        : [validate];
       const value: string = formData[fieldName] || '';
-      for (const validationCallback of validateList) {
+      for (let i = 0; i < validateList.length; i++) {
+        const validationCallback = validateList[i];
         const labelOrFieldName = label || fieldName;
         if (typeof validationCallback === 'string') {
           message = validateByType(validationCallback, value, labelOrFieldName);
@@ -123,7 +124,6 @@ export function useFormHook(
             fieldName,
             getRef: () => fieldRefs.current[fieldName]
           };
-          console.warn(message);
         }
         if (showError) {
           props.color = 'error';

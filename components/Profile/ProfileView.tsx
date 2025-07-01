@@ -11,7 +11,9 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
-import { UserProfile, UserProfileInfo, UserProfileStatus } from '@util/profile';
+import {
+  getStatusName, UserProfile, UserProfileInfo, UserProfileStatus
+} from '@util/profile';
 import ReloadingImage from '@components/Image/ReloadingImage';
 import Link from 'next/link';
 
@@ -41,15 +43,13 @@ function ProfileView({ userProfile, userStatus }: ProfileViewProps) {
 
   return (
     <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
-      <Typography variant="h6" id="step1">
-        Contact Information
-      </Typography>
-
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow className="bg-blue-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
-              <TableCell colSpan={2}>Profile</TableCell>
+              <TableCell colSpan={2}>
+                Contact Information
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -59,7 +59,7 @@ function ProfileView({ userProfile, userStatus }: ProfileViewProps) {
               </TableCell>
               <TableCell>
                 <Alert severity={userStatus === 'paid' ? 'success' : 'info'}>
-                  {userStatus || 'N/A'}
+                  {getStatusName(userStatus)}
                 </Alert>
               </TableCell>
             </TableRow>

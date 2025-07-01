@@ -6,6 +6,8 @@ import { fetchUserResult } from '@util/userActions';
 import { validateAdminSession } from '@util/sessionActions';
 import UserStatusEditorAdmin from '@components/Admin/UserStatusEditorAdmin';
 import { updateUserStatus } from '@util/profileActions';
+import SendEmailAdmin from '@components/Admin/SendEmailAdmin';
+import { sendMail } from '@util/emailActions';
 
 // export const metadata = {
 //     title: 'Manage an Artist',
@@ -63,6 +65,12 @@ export default async function AdminUserManagementPage({
               {emailFormatted}
             </Alert>
           )}
+
+        <SendEmailAdmin
+          userStatus={status}
+          userEmail={emailFormatted}
+          sendMail={sendMail}
+        />
 
       </Stack>
     </>
