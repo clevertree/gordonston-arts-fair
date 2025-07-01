@@ -28,7 +28,7 @@ export default async function AdminUserManagementPage({
 
   return (
     <>
-      <h2 className="m-auto text-[color:var(--gold-color)] italic">Manage an Artist</h2>
+      <h1 className="m-auto text-[color:var(--gold-color)] italic">Manage an Artist</h1>
       <Stack spacing={2} padding={2}>
 
         <Link

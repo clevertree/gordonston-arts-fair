@@ -15,7 +15,7 @@ export interface FormFieldProps {
 
   focusRef?: (e: HTMLElement | null) => void,
 
-  onUpdate(value: string | undefined): void
+  onUpdate?: (value: string | undefined) => void
 }
 
 export interface FormFieldValues {

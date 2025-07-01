@@ -130,6 +130,7 @@ export async function passwordResetAction(email: string): Promise<ActionResponse
   const redisPasswordResetKey = `user:${email.toLowerCase()}:reset-password`;
   await redisClient.set(redisPasswordResetKey, resetCode, { EX: 60 * 15 });
 
+  // eslint-disable-next-line no-console
   console.log('Password reset request: ', email, resetCode);
 
   // Send the registration email
@@ -151,12 +152,17 @@ export async function passwordResetAction(email: string): Promise<ActionResponse
   };
 }
 
-export async function passwordResetValidateAction(email: string, code: string, password: string): Promise<ActionResponse> {
+export async function passwordResetValidateAction(
+  email: string,
+  code: string,
+  password: string
+): Promise<ActionResponse> {
   const redisClient = await getRedisClient();
   const redisPasswordResetKey = `user:${email.toLowerCase()}:reset-password`;
 
   const storedCode = await redisClient.get(redisPasswordResetKey);
   if (!storedCode || (storedCode !== code)) {
+    // eslint-disable-next-line no-console
     console.error('Invalid reset request:', email, storedCode, code);
     // Add an error log entry
     await addAccessLogEntry(email, 'log-in-error', 'Invalid reset request');
@@ -202,11 +208,15 @@ type AccessLogActionType = 'log-in'
 | 'log-out'
 | 'password-reset';
 
-export async function addAccessLogEntry(email: string, action: AccessLogActionType, message: string) {
+export async function addAccessLogEntry(
+  email: string,
+  action: AccessLogActionType,
+  message: string
+) {
   const redisClient = await getRedisClient();
 
   // Add a log entry
-  const redisAccessLogKey = `user:${email.toLowerCase()}:access-log`;
+  const redisAccessLogKey = `user:${email.toLowerCase()}:log:access`;
   await redisClient.zAdd(redisAccessLogKey, [
     {
       value: `${action}:${message}`,

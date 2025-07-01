@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Alert,
   Box,
@@ -47,6 +47,7 @@ function ProfileEditor({
   // const formRef = useRef<HTMLFormElement>();
   const { uploads: profileUploads = {}, info: profileInfo = {} } = userProfileClient;
   const formUploadList: { [filename: string]: FormHookObject } = {};
+  const formRef = useRef<HTMLFormElement>(null);
 
   const formInfo = useFormHook(profileInfo as FormFieldValues, (formData) => {
     setUserProfileClient((oldData) => ({ ...oldData, info: formData }));
@@ -77,6 +78,7 @@ function ProfileEditor({
     setStatus('ready');
     setMessage(['success', 'User profile updated successfully']);
     setUserProfileClient(updatedUserProfile);
+    formRef.current?.scrollIntoView(true);
   };
 
   function handleFormChange() {
@@ -90,12 +92,15 @@ function ProfileEditor({
     }
   }
 
+  const fileUploadCount = Object.keys(profileUploads).length;
+
   return (
     <form
+      ref={formRef}
       onChange={handleFormChange}
-      onSubmit={(e: any) => {
+      onSubmit={async (e: any) => {
         e.preventDefault();
-        handleSubmit();
+        await handleSubmit();
       }}
     >
       <Box
@@ -110,9 +115,14 @@ function ProfileEditor({
           borderRadius: 4,
         }}
       >
-        <Typography variant="h6" id="step1">
+        <Typography component="h2" id="step1">
           Contact Information
         </Typography>
+        {message && message[1] && (
+        <Alert severity={message[0]}>
+          {message[1]}
+        </Alert>
+        )}
         <fieldset disabled={status === 'updating'} className="grid md:grid-cols-3 gap-4">
           <TextField
             helperText="Please enter your first name"
@@ -182,7 +192,7 @@ function ProfileEditor({
             required
           />
         </fieldset>
-        <Typography variant="h6">
+        <Typography component="h2">
           Exhibit Information
         </Typography>
         <fieldset disabled={status === 'updating'} className="grid md:grid-cols-2 gap-4">
@@ -201,12 +211,12 @@ function ProfileEditor({
               </MenuItem>
             ))}
             {profileInfo.category && !LIST_CATEGORIES.includes(profileInfo.category) && (
-            <MenuItem
-              key={profileInfo.category}
-              value={profileInfo.category}
-            >
-              {profileInfo.category}
-            </MenuItem>
+              <MenuItem
+                key={profileInfo.category}
+                value={profileInfo.category}
+              >
+                {profileInfo.category}
+              </MenuItem>
             )}
           </SelectField>
           <Button
@@ -241,7 +251,7 @@ function ProfileEditor({
           />
         </fieldset>
 
-        <Typography variant="h6">
+        <Typography component="h2">
           Upload images
         </Typography>
 
@@ -286,7 +296,7 @@ function ProfileEditor({
           </Stack>
         </fieldset>
 
-        <Typography variant="h6">
+        <Typography component="h2">
           Manage uploaded images
         </Typography>
 
@@ -295,12 +305,12 @@ function ProfileEditor({
             <Table>
               <TableHead>
                 <TableRow
-                  className="bg-green-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2"
+                  className={`${fileUploadCount > 0 ? 'bg-green-700' : 'bg-amber-700'} [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2`}
                 >
                   <TableCell colSpan={2}>
                     File uploads:
                     {' '}
-                    {Object.keys(profileUploads).length}
+                    {fileUploadCount}
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -334,11 +344,6 @@ function ProfileEditor({
             </Table>
           </TableContainer>
         </fieldset>
-        {message && message[1] && (
-        <Alert severity={message[0]}>
-          {message[1]}
-        </Alert>
-        )}
         <Button
           type="submit"
           variant="contained"
@@ -429,18 +434,18 @@ function ProfileUploadForm({
       </TableCell>
       <TableCell sx={{ position: 'relative', width: '20rem', height: '20rem' }}>
         {uploadInfo.url && (
-        <Link href={uploadInfo.url} target="_blank" rel="noreferrer">
-          <ReloadingImage
-            loading="lazy"
-            src={uploadInfo.url}
-            alt={filename}
-            width={300}
-            height={300}
-            style={{
-              height: 'auto'
-            }}
-          />
-        </Link>
+          <Link href={uploadInfo.url} target="_blank" rel="noreferrer">
+            <ReloadingImage
+              loading="lazy"
+              src={uploadInfo.url}
+              alt={filename}
+              width={300}
+              height={300}
+              style={{
+                height: 'auto'
+              }}
+            />
+          </Link>
         )}
       </TableCell>
     </TableRow>

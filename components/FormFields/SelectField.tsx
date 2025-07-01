@@ -27,7 +27,7 @@ export default function SelectField({
         ref={focusRef}
         onChange={(e, a) => {
           if (props.onChange) props.onChange(e, a);
-          onUpdate(e.target.value as string | undefined);
+          if (onUpdate) onUpdate(e.target.value as string | undefined);
         }}
       />
       {helperText && (

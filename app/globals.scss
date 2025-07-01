@@ -11,6 +11,8 @@
   --link-color: #000042;
   --link-color-inverted: #e8e8e8;
   --link-color-visited: #272727;
+  --link-color-hover: #5763ff;
+  --link-color-active: #0013ff;
   --link-color-visited-inverted: #d4d4d4;
   --gold-color: #946900;
   --gold-color-bright: #eaac00;
@@ -64,12 +66,12 @@ a:visited {
 
 /* mouse over link */
 a:hover {
-  color: hotpink;
+  color: var(--link-color-hover);
 }
 
 /* selected link */
 a:active {
-  color: blue;
+  color: var(--link-color-hover);
 }
 
 .header-container {
@@ -84,6 +86,8 @@ a:active {
   /* unvisited link */
   a:link {
     color: var(--link-color-inverted);
+      text-decoration: none;
+
   }
 
   /* visited link */

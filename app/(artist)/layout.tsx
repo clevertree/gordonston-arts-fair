@@ -28,9 +28,7 @@ export default function ArtistLayout({
           {children}
         </Suspense>
       </article>
-      <footer
-        className="w-full text-[color:var(--foreground-inverted-color)] bg-[color:var(--background-inverted-color)] m-auto"
-      >
+      <footer className="footer-container">
         <div className="p-4 pb-6 text-center">
           For help submitting your Artist Profile please contact the admin at
           {' '}

@@ -16,7 +16,7 @@ export default async function PasswordResetValidationPage({
 
   return (
     <>
-      <h2 className="m-auto text-[color:var(--gold-color)] italic">Artist Registration</h2>
+      <h1 className="m-auto text-[color:var(--gold-color)] italic">Artist Registration</h1>
 
       <PasswordResetValidationForm
         passwordResetValidateAction={passwordResetValidateAction}

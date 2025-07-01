@@ -14,7 +14,7 @@ import {
   TableRow,
   TextField
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { UserProfileStatus } from '@util/profile';
 import type { AlertColor } from '@mui/material/Alert';
 import Mail from 'nodemailer/lib/mailer';
@@ -33,22 +33,28 @@ export default function SendEmailAdmin({
   userEmail,
   sendMail,
 }: SendEmailAdminProps) {
+  const [status, setStatus] = useState<'ready' | 'submitting'>('ready');
   const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
   const [email, setEmail] = useState(userEmail);
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
 
   return (
     <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
       <form
+        ref={formRef}
         action={async () => {
-          const { message: updateMessage } = await sendMail({
+          setStatus('submitting');
+          const { success, message: updateMessage } = await sendMail({
             to: email,
             html: body,
             text: body,
             subject
           });
-          setMessage(['success', updateMessage]);
+          setStatus('ready');
+          setMessage([success ? 'success' : 'error', updateMessage]);
+          formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }}
         method="POST"
       >
@@ -149,8 +155,9 @@ export default function SendEmailAdmin({
                     type="submit"
                     variant="contained"
                     color="primary"
+                    disabled={status === 'submitting'}
                   >
-                    Update Status
+                    Send Email
                   </Button>
                 </TableCell>
               </TableRow>

@@ -2,6 +2,7 @@
 
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
+import { getRedisClient } from '@util/redis';
 
 const { SMTP_SERVER_HOST } = process.env;
 const { SMTP_SERVER_USERNAME } = process.env;
@@ -20,6 +21,11 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function sendMail(options: Mail.Options) {
+  const email = `${options.to}`;
+  const subject = `${options.subject}`;
+  if (!email) { return { success: false, message: `Invalid recipient email: ${JSON.stringify(options)}` }; }
+  if (!subject) { return { success: false, message: `Invalid subject: ${JSON.stringify(options)}` }; }
+
   let isVerified = false;
   try {
     isVerified = await transporter.verify();
@@ -28,22 +34,31 @@ export async function sendMail(options: Mail.Options) {
     console.error('Something Went Wrong', SMTP_SERVER_USERNAME, SMTP_SERVER_PASSWORD, error);
     return { success: false, message: `Unable to send email: ${error.message}` };
   }
-  if (process.env.TEST_MODE !== 'false') {
+
+  const testMode = process.env.TEST_MODE === 'false';
+  if (testMode) {
+    const info = await transporter.sendMail({
+      from: EMAIL_ADMIN,
+      bcc: EMAIL_BCC,
+      ...options
+    });
     // eslint-disable-next-line no-console
-    console.log('TEST MODE: Sending email to', options);
-    return {
-      success: true,
-      message: 'TEST MODE: Email not sent',
-    };
+    console.log('Mail sent to', email, `verified=${isVerified}`, info.messageId);
+  } else {
+  // eslint-disable-next-line no-console
+    console.log('TEST MODE: No actual mail was sent', options);
   }
 
-  const info = await transporter.sendMail({
-    from: EMAIL_ADMIN,
-    bcc: EMAIL_BCC,
-    ...options
-  });
-    // eslint-disable-next-line no-console
-  console.log('Mail sent to', options.to, `verified=${isVerified}`, info.messageId);
+  // Add a log entry
+  const redisClient = await getRedisClient();
+  const redisAccessLogKey = `user:${email.toLowerCase()}:log:message`;
+  await redisClient.zAdd(redisAccessLogKey, [
+    {
+      value: (testMode ? 'TEST ONLY: ' : '') + subject,
+      score: new Date().getTime()
+    }
+  ]);
+
   return {
     success: true,
     message: 'Email sent successfully',

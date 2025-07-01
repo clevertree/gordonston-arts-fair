@@ -50,7 +50,7 @@ function LoginForm({
         borderRadius: 4,
       }}
     >
-      <Typography variant="h6" align="center">
+      <Typography component="h2" align="center">
         Artist Login
       </Typography>
       {message && message[1] && (
@@ -59,6 +59,7 @@ function LoginForm({
         </Alert>
       )}
       <TextField
+        name="email"
         required
         label="Email Address"
         variant="outlined"
@@ -72,6 +73,7 @@ function LoginForm({
         }}
       />
       <TextField
+        name="password"
         label="Password"
         variant="outlined"
         type="password"

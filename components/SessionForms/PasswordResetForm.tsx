@@ -47,7 +47,7 @@ function PasswordResetForm({ passwordResetAction }: PasswordResetFormProps) {
         borderRadius: 4,
       }}
     >
-      <Typography variant="h6" align="center">
+      <Typography component="h2" align="center">
         Submit Password Reset Request
       </Typography>
       {message && message[1] && (

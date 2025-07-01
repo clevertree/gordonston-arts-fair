@@ -12,7 +12,7 @@ export default async function ArtistLogout() {
 
   return (
     <>
-      <h2 className="m-auto text-[color:var(--gold-color)] italic">Artist Logout</h2>
+      <h1 className="m-auto text-[color:var(--gold-color)] italic">Artist Logout</h1>
 
       <LogoutForm logoutAction={logoutAction} />
 

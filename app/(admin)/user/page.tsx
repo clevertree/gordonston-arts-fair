@@ -14,11 +14,11 @@ export default async function PasswordResetValidationPage() {
   const userList = await listUsersAsAdmin();
   return (
     <>
-      <h2 className="m-auto text-[color:var(--gold-color)] italic">
+      <h1 className="m-auto text-[color:var(--gold-color)] italic">
         Manage
         {USER_LABEL}
         s
-      </h2>
+      </h1>
 
       <AdminUserList userList={userList} />
     </>

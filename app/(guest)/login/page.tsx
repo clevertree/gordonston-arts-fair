@@ -12,7 +12,7 @@ export default async function ArtistLogin() {
 
   return (
     <>
-      <h2 className="m-auto text-[color:var(--gold-color)] italic">Artist Login</h2>
+      <h1 className="m-auto text-[color:var(--gold-color)] italic">Artist Login</h1>
 
       <LoginForm loginAction={loginAction} />
 

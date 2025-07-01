@@ -14,7 +14,7 @@ import {
   TableHead,
   TableRow
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { getStatusName, profileStatuses, UserProfileStatus } from '@util/profile';
 import type { AlertColor } from '@mui/material/Alert';
 
@@ -30,14 +30,17 @@ export default function UserStatusEditorAdmin({
   userStatus, updateUserStatus
 }: UserStatusEditorAdminProps) {
   const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
+  const formRef = useRef<HTMLFormElement>(null);
 
   return (
     <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
       <form
+        ref={formRef}
         action={async (formData) => {
           const status = formData.get('status') as UserProfileStatus;
           const { message: updateMessage } = await updateUserStatus(status);
           setMessage(['success', updateMessage]);
+          formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }}
         method="POST"
       >

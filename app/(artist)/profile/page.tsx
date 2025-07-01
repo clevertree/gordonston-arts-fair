@@ -22,7 +22,7 @@ export default async function ProfilePage() {
 
   return (
     <>
-      <h2 className="m-auto text-[color:var(--gold-color)] italic">Artist Profile</h2>
+      <h1 className="m-auto text-[color:var(--gold-color)] italic">Artist Profile</h1>
 
       <ProfileEditor
         userProfile={profileData}

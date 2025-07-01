@@ -48,12 +48,12 @@ export default function TextField({
         }
         if (e.target !== document.activeElement) {
           // Detect autofill
-          onUpdate(newValue);
+          if (onUpdate) onUpdate(newValue);
         }
         if (props.onChange) props.onChange(e);
       }}
       onBlur={(e) => {
-        onUpdate(value);
+        if (onUpdate) onUpdate(value);
         if (props.onBlur) props.onBlur(e);
       }}
     />

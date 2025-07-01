@@ -45,7 +45,7 @@ export default function RootLayout({
             <h2 className="text-white text-4xl md:text-6xl px-3 py-1 rounded-t-2xl bg-[#000A]">ART FAIR</h2>
             <h3 className="text-white md:text-2xl font-bold px-3 py-1 rounded-3xl bg-[#000A]">{eventDateString}</h3>
             <div className="pt-12 md:pt-12" />
-            <DateLocationApply className="bg-white" />
+            <DateLocationApply className="bg-white font-bold rounded-3xl px-5 py-3" />
           </div>
         </div>
       </header>
@@ -54,9 +54,7 @@ export default function RootLayout({
           {children}
         </Suspense>
       </article>
-      <footer
-        className="footer-container"
-      >
+      <footer className="footer-container">
         <DateLocationApply />
 
         <div className="p-4 pb-6 text-center">

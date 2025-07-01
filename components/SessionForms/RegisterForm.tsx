@@ -50,7 +50,7 @@ function RegisterForm({
         borderRadius: 4,
       }}
     >
-      <Typography variant="h6" align="center">
+      <Typography variant="h6" component="h2" align="center">
         Register an Artist Account
       </Typography>
       {message && message[1] && (
@@ -59,6 +59,7 @@ function RegisterForm({
         </Alert>
       )}
       <TextField
+        name="email"
         required
         label="Email Address"
         variant="outlined"
@@ -73,6 +74,7 @@ function RegisterForm({
         }}
       />
       <TextField
+        name="password"
         required
         label="Password"
         variant="outlined"

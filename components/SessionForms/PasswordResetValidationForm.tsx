@@ -58,7 +58,7 @@ function PasswordResetValidationForm({
         borderRadius: 4,
       }}
     >
-      <Typography variant="h6" align="center">
+      <Typography component="h2" align="center">
         Set a new password
       </Typography>
       {message && message[1] && (

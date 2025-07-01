@@ -12,7 +12,7 @@ export default async function ArtistLogin() {
 
   return (
     <>
-      <h2 className="m-auto text-[color:var(--gold-color)] italic">Artist Registration</h2>
+      <h1 className="m-auto text-[color:var(--gold-color)] italic">Password Reset</h1>
 
       <PasswordResetForm passwordResetAction={passwordResetAction} />
 

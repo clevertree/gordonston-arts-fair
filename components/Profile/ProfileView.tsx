@@ -77,7 +77,7 @@ function ProfileView({ userProfile, userStatus }: ProfileViewProps) {
         </Table>
       </TableContainer>
 
-      <Typography variant="h6" id="step1">
+      <Typography component="h2" id="step1">
         Uploaded files
       </Typography>
 
@@ -95,7 +95,7 @@ function ProfileView({ userProfile, userStatus }: ProfileViewProps) {
             {uploadList.map(({ title, description, url }) => (
               <TableRow key={url + title}>
                 <TableCell component="th" scope="row" sx={{ verticalAlign: 'top' }}>
-                  <Typography variant="h6">
+                  <Typography component="h2">
                     {title}
                   </Typography>
                   {description && (
