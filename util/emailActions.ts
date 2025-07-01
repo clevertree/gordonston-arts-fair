@@ -3,6 +3,7 @@
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 import { getRedisClient } from '@util/redis';
+import { EmailTemplate } from '../email';
 
 const { SMTP_SERVER_HOST } = process.env;
 const { SMTP_SERVER_USERNAME } = process.env;
@@ -20,11 +21,23 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+export async function sendTemplateMail(email: string, template: EmailTemplate, props: any = {}) {
+  return sendMail({
+    to: email,
+    html: template.htmlBody(props),
+    text: template.textBody(props),
+    subject: template.subject
+  });
+}
+
 export async function sendMail(options: Mail.Options) {
   const email = `${options.to}`;
   const subject = `${options.subject}`;
   if (!email) { return { success: false, message: `Invalid recipient email: ${JSON.stringify(options)}` }; }
   if (!subject) { return { success: false, message: `Invalid subject: ${JSON.stringify(options)}` }; }
+
+  const redisClient = await getRedisClient();
+  const redisAccessLogKey = `user:${email.toLowerCase()}:log`;
 
   let isVerified = false;
   try {
@@ -32,11 +45,13 @@ export async function sendMail(options: Mail.Options) {
   } catch (error: any) {
     // eslint-disable-next-line no-console
     console.error('Something Went Wrong', SMTP_SERVER_USERNAME, SMTP_SERVER_PASSWORD, error);
+    // Add a log entry
+    await redisClient.hSet(redisAccessLogKey, new Date().getTime(), `message:${error}`);
     return { success: false, message: `Unable to send email: ${error.message}` };
   }
 
-  const testMode = process.env.TEST_MODE === 'false';
-  if (testMode) {
+  const testMode = process.env.TEST_MODE !== 'false';
+  if (!testMode) {
     const info = await transporter.sendMail({
       from: EMAIL_ADMIN,
       bcc: EMAIL_BCC,
@@ -50,14 +65,7 @@ export async function sendMail(options: Mail.Options) {
   }
 
   // Add a log entry
-  const redisClient = await getRedisClient();
-  const redisAccessLogKey = `user:${email.toLowerCase()}:log:message`;
-  await redisClient.zAdd(redisAccessLogKey, [
-    {
-      value: (testMode ? 'TEST ONLY: ' : '') + subject,
-      score: new Date().getTime()
-    }
-  ]);
+  await redisClient.hSet(redisAccessLogKey, new Date().getTime(), `message:${testMode ? 'TEST ONLY: ' : ''}${subject}`);
 
   return {
     success: true,

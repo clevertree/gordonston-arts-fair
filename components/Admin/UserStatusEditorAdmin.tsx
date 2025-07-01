@@ -17,6 +17,7 @@ import {
 import React, { useRef, useState } from 'react';
 import { getStatusName, profileStatuses, UserProfileStatus } from '@util/profile';
 import type { AlertColor } from '@mui/material/Alert';
+import { useRouter } from 'next/navigation';
 
 interface UserStatusEditorAdminProps {
   userStatus: UserProfileStatus,
@@ -31,6 +32,7 @@ export default function UserStatusEditorAdmin({
 }: UserStatusEditorAdminProps) {
   const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
 
   return (
     <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
@@ -40,7 +42,8 @@ export default function UserStatusEditorAdmin({
           const status = formData.get('status') as UserProfileStatus;
           const { message: updateMessage } = await updateUserStatus(status);
           setMessage(['success', updateMessage]);
-          formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          router.refresh(); // Refresh the current page
         }}
         method="POST"
       >

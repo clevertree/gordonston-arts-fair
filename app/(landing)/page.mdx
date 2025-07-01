@@ -1,4 +1,4 @@
-import {formatToLocal, getTimeSpan} from "../../util/date";
+import {formatDate, getTimeSpan} from "../../util/date";
 
 export const metadata = {
     title: 'Welcome to the Gordonston Art Fair Website',
@@ -10,7 +10,7 @@ export const metadata = {
     }
 }
 
-export {formatToLocal};
+export {formatDate};
 export const eventDate = new Date(process.env.NEXT_PUBLIC_EVENT_DATE);
 export const registrationOpenDate = new Date(process.env.NEXT_PUBLIC_REGISTRATION_OPEN_DATE);
 export const registrationTimeUntil = getTimeSpan(new Date(), registrationOpenDate);
@@ -30,11 +30,11 @@ There will be food trucks, live music, and a supervised children's crafts area.
 
 Welcome to the application page. Please carefully read the following:
 
-* This event takes place on {formatToLocal(eventDate)}
-* Online applications will be accepted on {formatToLocal(registrationOpenDate)}.
-* Applications must be submitted by {formatToLocal(registrationEndDate)} with a non-refundable fee of ${registrationFee}`.
-* Artists/artisans will be notified of their status (accepted, declined, or waiting list) by {formatToLocal(registrationEndDate)}.
-* We will then be expecting an ${boothFee} booth fee to be made by {formatToLocal(registrationFeeDate)}
+* This event takes place on {formatDate(eventDate)}
+* Online applications will be accepted on {formatDate(registrationOpenDate)}.
+* Applications must be submitted by {formatDate(registrationEndDate)} with a non-refundable fee of ${registrationFee}`.
+* Artists/artisans will be notified of their status (accepted, declined, or waiting list) by {formatDate(registrationEndDate)}.
+* We will then be expecting an ${boothFee} booth fee to be made by {formatDate(registrationFeeDate)}
 * As our vending space is limited, we may fill up before the deadline. In this event, we will maintain a
 waiting list.
 
@@ -42,7 +42,7 @@ Only online applications will be accepted. The registration fee is ${registratio
 If accepted, the booth fee is ${boothFee}.00 and must
 be paid upon acceptance.
 
-Application deadline is {formatToLocal(registrationEndDate)};
+Application deadline is {formatDate(registrationEndDate)};
 however, artists will be informed in a timely manner whether they have
 been selected so that they may plan accordingly.
 Spaces may fill up before the deadline.
@@ -242,6 +242,6 @@ Ave. at #10 Edgewood Road, Savannah, Georgia 31404
 
 First, you need to apply for an exhibitor booth. Only online applications will be accepted. The application fee is
 ${registrationFee}.00. If accepted, the booth fee is ${boothFee}.00 and must be paid upon acceptance. The application deadline is July 31st.
-The website will begin accepting applications for artists on {formatToLocal(registrationOpenDate)}.
+The website will begin accepting applications for artists on {formatDate(registrationOpenDate)}.
 
 <div className='pb-16'/>

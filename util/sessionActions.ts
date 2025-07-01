@@ -3,9 +3,10 @@
 import { getRedisClient } from '@util/redis';
 import bcrypt from 'bcrypt';
 import { endSession, startSession, validateSession } from '@util/session';
-import { sendMail } from '@util/emailActions';
+import { sendMail, sendTemplateMail } from '@util/emailActions';
 import { randomBytes } from 'node:crypto';
 import { HttpError } from '@util/exception/httpError';
+import { UserPasswordResetEmailTemplate, UserRegistrationEmailTemplate } from '../email';
 
 export type ActionResponse = {
   status: 'success' | 'error';
@@ -103,6 +104,7 @@ export async function registerAction(email: string, password: string): Promise<A
     text: 'TEXT',
     subject: 'Registration Complete'
   });
+  await sendTemplateMail(email, UserRegistrationEmailTemplate);
 
   return {
     status: 'success',
@@ -133,14 +135,15 @@ export async function passwordResetAction(email: string): Promise<ActionResponse
   // eslint-disable-next-line no-console
   console.log('Password reset request: ', email, resetCode);
 
-  // Send the registration email
-  const url = `${process.env.NEXT_PUBLIC_METADATA_URL}/password/validate/${email}/${resetCode}`;
-  await sendMail({
-    to: email,
-    html: `<a href='${url}'>Click here to reset your password</a>`,
-    text: `Open this link to reset your password: ${url}`,
-    subject: 'Password Reset Request'
-  });
+  // Send the password reset email
+  const validationURL = `${process.env.NEXT_PUBLIC_METADATA_URL}/password/validate/${email}/${resetCode}`;
+  await sendTemplateMail(email, UserPasswordResetEmailTemplate, { validationURL });
+  // await sendMail({
+  //   to: email,
+  //   html: `<a href='${url}'>Click here to reset your password</a>`,
+  //   text: `Open this link to reset your password: ${url}`,
+  //   subject: 'Password Reset Request'
+  // });
 
   // Add a log entry
   await addAccessLogEntry(email, 'password-reset', '');
@@ -211,16 +214,11 @@ type AccessLogActionType = 'log-in'
 export async function addAccessLogEntry(
   email: string,
   action: AccessLogActionType,
-  message: string
+  message?: string
 ) {
   const redisClient = await getRedisClient();
 
   // Add a log entry
-  const redisAccessLogKey = `user:${email.toLowerCase()}:log:access`;
-  await redisClient.zAdd(redisAccessLogKey, [
-    {
-      value: `${action}:${message}`,
-      score: new Date().getTime()
-    }
-  ]);
+  const redisAccessLogKey = `user:${email.toLowerCase()}:log`;
+  await redisClient.hSet(redisAccessLogKey, new Date().getTime(), `access:${action}${message ? `:${message}` : ''}`);
 }

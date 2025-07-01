@@ -1,4 +1,4 @@
-import {formatToLocal, getTimeSpan} from "../../../util/date";
+import {formatDate, getTimeSpan} from "../../../util/date";
 import RegisterForm from "../../../components/SessionForms/RegisterForm";
 import {registerAction} from "../../../util/sessionActions";
 import {Stack} from "@mui/material";
@@ -8,7 +8,7 @@ export const metadata = {
     title: 'Apply to Gordonston Art Fair',
 }
 
-export {formatToLocal};
+export {formatDate};
 export const eventDate = new Date(process.env.NEXT_PUBLIC_EVENT_DATE);
 export const eventDayBeforeDate = new Date(eventDate.getTime() - 1000 * 60 * 60 * 24);
 export const registrationOpenDate = new Date(process.env.NEXT_PUBLIC_REGISTRATION_OPEN_DATE);
@@ -21,9 +21,9 @@ export const boothFee = process.env.NEXT_PUBLIC_BOOTH_FEE;
 
 <h2 className='m-auto text-[color:var(--gold-color)] italic'>Artist Registration</h2>
 
-This event takes place on **{formatToLocal(eventDate)}**.
+This event takes place on **{formatDate(eventDate)}**.
 Registration for this event opens in {registrationTimeUntil}
-on **{formatToLocal(registrationEndDate)}**.
+on **{formatDate(registrationEndDate)}**.
 
 * * *
 
@@ -33,10 +33,10 @@ Only online applications will be accepted.
 The registration fee is ${registrationFee}.00.
 If accepted, the booth fee is ${boothFee}.00.
 
-Application deadline is {formatToLocal(registrationEndDate)};
+Application deadline is {formatDate(registrationEndDate)};
 however, artists will be informed in a timely manner
 whether they have been selected so that they may plan accordingly.
-Although the deadline is {formatToLocal(registrationEndDate, false, false)},
+Although the deadline is {formatDate(registrationEndDate, false, false)},
 spaces may fill up before that time.
 We will close/extend submissions at our discretion.
 We will keep artists on a waitlist in the event spaces become available.
@@ -66,8 +66,8 @@ To ensure a balanced and varied selection of exhibitors, we will limit the numbe
 *   Tents and displays must be secured (stakes allowed) and able to withstand strong winds and all-weather conditions – we are a rain or shine event.
 *   Artist booths must remain open for the duration of the event. No early teardowns
 *   Artist vehicles must be off the park grounds
-by 7:00 pm on {formatToLocal(eventDayBeforeDate, true, false)}
-and by 9:30 am on {formatToLocal(eventDate, true, false)}
+by 7:00 pm on {formatDate(eventDayBeforeDate, true, false)}
+and by 9:30 am on {formatDate(eventDate, true, false)}
 and are not permitted to return until after 4:00 pm on Saturday.
 It is required that to avoid congestion, artists completely tear down
 their booths before bringing in vehicles for load-in.

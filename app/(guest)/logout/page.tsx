@@ -17,7 +17,7 @@ export default async function ArtistLogout() {
       <LogoutForm logoutAction={logoutAction} />
 
       <Stack sx={{ margin: 'auto' }} direction="column">
-        <Link href="/logout">Click here to log in as an Artist</Link>
+        <Link href="/login">Click here to log in as an Artist</Link>
       </Stack>
     </>
   );

@@ -37,6 +37,12 @@
       ],
       "@components/*": [
         "./components/*"
+      ],
+      "@email/*": [
+        "./email/*"
+      ],
+      "@email": [
+        "./email"
       ]
     },
     "target": "ES2017"
