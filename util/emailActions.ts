@@ -33,8 +33,12 @@ export async function sendTemplateMail(email: string, template: EmailTemplate, p
 export async function sendMail(options: Mail.Options) {
   const email = `${options.to}`;
   const subject = `${options.subject}`;
-  if (!email) { return { success: false, message: `Invalid recipient email: ${JSON.stringify(options)}` }; }
-  if (!subject) { return { success: false, message: `Invalid subject: ${JSON.stringify(options)}` }; }
+  if (!email) {
+    return { success: false, message: `Invalid recipient email: ${JSON.stringify(options)}` };
+  }
+  if (!subject) {
+    return { success: false, message: `Invalid subject: ${JSON.stringify(options)}` };
+  }
 
   const redisClient = await getRedisClient();
   const redisAccessLogKey = `user:${email.toLowerCase()}:log`;
@@ -60,7 +64,7 @@ export async function sendMail(options: Mail.Options) {
     // eslint-disable-next-line no-console
     console.log('Mail sent to', email, `verified=${isVerified}`, info.messageId);
   } else {
-  // eslint-disable-next-line no-console
+    // eslint-disable-next-line no-console
     console.log('TEST MODE: No actual mail was sent', options);
   }
 

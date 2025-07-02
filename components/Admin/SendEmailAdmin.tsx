@@ -48,9 +48,11 @@ export default function SendEmailAdmin({
         ref={formRef}
         action={async () => {
           setStatus('submitting');
+
+          // TOOD: send template instead of custom email?
           const { success, message: updateMessage } = await sendMail({
             to: email,
-            html: body,
+            // html: body,
             text: body,
             subject
           });
