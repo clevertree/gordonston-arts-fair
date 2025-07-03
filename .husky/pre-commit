@@ -27,3 +27,7 @@ echo "Running E2E tests"
 npx cypress run --e2e --config baseUrl=http://localhost:3000
 echo "Testing complete"
 kill $SERVER_PID
+
+# Patch version
+npm version patch --no-git-tag-version
+git add package.json
