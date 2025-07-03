@@ -3,6 +3,7 @@ import React, { Suspense } from 'react';
 import Link from 'next/link';
 import FloatingDiv from '@components/FloatingDiv/FloatingDiv';
 import { SuspenseContent } from '@app/suspenseContent';
+import PackageJSON from '../../package.json';
 
 export const metadata: Metadata = {
   title: 'Gordonston Art Fair',
@@ -29,7 +30,7 @@ export default function AdminLayout({
         </Suspense>
       </article>
       <footer className="footer-container">
-        <div className="p-4 pb-6 text-center">
+        <div className="p-2 text-center">
           For administration support please email or text Ari Asulin at
           {' '}
           <Link href="mailto:ari@asu.edu">ari@asu.edu</Link>
@@ -37,6 +38,12 @@ export default function AdminLayout({
           or
           {' '}
           <Link href="tel:602-632-6729">602-632-6729</Link>
+        </div>
+        <div className="p-2 text-center">
+          <Link href="http://github.com/clevertree/gordonston-arts-fair/">
+            Version:
+            {PackageJSON.version}
+          </Link>
         </div>
       </footer>
     </>
