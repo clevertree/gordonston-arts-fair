@@ -9,14 +9,13 @@ export const metadata = {
 
 const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
-export default async function PasswordResetValidationPage({
-  searchParams,
-}: {
-  searchParams?: string | string[][] | Record<string, string> | URLSearchParams | undefined
-}) {
+interface AdminUserListPageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function AdminUserListPage({ searchParams }:AdminUserListPageProps) {
   await validateAdminSession();
-  const params = await searchParams;
-  const urlSearchParams = new URLSearchParams(params || {});
+  const params = new URLSearchParams(await searchParams as Record<string, string>);
   const userList = await listUsersAsAdmin();
   return (
     <>
@@ -24,7 +23,7 @@ export default async function PasswordResetValidationPage({
         {`Manage ${USER_LABEL}s`}
       </h1>
 
-      <AdminUserList userList={userList} searchArgs={urlSearchParams} />
+      <AdminUserList userList={userList} searchParams={params} />
     </>
   );
 }

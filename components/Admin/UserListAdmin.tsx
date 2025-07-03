@@ -19,7 +19,7 @@ import {
 
 interface AdminUserListProps {
   userList: UserProfile[],
-  searchArgs: URLSearchParams
+  searchParams: URLSearchParams
 }
 
 interface SearchArgs {
@@ -32,17 +32,17 @@ interface SearchArgs {
 
 const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
-export default async function UserListAdmin({ userList, searchArgs }: AdminUserListProps) {
+export default async function UserListAdmin({ userList, searchParams }: AdminUserListProps) {
   function getSearchParams(variable: keyof SearchArgs, title: string) {
-    const oldValue = searchArgs.get(variable);
+    const oldValue = searchParams.get(variable);
     switch (variable) {
       case 'email':
       case 'isAdmin':
       case 'name':
       case 'createdAt':
       case 'status':
-        searchArgs.set(variable, oldValue === 'asc' ? 'desc' : 'asc');
-        return <Link href={`?${searchArgs}`}>{title}</Link>;
+        searchParams.set(variable, oldValue === 'asc' ? 'desc' : 'asc');
+        return <Link href={`?${searchParams}`}>{title}</Link>;
       default:
         throw new Error(`Invalid search param: ${variable}`);
     }
@@ -58,13 +58,11 @@ export default async function UserListAdmin({ userList, searchArgs }: AdminUserL
         <Table>
           <TableHead>
             <TableRow className="bg-blue-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
-              <TableCell align="center">
-                <Link href="">Email</Link>
-              </TableCell>
+              <TableCell align="center">{getSearchParams('email', 'Email')}</TableCell>
               <TableCell align="center">{getSearchParams('name', 'Name')}</TableCell>
               <TableCell align="center">{getSearchParams('isAdmin', 'Admin')}</TableCell>
               <TableCell align="center">{getSearchParams('createdAt', 'Created')}</TableCell>
-              <TableCell align="center">{getSearchParams('status', 'Statys')}</TableCell>
+              <TableCell align="center">{getSearchParams('status', 'Status')}</TableCell>
               <TableCell align="center">Images</TableCell>
               <TableCell align="center">Edit</TableCell>
             </TableRow>
