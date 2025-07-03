@@ -5,7 +5,8 @@ export type UserProfileStatus =
     | 'approved'
     | 'standby'
     | 'declined'
-    | 'paid';
+    | 'paid'
+    | 'imported';
 
 export const profileStatuses: UserProfileStatus[] = [
   'unregistered',
@@ -14,14 +15,20 @@ export const profileStatuses: UserProfileStatus[] = [
   'approved',
   'standby',
   'declined',
-  'paid'
+  'paid',
+  'imported'
 ];
 
 export interface UserProfile {
+  email: string,
+  status: UserProfileStatus,
   info: UserProfileInfo,
   uploads: {
     [filename: string]: UserProfileUpload
   }
+  createdAt: number,
+  updatedAt?: number,
+  isAdmin?: true,
   // expiresAt: Date
 }
 

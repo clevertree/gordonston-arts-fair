@@ -1,11 +1,20 @@
 import { fetchUserLogs, fetchUserResult } from '@util/userActions';
 import { validateAdminSession } from '@util/sessionActions';
 import { updateUserStatus } from '@util/profileActions';
-import AdminUserPanel from '@components/Admin/AdminUserPanel';
+import Link from 'next/link';
+import UserStatusEditorAdmin from '@components/Admin/UserStatusEditorAdmin';
+import ProfileView from '@components/Profile/ProfileView';
+import { Stack } from '@mui/material';
+import SendEmailAdmin from '@components/Admin/SendEmailAdmin';
+import { sendMail } from '@util/emailActions';
+import UserLogAdmin from '@components/Admin/UserLogAdmin';
+import React from 'react';
 
 // export const metadata = {
 //     title: 'Manage an Artist',
 // }
+
+const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
 export default async function AdminUserManagementPage({
   params,
@@ -16,23 +25,41 @@ export default async function AdminUserManagementPage({
 
   const { email } = await params;
   const emailFormatted = email.replace('%40', '@');
-  const { profile, status } = await fetchUserResult(emailFormatted);
+  const profile = await fetchUserResult(emailFormatted);
   const userLogs = await fetchUserLogs(emailFormatted);
 
   return (
     <>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">Manage an Artist</h1>
-      <AdminUserPanel
-        profile={profile}
-        userStatus={status}
-        updateUserStatus={async (newStatus) => {
-          'use server';
 
-          return updateUserStatus(emailFormatted, newStatus);
-        }}
-        email={emailFormatted}
-        logs={userLogs}
-      />
+      <Stack spacing={2} padding={2}>
+
+        <Link
+          href="/user"
+          className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
+        >
+          {`← Back to ${USER_LABEL} List`}
+        </Link>
+
+        <UserStatusEditorAdmin
+          userStatus={profile.status}
+          updateUserStatus={async (newStatus) => {
+            'use server';
+
+            return updateUserStatus(emailFormatted, newStatus);
+          }}
+        />
+        <ProfileView userProfile={profile} />
+
+        <SendEmailAdmin
+          userStatus={profile.status}
+          userEmail={email}
+          sendMail={sendMail}
+        />
+
+        <UserLogAdmin logs={userLogs} email={email} />
+
+      </Stack>
     </>
   );
 }

@@ -33,7 +33,7 @@ interface RowData {
   description4: string
 }
 
-function rowToProfile(row: RowData) {
+function rowToProfile(email: string, row: RowData) {
   const {
     // id,
     fname,
@@ -73,6 +73,9 @@ function rowToProfile(row: RowData) {
     category
   };
   const userProfile: UserProfile = {
+    status: 'imported',
+    createdAt: new Date().getTime(),
+    email,
     info: profileInfo,
     uploads: {}
   };
@@ -124,7 +127,7 @@ export async function importDBFromCSV() {
       continue;
     }
 
-    const newProfile: UserProfile = rowToProfile(row as unknown as RowData);
+    const newProfile: UserProfile = rowToProfile(email, row as unknown as RowData);
     const profileHash = `user:${email.toLowerCase()}:profile`;
     const currentUserProfile = (await redisClient.json.get(profileHash)) as unknown as UserProfile;
     if (currentUserProfile) {

@@ -13,11 +13,10 @@ import {
   Typography
 } from '@mui/material';
 import Link from 'next/link';
-import { UserResult } from '@util/userActions';
-import { getFullName, getStatusName } from '@util/profile';
+import { getFullName, getStatusName, UserProfile } from '@util/profile';
 
 interface AdminUserListProps {
-  userList: UserResult[]
+  userList: UserProfile[]
 }
 
 const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
@@ -44,7 +43,7 @@ export default async function UserListAdmin({ userList }: AdminUserListProps) {
           </TableHead>
           <TableBody>
             {userList.map(({
-              email, isAdmin, createdAt, profile, status
+              email, isAdmin, createdAt, info, status, uploads
             }) => (
               <TableRow
                 key={email}
@@ -54,18 +53,18 @@ export default async function UserListAdmin({ userList }: AdminUserListProps) {
                   <Link href={`/user/${email}`}>{email}</Link>
                 </TableCell>
                 <TableCell align="center">
-                  {getFullName(profile?.info?.firstName, profile?.info?.lastName)}
+                  {getFullName(info.firstName, info.lastName)}
                 </TableCell>
                 <TableCell align="center">
                   {isAdmin ? '🔑 Admin' : '🎨 Artist'}
                 </TableCell>
                 <TableCell align="center">
                   {createdAt
-                    ? new Date(createdAt).toLocaleString()
+                    ? new Date(createdAt).toLocaleDateString()
                     : 'N/A'}
                 </TableCell>
                 <TableCell align="center">
-                  {Object.keys(profile?.uploads || {}).length}
+                  {Object.keys(uploads || {}).length}
                 </TableCell>
                 <TableCell align="center">
                   {getStatusName(status)}

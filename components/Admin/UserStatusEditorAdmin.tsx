@@ -6,7 +6,6 @@ import {
   Button,
   MenuItem,
   Paper,
-  Select,
   Table,
   TableBody,
   TableCell,
@@ -18,6 +17,7 @@ import React, { useRef, useState } from 'react';
 import { getStatusName, profileStatuses, UserProfileStatus } from '@util/profile';
 import type { AlertColor } from '@mui/material/Alert';
 import { useRouter } from 'next/navigation';
+import { SelectField } from '@components/FormFields';
 
 interface UserStatusEditorAdminProps {
   userStatus: UserProfileStatus,
@@ -31,6 +31,7 @@ export default function UserStatusEditorAdmin({
   userStatus, updateUserStatus
 }: UserStatusEditorAdminProps) {
   const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
+  const [updatedUserStatus, setUpdatedUserStatus] = useState(userStatus);
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
 
@@ -38,9 +39,8 @@ export default function UserStatusEditorAdmin({
     <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
       <form
         ref={formRef}
-        action={async (formData) => {
-          const status = formData.get('status') as UserProfileStatus;
-          const { message: updateMessage } = await updateUserStatus(status);
+        action={async () => {
+          const { message: updateMessage } = await updateUserStatus(updatedUserStatus);
           setMessage(['success', updateMessage]);
           formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           router.refresh(); // Refresh the current page
@@ -68,11 +68,15 @@ export default function UserStatusEditorAdmin({
                   Status
                 </TableCell>
                 <TableCell>
-                  <Select<UserProfileStatus>
+                  <SelectField
                     name="status"
+                    label="Select new status"
                     fullWidth
                     variant="outlined"
-                    defaultValue={userStatus}
+                    value={updatedUserStatus || ''}
+                    onUpdate={(value) => {
+                      if (value) setUpdatedUserStatus(value as UserProfileStatus);
+                    }}
                   >
                     {profileStatuses.map((status) => (
                       <MenuItem
@@ -82,7 +86,7 @@ export default function UserStatusEditorAdmin({
                         {getStatusName(status)}
                       </MenuItem>
                     ))}
-                  </Select>
+                  </SelectField>
                 </TableCell>
               </TableRow>
               <TableRow>

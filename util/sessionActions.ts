@@ -42,7 +42,6 @@ export async function loginAction(email: string, password: string): Promise<Acti
   }
 
   await startSession(email);
-  const isAdmin = !!(await redisClient.get(`user:${email.toLowerCase()}:admin`));
 
   // Add a log entry
   await addAccessLogEntry(email, 'log-in', '');
@@ -50,7 +49,7 @@ export async function loginAction(email: string, password: string): Promise<Acti
   return {
     status: 'success',
     message: 'Login successful. Redirecting...',
-    redirectURL: isAdmin ? '/user' : '/profile'
+    redirectURL: (await isAdmin(email)) ? '/user' : '/profile'
   };
 }
 
@@ -195,12 +194,16 @@ export async function passwordResetValidateAction(
   };
 }
 
+export async function isAdmin(email: string) {
+  const redisClient = await getRedisClient();
+  const profilePath = `user:${email.toLowerCase()}:profile`;
+  const adminCheck = await redisClient.json.get(profilePath, { path: ['$.isAdmin'] }) as [boolean];
+  return (adminCheck && adminCheck[0]);
+}
+
 export async function validateAdminSession() {
   const session = await validateSession();
-  const redisClient = await getRedisClient();
-  const redisAdminKey = `user:${session.email.toLowerCase()}:admin`;
-  const adminCheck = await redisClient.get(redisAdminKey);
-  if (!adminCheck) throw HttpError.Unauthorized('Unauthorized - Admin access required');
+  if (!await isAdmin(session.email)) throw HttpError.Unauthorized('Unauthorized - Admin access required');
   return session;
 }
 

@@ -5,7 +5,7 @@ const boothFee = process.env.NEXT_PUBLIC_BOOTH_FEE;
 const registrationFeeDate = new Date(`${process.env.NEXT_PUBLIC_REGISTRATION_FEE_DATE}`);
 const paymentURL = `${process.env.NEXT_PUBLIC_METADATA_URL}/payment`;
 
-export const name = 'exhibit-accepted';
+export const name = 'accepted';
 export const subject = 'Your exhibit has been accepted';
 
 export const htmlBody = () => `<p>Dear Artist,</p>

@@ -12,7 +12,11 @@ export async function fetchProfile(email: string) {
 
   // Get profile data
   const profilePath = `user:${email.toLowerCase()}:profile`;
-  const profileData = (await redisClient.json.get(profilePath)) as unknown as UserProfile || {
+  return await redisClient.json.get(profilePath) as unknown as UserProfile;
+}
+
+export async function fetchProfileAndUploads(email: string) {
+  const profileData = await fetchProfile(email) || {
     uploads: {},
     status: 'registered'
   };
@@ -42,9 +46,17 @@ export async function fetchProfile(email: string) {
 
 export async function updateProfile(email: string, newUserProfile: UserProfile) {
   const redisClient = await getRedisClient();
+  const updatedUserProfile = await fetchProfile(email) || {
+    status: 'unregistered',
+    info: {},
+    uploads: {},
+    createdAt: new Date().getTime()
+  };
+  Object.assign(updatedUserProfile.info, newUserProfile.info);
+  Object.assign(updatedUserProfile.uploads, newUserProfile.uploads);
+  updatedUserProfile.updatedAt = new Date().getTime();
+  // const updatedUserProfile: UserProfile = { ...oldUserProfile, ...newUserProfile };
   const profileHash = `user:${email.toLowerCase()}:profile`;
-  const oldUserProfile = (await redisClient.json.get(profileHash)) as unknown as UserProfile;
-  const updatedUserProfile: UserProfile = { ...oldUserProfile, ...newUserProfile };
   await redisClient.json.set(profileHash, '$', updatedUserProfile as unknown as RedisJSON);
   return updatedUserProfile;
 }
@@ -63,8 +75,9 @@ export async function uploadFile(email: string, file: File) {
 export async function updateUserStatus(email: string, newStatus: UserProfileStatus) {
   const adminSession = await validateAdminSession();
   const redisClient = await getRedisClient();
-  const profileHash = `user:${email.toLowerCase()}:status`;
-  await redisClient.set(profileHash, newStatus);
+
+  const profileHash = `user:${email.toLowerCase()}:profile`;
+  await redisClient.json.set(profileHash, '$.status', newStatus);
 
   // Add a log entry
   const redisAccessLogKey = `user:${email.toLowerCase()}:log`;

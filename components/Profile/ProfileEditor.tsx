@@ -74,10 +74,15 @@ function ProfileEditor({
     // Submit to server
     setStatus('updating');
     setMessage(['info', 'Submitting form...']);
-    const updatedUserProfile = await updateProfile(userProfileClient);
-    setStatus('ready');
-    setMessage(['success', 'User profile updated successfully']);
-    setUserProfileClient(updatedUserProfile);
+    try {
+      const updatedUserProfile = await updateProfile(userProfileClient);
+      setStatus('ready');
+      setMessage(['success', 'User profile updated successfully']);
+      setUserProfileClient(updatedUserProfile);
+    } catch (e: any) {
+      setStatus('ready');
+      setMessage(['error', e.message]);
+    }
     formRef.current?.scrollIntoView(true);
   };
 

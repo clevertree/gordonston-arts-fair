@@ -11,19 +11,16 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
-import {
-  getStatusName, UserProfile, UserProfileInfo, UserProfileStatus
-} from '@util/profile';
+import { getStatusName, UserProfile, UserProfileInfo } from '@util/profile';
 import ReloadingImage from '@components/Image/ReloadingImage';
 import Link from 'next/link';
 
 interface ProfileViewProps {
-  userProfile: UserProfile,
-  userStatus: UserProfileStatus
+  userProfile: UserProfile
 }
 
-function ProfileView({ userProfile, userStatus }: ProfileViewProps) {
-  const { uploads: profileUploads = {}, info: profileInfo = {} } = userProfile;
+function ProfileView({ userProfile }: ProfileViewProps) {
+  const { uploads: profileUploads = {}, info: profileInfo = {}, status } = userProfile;
 
   const profileInfoLabels: {
     [key in keyof UserProfileInfo]: string
@@ -58,8 +55,8 @@ function ProfileView({ userProfile, userStatus }: ProfileViewProps) {
                 Status
               </TableCell>
               <TableCell>
-                <Alert severity={userStatus === 'paid' ? 'success' : 'info'}>
-                  {getStatusName(userStatus)}
+                <Alert severity={status === 'paid' ? 'success' : 'info'}>
+                  {getStatusName(status)}
                 </Alert>
               </TableCell>
             </TableRow>
