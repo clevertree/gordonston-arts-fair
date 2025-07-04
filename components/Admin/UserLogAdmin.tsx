@@ -1,7 +1,8 @@
 import {
   Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography
 } from '@mui/material';
-import { LogEntry } from '@util/userActions';
+
+import { LogEntry } from '@util/logActions';
 
 interface AdminUserLogProps {
   logs: LogEntry[],
@@ -28,14 +29,14 @@ export default async function UserLogAdmin({ logs, email }: AdminUserLogProps) {
           </TableHead>
           <TableBody>
             {logs.map(({
-              type, message, timestamp
+              type, message, created_at
             }) => (
               <TableRow
                 key={email}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell align="center" scope="row">
-                  {(new Date(timestamp)).toLocaleString()}
+                  {created_at ? created_at.toLocaleString() : 'N/A'}
                 </TableCell>
                 <TableCell align="center">
                   {type}

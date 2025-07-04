@@ -13,39 +13,37 @@ import {
   Typography
 } from '@mui/material';
 import Link from 'next/link';
-import {
-  getFullName, getStatusName, UserProfile, UserProfileStatus
-} from '@util/profile';
+import { getFullName, getStatusName } from '@util/profile';
+import { UserTableRow } from '@util/schema';
 
 interface AdminUserListProps {
-  userList: UserProfile[],
+  userList: UserTableRow[],
   searchParams: URLSearchParams
 }
 
-interface SearchArgs {
-  email?: 'asc' | 'desc',
-  name?: 'asc' | 'desc',
-  isAdmin?: 'asc' | 'desc',
-  createdAt?: 'asc' | 'desc',
-  status?: UserProfileStatus,
-}
+type OrderFieldType = 'email' | 'last_name' | 'created_at' | 'status';
 
 const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
 export default async function UserListAdmin({ userList, searchParams }: AdminUserListProps) {
-  function getSearchParams(variable: keyof SearchArgs, title: string) {
-    const oldValue = searchParams.get(variable);
+  function getSearchParams(variable: OrderFieldType, title: string) {
+    const orderBy = searchParams.get('orderBy');
+    const newParams = new URLSearchParams(`${searchParams}`);
+    if (orderBy && orderBy === variable) {
+      // If the same variable was hit twice, toggle the order
+      newParams.set('order', newParams.get('order') === 'asc' ? 'desc' : 'asc');
+    }
     switch (variable) {
       case 'email':
-      case 'isAdmin':
-      case 'name':
-      case 'createdAt':
+      case 'last_name':
+      case 'created_at':
       case 'status':
-        searchParams.set(variable, oldValue === 'asc' ? 'desc' : 'asc');
-        return <Link href={`?${searchParams}`}>{title}</Link>;
+        newParams.set('orderBy', variable);
+        break;
       default:
         throw new Error(`Invalid search param: ${variable}`);
     }
+    return <Link href={`?${newParams}`}>{title}</Link>;
   }
 
   return (
@@ -59,9 +57,9 @@ export default async function UserListAdmin({ userList, searchParams }: AdminUse
           <TableHead>
             <TableRow className="bg-blue-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
               <TableCell align="center">{getSearchParams('email', 'Email')}</TableCell>
-              <TableCell align="center">{getSearchParams('name', 'Name')}</TableCell>
-              <TableCell align="center">{getSearchParams('isAdmin', 'Admin')}</TableCell>
-              <TableCell align="center">{getSearchParams('createdAt', 'Created')}</TableCell>
+              <TableCell align="center">{getSearchParams('last_name', 'Name')}</TableCell>
+              <TableCell align="center">Type</TableCell>
+              <TableCell align="center">{getSearchParams('created_at', 'Created')}</TableCell>
               <TableCell align="center">{getSearchParams('status', 'Status')}</TableCell>
               <TableCell align="center">Images</TableCell>
               <TableCell align="center">Edit</TableCell>
@@ -69,7 +67,8 @@ export default async function UserListAdmin({ userList, searchParams }: AdminUse
           </TableHead>
           <TableBody>
             {userList.map(({
-              email, isAdmin, createdAt, info, status, uploads
+              first_name, last_name, email,
+              type, created_at, status, uploads
             }) => (
               <TableRow
                 key={email}
@@ -79,14 +78,14 @@ export default async function UserListAdmin({ userList, searchParams }: AdminUse
                   <Link href={`/user/${email}`}>{email}</Link>
                 </TableCell>
                 <TableCell align="center">
-                  {getFullName(info.firstName, info.lastName)}
+                  {getFullName(first_name, last_name)}
                 </TableCell>
                 <TableCell align="center">
-                  {isAdmin ? '🔑 Admin' : '🎨 Artist'}
+                  {type === 'admin' ? '🔑 Admin' : '🎨 Artist'}
                 </TableCell>
                 <TableCell align="center">
-                  {createdAt
-                    ? new Date(createdAt).toLocaleDateString()
+                  {created_at
+                    ? new Date(created_at).toLocaleDateString()
                     : 'N/A'}
                 </TableCell>
                 <TableCell align="center">

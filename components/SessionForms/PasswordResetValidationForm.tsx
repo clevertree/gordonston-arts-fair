@@ -44,46 +44,49 @@ function PasswordResetValidationForm({
   };
 
   return (
-    <Box
-      component="form"
+    <form
+      method="post"
       onSubmit={handleSubmit}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2,
-        maxWidth: 400,
-        margin: 'auto',
-        padding: 3,
-        border: '1px solid #ccc',
-        borderRadius: 4,
-      }}
     >
-      <Typography component="h2" align="center">
-        Set a new password
-      </Typography>
-      {message && message[1] && (
-        <Alert severity={message[0]}>
-          {message[1]}
-        </Alert>
-      )}
-      <TextField
-        required
-        label="Password"
-        variant="outlined"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        fullWidth
-        slotProps={{
-          inputLabel: {
-            shrink: true
-          }
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          maxWidth: 400,
+          margin: 'auto',
+          padding: 3,
+          border: '1px solid #ccc',
+          borderRadius: 4,
         }}
-      />
-      <Button type="submit" variant="contained" color="primary" disabled={status === 'submitting'}>
-        Reset Password
-      </Button>
-    </Box>
+      >
+        <Typography component="h2" align="center">
+          Set a new password
+        </Typography>
+        {message && message[1] && (
+          <Alert severity={message[0]}>
+            {message[1]}
+          </Alert>
+        )}
+        <TextField
+          required
+          label="Password"
+          variant="outlined"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          fullWidth
+          slotProps={{
+            inputLabel: {
+              shrink: true
+            }
+          }}
+        />
+        <Button type="submit" variant="contained" color="primary" disabled={status === 'submitting'}>
+          Reset Password
+        </Button>
+      </Box>
+    </form>
   );
 }
 

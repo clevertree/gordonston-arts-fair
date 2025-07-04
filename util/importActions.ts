@@ -1,12 +1,11 @@
-/* eslint-disable no-await-in-loop,no-restricted-syntax */
+/* eslint-disable no-await-in-loop,no-restricted-syntax,no-console */
 
 'use server';
 
-import { UserProfile, UserProfileInfo } from '@util/profile';
-import { getRedisClient } from '@util/redis';
 import { validateEmail } from '@components/FormFields/validation';
-import { RedisJSON } from '@redis/json/dist/lib/commands';
 import * as fs from 'node:fs';
+import { getPGSQLClient } from '@util/pgsql';
+import { UserFileUploadDescription } from '@util/schema';
 
 interface RowData {
   id: string,
@@ -33,7 +32,7 @@ interface RowData {
   description4: string
 }
 
-function rowToProfile(email: string, row: RowData) {
+async function insertUser(email: string, row: RowData) {
   const {
     // id,
     fname,
@@ -58,55 +57,41 @@ function rowToProfile(email: string, row: RowData) {
     name4,
     description4
   } = row;
-  const profileInfo: UserProfileInfo = {
-    firstName: fname,
-    lastName: lname,
-    companyName: company,
-    address,
-    city,
-    state,
-    zip,
-    phone,
-    phone2,
-    website,
-    description: comment,
-    category
-  };
-  const userProfile: UserProfile = {
-    status: 'imported',
-    createdAt: new Date().getTime(),
-    email,
-    info: profileInfo,
-    uploads: {}
-  };
+  const uploads: { [key: string]: UserFileUploadDescription } = {};
   if (name1 && description1) {
-    userProfile.uploads[name1] = {
+    uploads[name1] = {
       title: name1, description: description1
     };
   }
 
   if (name2 && description2) {
-    userProfile.uploads[name2] = {
+    uploads[name2] = {
       title: name2,
       description: description2
     };
   }
 
   if (name3 && description3) {
-    userProfile.uploads[name3] = {
+    uploads[name3] = {
       title: name3,
       description: description3
     };
   }
 
   if (name4 && description4) {
-    userProfile.uploads[name4] = {
+    uploads[name4] = {
       title: name4,
       description: description4
     };
   }
 
-  return userProfile;
+  const sql = getPGSQLClient();
+  return sql`INSERT INTO gaf_user (email, type, status, first_name, last_name, company_name,
+                                   address, city, state, zipcode, phone, phone2, website,
+                                   description, category, uploads, created_at)
+             VALUES (${email}, 'user', 'imported', ${fname}, ${lname}, ${company},
+                     ${address}, ${city}, ${state}, ${zip}, ${phone}, ${phone2}, ${website},
+                     ${comment}, ${category}, ${uploads}, now()) ON CONFLICT (email) DO NOTHING;`;
 }
 
 export async function importDBFromCSV() {
@@ -115,7 +100,6 @@ export async function importDBFromCSV() {
 
   const csvData = await parseCSV('export.csv');
   console.log('csv', csvData);
-  const redisClient = await getRedisClient();
   for (const row of csvData) {
     const { email } = row;
     if (!email) {
@@ -127,17 +111,17 @@ export async function importDBFromCSV() {
       continue;
     }
 
-    const newProfile: UserProfile = rowToProfile(email, row as unknown as RowData);
-    const profileHash = `user:${email.toLowerCase()}:profile`;
-    const currentUserProfile = (await redisClient.json.get(profileHash)) as unknown as UserProfile;
-    if (currentUserProfile) {
-      const { info, uploads } = newProfile;
-      Object.assign(newProfile, currentUserProfile);
-      newProfile.info = { ...info, ...currentUserProfile.info };
-      newProfile.uploads = { ...uploads, ...currentUserProfile.uploads };
-    }
     console.info('Importing profile: ', email);
-    await redisClient.json.set(profileHash, '$', newProfile as unknown as RedisJSON);
+    await insertUser(email, row as unknown as RowData);
+    // const currentUserProfile = (await sql`SELECT *
+    //                                       FROM gaf_user
+    //                                       WHERE email = ${email}`) as unknown as UserProfile;
+    // if (currentUserProfile) {
+    //   const { info, uploads } = newProfile;
+    //   Object.assign(newProfile, currentUserProfile);
+    //   newProfile.info = { ...info, ...currentUserProfile.info };
+    //   newProfile.uploads = { ...uploads, ...currentUserProfile.uploads };
+    // }
   }
 }
 

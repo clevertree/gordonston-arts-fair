@@ -49,8 +49,12 @@ export interface FormHookObject {
 
 export type FormDataUpdateCallback = (formData: any) => any;
 
+export interface FormValue {
+  [fieldName: string]: any
+}
+
 export function useFormHook(
-  formData: FormFieldValues,
+  formData: FormValue,
   updateFormData: FormDataUpdateCallback,
   showError = false
 ) {

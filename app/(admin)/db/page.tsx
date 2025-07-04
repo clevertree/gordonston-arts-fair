@@ -1,4 +1,4 @@
-import { importDBFromCSV } from '@util/dbActions';
+import { importDBFromCSV } from '@util/importActions';
 import { validateAdminSession } from '@util/sessionActions';
 
 export const metadata = {

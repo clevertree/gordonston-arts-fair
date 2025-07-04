@@ -1,4 +1,4 @@
-import { fetchUserLogs, fetchUserResult } from '@util/userActions';
+import { fetchUserResult } from '@util/userActions';
 import { validateAdminSession } from '@util/sessionActions';
 import { updateUserStatus } from '@util/profileActions';
 import Link from 'next/link';
@@ -9,6 +9,7 @@ import SendEmailAdmin from '@components/Admin/SendEmailAdmin';
 import { sendMail } from '@util/emailActions';
 import UserLogAdmin from '@components/Admin/UserLogAdmin';
 import React from 'react';
+import { fetchUserLogs } from '@util/logActions';
 
 // export const metadata = {
 //     title: 'Manage an Artist',
@@ -26,7 +27,7 @@ export default async function AdminUserManagementPage({
   const { email } = await params;
   const emailFormatted = email.replace('%40', '@');
   const profile = await fetchUserResult(emailFormatted);
-  const userLogs = await fetchUserLogs(emailFormatted);
+  const userLogs = await fetchUserLogs(profile.id);
 
   return (
     <>
@@ -46,18 +47,18 @@ export default async function AdminUserManagementPage({
           updateUserStatus={async (newStatus) => {
             'use server';
 
-            return updateUserStatus(emailFormatted, newStatus);
+            return updateUserStatus(profile.email, newStatus);
           }}
         />
         <ProfileView userProfile={profile} />
 
         <SendEmailAdmin
           userStatus={profile.status}
-          userEmail={email}
+          userEmail={profile.email}
           sendMail={sendMail}
         />
 
-        <UserLogAdmin logs={userLogs} email={email} />
+        <UserLogAdmin logs={userLogs} email={profile.email} />
 
       </Stack>
     </>

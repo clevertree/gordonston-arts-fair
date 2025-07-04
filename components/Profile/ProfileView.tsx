@@ -11,31 +11,32 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
-import { getStatusName, UserProfile, UserProfileInfo } from '@util/profile';
+import { getStatusName } from '@util/profile';
 import ReloadingImage from '@components/Image/ReloadingImage';
 import Link from 'next/link';
+import { UserTableRow } from '@util/schema';
 
 interface ProfileViewProps {
-  userProfile: UserProfile
+  userProfile: UserTableRow
 }
 
 function ProfileView({ userProfile }: ProfileViewProps) {
-  const { uploads: profileUploads = {}, info: profileInfo = {}, status } = userProfile;
+  const { uploads: profileUploads = {}, status } = userProfile;
 
   const profileInfoLabels: {
-    [key in keyof UserProfileInfo]: string
+    [key in keyof UserTableRow]?: string
   } = {
-    firstName: 'First Name',
-    lastName: 'Last Name',
+    first_name: 'First Name',
+    last_name: 'Last Name',
     phone: 'Primary Phone',
     phone2: 'Contact Phone',
     address: 'Address',
     city: 'City',
     state: 'State',
-    zip: 'Zipcode',
+    zipcode: 'Zipcode',
     category: 'Category',
   };
-  const profileInfoFields = Object.keys(profileInfoLabels) as (keyof UserProfileInfo)[];
+  const profileInfoFields = Object.keys(profileInfoLabels) as (keyof UserTableRow)[];
   const uploadList = Object.values(profileUploads);
 
   return (
@@ -66,7 +67,7 @@ function ProfileView({ userProfile }: ProfileViewProps) {
                   {profileInfoLabels[profileInfoField]}
                 </TableCell>
                 <TableCell>
-                  {profileInfo[profileInfoField]}
+                  {`${userProfile[profileInfoField] || 'N/A'}`}
                 </TableCell>
               </TableRow>
             ))}

@@ -1,4 +1,4 @@
-export type ValidationType = 'required' | 'phone';
+export type ValidationType = 'required' | 'phone' | 'zipcode';
 export type ValidationCallback = (value: string, labelOrFieldName: string) => string | undefined;
 
 export function validateRequired(value: string, labelOrFieldName: string) {
@@ -20,10 +20,19 @@ export function validateEmail(emailString: string, labelOrFieldName: string = 'E
   return undefined;
 }
 
+export function validateZipcode(zipcodeString: string, labelOrFieldName: string = 'Zipcode') {
+  if (!zipcodeString) return zipcodeString;
+  const match = zipcodeString.match(/(^\d{5}$)|(^\d{5}-\d{4}$)/);
+  if (!match) return `Please enter a valid ${labelOrFieldName}`;
+  return undefined;
+}
+
 export function validateByType(type: ValidationType, value: string, labelOrFieldName: string) {
   switch (type) {
     case 'phone':
       return validatePhone(value, labelOrFieldName);
+    case 'zipcode':
+      return validateZipcode(value, labelOrFieldName);
     case 'required':
       return validateRequired(value, labelOrFieldName);
     default:

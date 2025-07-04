@@ -34,37 +34,40 @@ function LogoutForm({
   };
 
   return (
-    <Box
-      component="form"
+    <form
+      method="post"
       onSubmit={handleSubmit}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2,
-        maxWidth: 400,
-        margin: 'auto',
-        padding: 3,
-        border: '1px solid #ccc',
-        borderRadius: 4,
-      }}
     >
-      <Typography component="h2" align="center">
-        Artist Logout
-      </Typography>
-      {message && message[1] && (
-        <Alert severity={message[0]}>
-          {message[1]}
-        </Alert>
-      )}
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        disabled={status === 'submitting'}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          maxWidth: 400,
+          margin: 'auto',
+          padding: 3,
+          border: '1px solid #ccc',
+          borderRadius: 4,
+        }}
       >
-        Logout
-      </Button>
-    </Box>
+        <Typography component="h2" align="center">
+          Artist Logout
+        </Typography>
+        {message && message[1] && (
+          <Alert severity={message[0]}>
+            {message[1]}
+          </Alert>
+        )}
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          disabled={status === 'submitting'}
+        >
+          Logout
+        </Button>
+      </Box>
+    </form>
   );
 }
 

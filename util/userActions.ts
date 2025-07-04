@@ -2,72 +2,84 @@
 
 'use server';
 
-import { getRedisClient } from '@util/redis';
-import { UserProfile } from '@util/profile';
+import { getPGSQLClient } from '@util/pgsql';
+import { UserTableRow } from '@util/schema';
 
-export type UserList = UserProfile[];
-
-export async function listUsersAsAdmin() {
-  // Get Redis client
-  const redisClient = await getRedisClient();
-
-  // Get all users by scanning for keys matching the pattern 'user:*:login'
-  const users: UserList = [];
-  for await (const keys of redisClient.scanIterator({
-    MATCH: 'user:*:profile',
-    COUNT: 100,
-  })) {
-    for (const key of keys) {
-      const email = key.split(':')[1];
-      users.push(await fetchUserResult(email));
-    }
-  }
-
-  return users;
+interface SearchParams {
+  status?: string,
+  order?: 'asc' | 'desc',
+  orderBy?: string,
+  page?: number,
+  pageCount?: number
 }
 
-export async function fetchUserResult(email: string): Promise<UserProfile> {
-  const emailLC = email.toLowerCase();
-  // Get Redis client
-  const redisClient = await getRedisClient();
-  try {
-    // const isAdmin = !!(await redisClient.get(`user:${emailLC}:admin`));
-    // const status = (await redisClient.get(`user:${emailLC}:status`)) as UserProfileStatus;
-    // const createdAt = await redisClient.get(`user:${emailLC}:createdAt`) || undefined;
-    const profile = (await redisClient.json.get(`user:${emailLC}:profile`)) as unknown as UserProfile;
-    profile.email = email;
-    return profile;
-  } catch (e: any) {
-    throw Error(`Error fetching user: ${e.message}`);
-  }
+export async function listUsersAsAdmin(params: SearchParams) {
+  const sql = getPGSQLClient();
+
+  const {
+    status,
+    orderBy,
+    order,
+    pageCount = 10,
+    page = 1
+  } = params;
+
+  // Default sort order
+  const orderByClause = `ORDER BY ${orderBy || 'id'} ${order || 'desc'}`;
+  let whereClause = '';
+  if (status && status !== 'all') whereClause = `WHERE status = '${status}'`;
+
+  const response = (await sql.query(`SELECT *
+                                     FROM gaf_user ${whereClause} ${orderByClause}
+                                     LIMIT ${pageCount} OFFSET ${page * pageCount}`)) as UserTableRow[];
+  return response;
 }
 
-export type LogType = 'access' | 'message' | 'status';
-export type LogEntry = {
-  type: LogType,
-  message: string,
-  timestamp: number,
-};
+export async function fetchUserResult(email: string): Promise<UserTableRow> {
+  const sql = getPGSQLClient();
+  const [userRow] = (await sql`SELECT id,
+                                      type,
+                                      email,
+                                      first_name,
+                                      last_name,
+                                      company_name,
+                                      address,
+                                      city,
+                                      state,
+                                      zipcode,
+                                      phone,
+                                      phone2,
+                                      website,
+                                      description,
+                                      category,
+                                      uploads,
+                                      status,
+                                      created_at,
+                                      updated_at
+                               FROM gaf_user
+                               WHERE email = ${email}
+                               LIMIT 1`) as UserTableRow[];
+  if (!userRow) throw new Error(`User not found: ${email}`);
+  if (!userRow.uploads) userRow.uploads = {};
+  return userRow;
+}
 
-export async function fetchUserLogs(email: string) {
-  const emailLC = email.toLowerCase();
-  const redisClient = await getRedisClient();
-  const logs: LogEntry[] = [];
+export async function fetchUserID(email: string) {
+  const sql = getPGSQLClient();
+  const rows = (await sql`SELECT id
+                          FROM gaf_user
+                          WHERE email = ${email}
+                          LIMIT 1`) as UserTableRow[];
+  if (!rows[0]) throw new Error(`User ID not found: ${email}`);
+  return rows[0].id;
+}
 
-  // Scan for all log entries matching the pattern user:{email}:log:*
-  for await (const logEntries of redisClient.hScanIterator(`user:${emailLC}:log`)) {
-    for (const logEntry of logEntries) {
-      const { value, field: timestamp } = logEntry;
-      const [type, message] = value.split(/:(.*)/s);
-      const entry: LogEntry = {
-        type: type as LogType,
-        message,
-        timestamp: parseInt(timestamp, 10)
-      };
-      logs.push(entry);
-    }
-  }
-
-  // Sort logs by timestamp (assuming logs have ISO date strings)
-  return logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+export async function isAdmin(email: string) {
+  const sql = getPGSQLClient();
+  const rows = (await sql`SELECT type
+                          FROM gaf_user
+                          WHERE email = ${email}
+                          LIMIT 1`) as UserTableRow[];
+  if (!rows[0]) throw new Error(`User Admin not found: ${email}`);
+  return rows[0].type === 'admin';
 }

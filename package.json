@@ -1,6 +1,6 @@
 {
   "name": "gordonston-arts-fair",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -20,6 +20,7 @@
     "@mui/material": "^7.2.0",
     "@mui/material-nextjs": "^7.2.0",
     "@next/mdx": "^14.1.4",
+    "@neondatabase/serverless": "^1.0.1",
     "@stripe/stripe-js": "^7.3.1",
     "@types/mdx": "^2.0.12",
     "@vercel/analytics": "^1.2.2",
@@ -32,7 +33,6 @@
     "nodemailer": "^7.0.3",
     "react": "^18",
     "react-dom": "^18",
-    "redis": "^5.5.6",
     "sass": "^1.72.0",
     "sharp": "^0.33.3",
     "stripe": "^18.2.1"
@@ -44,7 +44,6 @@
     "@types/nodemailer": "^6.4.17",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@redis/json": "^5.5.6",
     "autoprefixer": "^10.0.1",
     "axe-core": "^4.10.0",
     "csv-parser": "^3.2.0",

@@ -1,25 +1,36 @@
 'use server';
 
-import { getRedisClient } from '@util/redis';
-import { UserProfile, UserProfileStatus } from '@util/profile';
 import { del, list, put } from '@vercel/blob';
-import { RedisJSON } from '@redis/json/dist/lib/commands';
 import { validateAdminSession } from '@util/sessionActions';
+import { getPGSQLClient } from '@util/pgsql';
+import { UpdatedUserTableRow, UserStatus, UserTableRow } from '@util/schema';
+import { fetchUserID } from '@util/userActions';
+import { addUserLogEntry } from '@util/logActions';
 
-export async function fetchProfile(email: string) {
-  // Get redis client
-  const redisClient = await getRedisClient();
+export async function fetchProfileByEmail(email: string) {
+  // Get db client
+  const sql = getPGSQLClient();
 
-  // Get profile data
-  const profilePath = `user:${email.toLowerCase()}:profile`;
-  return await redisClient.json.get(profilePath) as unknown as UserProfile;
+  const rows = (await sql`SELECT *
+                          FROM gaf_user
+                          WHERE email = ${email} LIMIT 1`) as UserTableRow[];
+  if (!rows[0]) throw new Error(`User not found: ${email}`);
+  return rows[0];
+}
+
+export async function fetchProfileByID(userID: number) {
+  // Get db client
+  const sql = getPGSQLClient();
+  const rows = (await sql`SELECT *
+                          FROM gaf_user
+                          WHERE id = ${userID} LIMIT 1`) as UserTableRow[];
+  if (!rows[0]) throw new Error(`User ID not found: ${userID}`);
+  return rows[0];
 }
 
 export async function fetchProfileAndUploads(email: string) {
-  const profileData = await fetchProfile(email) || {
-    uploads: {},
-    status: 'registered'
-  };
+  const profileData = await fetchProfileByEmail(email);
+  if (!profileData.uploads) profileData.uploads = {};
 
   // Get uploaded images
   const imagePath = `profile/${email.toLowerCase()}/uploads`;
@@ -44,21 +55,32 @@ export async function fetchProfileAndUploads(email: string) {
   return profileData;
 }
 
-export async function updateProfile(email: string, newUserProfile: UserProfile) {
-  const redisClient = await getRedisClient();
-  const updatedUserProfile = await fetchProfile(email) || {
-    status: 'unregistered',
-    info: {},
-    uploads: {},
-    createdAt: new Date().getTime()
-  };
-  Object.assign(updatedUserProfile.info, newUserProfile.info);
-  Object.assign(updatedUserProfile.uploads, newUserProfile.uploads);
-  updatedUserProfile.updatedAt = new Date().getTime();
-  // const updatedUserProfile: UserProfile = { ...oldUserProfile, ...newUserProfile };
-  const profileHash = `user:${email.toLowerCase()}:profile`;
-  await redisClient.json.set(profileHash, '$', updatedUserProfile as unknown as RedisJSON);
-  return updatedUserProfile;
+export async function updateProfile(email: string, updatedUserRow: UpdatedUserTableRow) {
+  const sql = getPGSQLClient();
+  const userRow = await fetchProfileByEmail(email);
+  Object.assign(userRow, updatedUserRow);
+  const {
+    first_name, last_name, company_name,
+    address, city, state, zipcode, phone, phone2, website,
+    description, category, uploads
+  } = { ...userRow, ...updatedUserRow };
+
+  await sql`UPDATE gaf_user
+            SET first_name   = ${first_name},
+                last_name    = ${last_name},
+                company_name = ${company_name},
+                address      = ${address},
+                city         = ${city},
+                state        = ${state},
+                zipcode      = ${zipcode},
+                phone        = ${phone},
+                phone2       = ${phone2},
+                website      = ${website},
+                description  = ${description},
+                category     = ${category},
+                uploads      = ${uploads},
+                updated_at   = NOW()`;
+  return userRow;
 }
 
 export async function uploadFile(email: string, file: File) {
@@ -72,16 +94,17 @@ export async function uploadFile(email: string, file: File) {
   });
 }
 
-export async function updateUserStatus(email: string, newStatus: UserProfileStatus) {
+export async function updateUserStatus(email: string, newStatus: UserStatus) {
   const adminSession = await validateAdminSession();
-  const redisClient = await getRedisClient();
-
-  const profileHash = `user:${email.toLowerCase()}:profile`;
-  await redisClient.json.set(profileHash, '$.status', newStatus);
+  const sql = getPGSQLClient();
+  const id = await fetchUserID(email);
+  await sql`UPDATE gaf_user
+            SET status     = ${newStatus},
+                updated_at = NOW()
+            WHERE id = ${id} LIMIT 1`;
 
   // Add a log entry
-  const redisAccessLogKey = `user:${email.toLowerCase()}:log`;
-  await redisClient.hSet(redisAccessLogKey, new Date().getTime(), `status:${newStatus}:by=${adminSession.email.toLowerCase()}`);
+  await addUserLogEntry(id, 'status-change', `${newStatus} set  by ${adminSession.email}`);
 
   return {
     message: 'Status updated successfully',

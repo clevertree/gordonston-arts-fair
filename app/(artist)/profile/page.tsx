@@ -3,8 +3,8 @@ import { validateSession } from '@util/session';
 import {
   deleteFile, fetchProfileAndUploads, updateProfile, uploadFile
 } from '@util/profileActions';
-import { UserProfile } from '@util/profile';
 import { redirect } from 'next/navigation';
+import { UserTableRow } from '@util/schema';
 
 export const metadata = {
   title: 'Artist Profile',
@@ -37,7 +37,7 @@ export default async function ProfilePage() {
 
           return deleteFile(sessionEmail, filename);
         }}
-        updateProfile={async (newUserProfile: UserProfile) => {
+        updateProfile={async (newUserProfile: UserTableRow) => {
           'use server';
 
           return updateProfile(sessionEmail, newUserProfile);

@@ -36,65 +36,68 @@ function LoginForm({
   };
 
   return (
-    <Box
-      component="form"
+    <form
+      method="post"
       onSubmit={handleSubmit}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2,
-        maxWidth: 400,
-        margin: 'auto',
-        padding: 3,
-        border: '1px solid #ccc',
-        borderRadius: 4,
-      }}
     >
-      <Typography component="h2" align="center">
-        Artist Login
-      </Typography>
-      {message && message[1] && (
-        <Alert severity={message[0]}>
-          {message[1]}
-        </Alert>
-      )}
-      <TextField
-        name="email"
-        required
-        label="Email Address"
-        variant="outlined"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        fullWidth
-        slotProps={{
-          inputLabel: {
-            shrink: true
-          }
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          maxWidth: 400,
+          margin: 'auto',
+          padding: 3,
+          border: '1px solid #ccc',
+          borderRadius: 4,
         }}
-      />
-      <TextField
-        name="password"
-        label="Password"
-        variant="outlined"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        fullWidth
-        slotProps={{
-          inputLabel: {
-            shrink: true
-          }
-        }}
-      />
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        disabled={status === 'submitting'}
       >
-        Login
-      </Button>
-    </Box>
+        <Typography component="h2" align="center">
+          Artist Login
+        </Typography>
+        {message && message[1] && (
+          <Alert severity={message[0]}>
+            {message[1]}
+          </Alert>
+        )}
+        <TextField
+          name="email"
+          required
+          label="Email Address"
+          variant="outlined"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          fullWidth
+          slotProps={{
+            inputLabel: {
+              shrink: true
+            }
+          }}
+        />
+        <TextField
+          name="password"
+          label="Password"
+          variant="outlined"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          fullWidth
+          slotProps={{
+            inputLabel: {
+              shrink: true
+            }
+          }}
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          disabled={status === 'submitting'}
+        >
+          Login
+        </Button>
+      </Box>
+    </form>
   );
 }
 

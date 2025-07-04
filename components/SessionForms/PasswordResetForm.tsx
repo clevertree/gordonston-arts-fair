@@ -33,50 +33,53 @@ function PasswordResetForm({ passwordResetAction }: PasswordResetFormProps) {
   };
 
   return (
-    <Box
-      component="form"
+    <form
+      method="post"
       onSubmit={handleSubmit}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2,
-        maxWidth: 400,
-        margin: 'auto',
-        padding: 3,
-        border: '1px solid #ccc',
-        borderRadius: 4,
-      }}
     >
-      <Typography component="h2" align="center">
-        Submit Password Reset Request
-      </Typography>
-      {message && message[1] && (
-        <Alert severity={message[0]}>
-          {message[1]}
-        </Alert>
-      )}
-      <TextField
-        required
-        label="Email Address"
-        variant="outlined"
-        type="email"
-        value={email}
-        onChange={(e) => {
-          setEmail(e.target.value);
-          setStatus('ready');
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          maxWidth: 400,
+          margin: 'auto',
+          padding: 3,
+          border: '1px solid #ccc',
+          borderRadius: 4,
         }}
-        fullWidth
-        slotProps={{
-          inputLabel: {
-            shrink: true
-          }
-        }}
-        helperText="Enter the email you wish to send a reset request to"
-      />
-      <Button type="submit" variant="contained" color="primary" disabled={status === 'submitting'}>
-        Submit request
-      </Button>
-    </Box>
+      >
+        <Typography component="h2" align="center">
+          Submit Password Reset Request
+        </Typography>
+        {message && message[1] && (
+          <Alert severity={message[0]}>
+            {message[1]}
+          </Alert>
+        )}
+        <TextField
+          required
+          label="Email Address"
+          variant="outlined"
+          type="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setStatus('ready');
+          }}
+          fullWidth
+          slotProps={{
+            inputLabel: {
+              shrink: true
+            }
+          }}
+          helperText="Enter the email you wish to send a reset request to"
+        />
+        <Button type="submit" variant="contained" color="primary" disabled={status === 'submitting'}>
+          Submit request
+        </Button>
+      </Box>
+    </form>
   );
 }
 

@@ -1,12 +1,16 @@
 'use server';
 
-import { getRedisClient } from '@util/redis';
 import bcrypt from 'bcrypt';
 import { endSession, startSession, validateSession } from '@util/session';
-import { sendMail, sendTemplateMail } from '@util/emailActions';
+import { sendTemplateMail } from '@util/emailActions';
 import { randomBytes } from 'node:crypto';
 import { HttpError } from '@util/exception/httpError';
-import { UserPasswordResetEmailTemplate, UserRegistrationEmailTemplate } from '../email';
+import { UserPasswordResetEmailTemplate, UserRegistrationEmailTemplate } from '@email';
+import { getPGSQLClient } from '@util/pgsql';
+import { UserTableRow } from '@util/schema';
+import { fetchUserID, fetchUserResult, isAdmin } from '@util/userActions';
+import { addUserLogEntry } from '@util/logActions';
+import { LOGIN_ERROR_MESSAGE } from '@util/messageUtil';
 
 export type ActionResponse = {
   status: 'success' | 'error';
@@ -15,28 +19,28 @@ export type ActionResponse = {
 };
 
 export async function loginAction(email: string, password: string): Promise<ActionResponse> {
-  const redisClient = await getRedisClient();
-  const redisLoginKey = `user:${email.toLowerCase()}:login`;
-
-  const count = await redisClient.exists(redisLoginKey);
-  const errorMessage = 'Invalid email/password combination. Please try again or register before logging in';
-  if (count === 0) {
-    // Add an error log entry
-    await addAccessLogEntry(email, 'log-in-error', 'Invalid email');
+  const sql = getPGSQLClient();
+  // Fetch user from the database
+  const rows = (await sql`SELECT id, password
+                          FROM gaf_user
+                          WHERE email = ${email}
+                          LIMIT 1`) as UserTableRow[];
+  if (!rows[0]) {
+    // Add a log entry
+    await addUserLogEntry(null, 'log-in-error', `Email not found: ${email}`);
     return {
-      message: errorMessage,
+      message: LOGIN_ERROR_MESSAGE,
       status: 'error'
     };
   }
+  const { id, password: passwordHash } = rows[0];
 
-  // Fetch user from the database
-  const passwordHash = await redisClient.get(redisLoginKey);
   const passwordResult = passwordHash && await bcrypt.compare(password, passwordHash);
   if (!passwordResult) {
     // Add an error log entry
-    await addAccessLogEntry(email, 'log-in-error', 'Invalid password');
+    await addUserLogEntry(id, 'log-in-error', `Invalid password: ${email}`);
     return {
-      message: errorMessage,
+      message: LOGIN_ERROR_MESSAGE,
       status: 'error'
     };
   }
@@ -44,7 +48,7 @@ export async function loginAction(email: string, password: string): Promise<Acti
   await startSession(email);
 
   // Add a log entry
-  await addAccessLogEntry(email, 'log-in', '');
+  await addUserLogEntry(id, 'log-in');
 
   return {
     status: 'success',
@@ -55,9 +59,10 @@ export async function loginAction(email: string, password: string): Promise<Acti
 
 export async function logoutAction(): Promise<ActionResponse> {
   const oldSession = await endSession();
+  const id = await fetchUserID(oldSession.email);
 
   // Add a log entry
-  await addAccessLogEntry(oldSession.email, 'log-out', '');
+  await addUserLogEntry(id, 'log-out');
 
   return {
     status: 'success',
@@ -67,13 +72,14 @@ export async function logoutAction(): Promise<ActionResponse> {
 }
 
 export async function registerAction(email: string, password: string): Promise<ActionResponse> {
-  const redisClient = await getRedisClient();
-  const redisLoginKey = `user:${email.toLowerCase()}:login`;
-
-  const count = await redisClient.exists(redisLoginKey);
-  if (count >= 1) {
+  const sql = getPGSQLClient();
+  const rows = (await sql`SELECT id
+                          FROM gaf_user
+                          WHERE email = ${email}
+                          LIMIT 1`) as UserTableRow[];
+  if (rows.length > 0) {
     // Add an error log entry
-    await addAccessLogEntry(email, 'register-error', 'User already exists');
+    await addUserLogEntry(rows[0].id, 'register-error', 'User already exists');
     console.error('User already exists:', email);
     return {
       message: 'User already exists with this email. Please log in or reset your password',
@@ -83,27 +89,20 @@ export async function registerAction(email: string, password: string): Promise<A
 
   // Store user in the database
   const hashedPassword = await bcrypt.hash(password, 10);
-  await redisClient.set(redisLoginKey, hashedPassword);
-
-  const redisCreatedKey = `user:${email.toLowerCase()}:createdAt`;
-  await redisClient.set(redisCreatedKey, new Date().toISOString());
-
-  console.log('Registered a new user: ', email);
+  const result = await sql`INSERT INTO gaf_user (email, type, status, password, created_at)
+                           VALUES (${email}, 'user', 'registered', ${hashedPassword}, now())
+                           RETURNING id`;
+  const userID = result[0].id;
+  console.log(`Registered a new user (${userID}): `, email);
 
   // Create the user session
   await startSession(email);
 
   // Add a log entry
-  await addAccessLogEntry(email, 'registered', '');
+  await addUserLogEntry(userID, 'register');
 
   // Send the registration email
-  await sendMail({
-    to: email,
-    html: 'HTML',
-    text: 'TEXT',
-    subject: 'Registration Complete'
-  });
-  await sendTemplateMail(email, UserRegistrationEmailTemplate);
+  await sendTemplateMail(userID, UserRegistrationEmailTemplate);
 
   return {
     status: 'success',
@@ -112,31 +111,43 @@ export async function registerAction(email: string, password: string): Promise<A
   };
 }
 
+const PASSWORD_RESET_REQUESTS: {
+  [email: string]: string;
+} = {};
 export async function passwordResetAction(email: string): Promise<ActionResponse> {
-  const redisClient = await getRedisClient();
-  const redisLoginKey = `user:${email.toLowerCase()}:login`;
-
-  const count = await redisClient.exists(redisLoginKey);
-  if (count === 0) {
+  const sql = getPGSQLClient();
+  // Fetch user from the database
+  const rows = (await sql`SELECT id, password
+                          FROM gaf_user
+                          WHERE email = ${email}
+                          LIMIT 1`) as UserTableRow[];
+  const message = `If a user account exists, a password reset will be sent to your email address at ${email}`;
+  if (!rows[0]) {
     // Add a log entry
-    await addAccessLogEntry(email, 'log-in-error', 'User not found for password reset');
+    await addUserLogEntry(null, 'password-reset-error', `Email not found: ${email}`);
     return {
-      message: `User not found for password reset: ${email}`,
-      status: 'error',
+      message,
+      status: 'error'
     };
   }
+  const { id } = rows[0];
 
   // Store password reset request
   const resetCode = Buffer.from(randomBytes(36)).toString('hex');
-  const redisPasswordResetKey = `user:${email.toLowerCase()}:reset-password`;
-  await redisClient.set(redisPasswordResetKey, resetCode, { EX: 60 * 15 });
+  const timeout = process.env.PASSWORD_RESET_TIMEOUT_MINUTES || '15';
+  // const redisPasswordResetKey = `user:${email.toLowerCase()}:reset-password`;
+  // await redisClient.set(redisPasswordResetKey, resetCode, { EX: 60 * 15 });
+  PASSWORD_RESET_REQUESTS[email] = resetCode;
+  setTimeout(() => {
+    delete PASSWORD_RESET_REQUESTS[email];
+  }, (parseInt(timeout, 10)) * 60 * 1000);
 
   // eslint-disable-next-line no-console
   console.log('Password reset request: ', email, resetCode);
 
   // Send the password reset email
   const validationURL = `${process.env.NEXT_PUBLIC_METADATA_URL}/password/validate/${email}/${resetCode}`;
-  await sendTemplateMail(email, UserPasswordResetEmailTemplate, { validationURL });
+  await sendTemplateMail(id, UserPasswordResetEmailTemplate, { validationURL });
   // await sendMail({
   //   to: email,
   //   html: `<a href='${url}'>Click here to reset your password</a>`,
@@ -145,11 +156,11 @@ export async function passwordResetAction(email: string): Promise<ActionResponse
   // });
 
   // Add a log entry
-  await addAccessLogEntry(email, 'password-reset', '');
+  await addUserLogEntry(id, 'password-reset');
 
   return {
     status: 'success',
-    message: 'If this email was registered, you should see reset instructions in your inbox',
+    message,
     // redirectURL: "/login"
   };
 }
@@ -159,33 +170,35 @@ export async function passwordResetValidateAction(
   code: string,
   password: string
 ): Promise<ActionResponse> {
-  const redisClient = await getRedisClient();
-  const redisPasswordResetKey = `user:${email.toLowerCase()}:reset-password`;
-
-  const storedCode = await redisClient.get(redisPasswordResetKey);
+  const storedCode = PASSWORD_RESET_REQUESTS[email];
   if (!storedCode || (storedCode !== code)) {
     // eslint-disable-next-line no-console
     console.error('Invalid reset request:', email, storedCode, code);
     // Add an error log entry
-    await addAccessLogEntry(email, 'log-in-error', 'Invalid reset request');
+    await addUserLogEntry(null, 'password-reset-error', 'Invalid password reset request');
     return {
       message: 'Invalid reset request',
       status: 'error',
     };
   }
 
-  // Delete the reset request
-  await redisClient.del(redisPasswordResetKey);
+  const user = await fetchUserResult(email);
 
-  // Store user in the database
+  // Delete the reset request
+  delete PASSWORD_RESET_REQUESTS[email];
+
+  // Update password in the database
+  const sql = getPGSQLClient();
   const hashedPassword = await bcrypt.hash(password, 10);
-  const redisLoginKey = `user:${email.toLowerCase()}:login`;
-  await redisClient.set(redisLoginKey, hashedPassword);
+  await sql`UPDATE gaf_user
+            SET password   = ${hashedPassword},
+                updated_at = NOW()
+            WHERE id = ${user.id}`;
 
   console.log('Password was reset: ', email);
 
   // Add a log entry
-  await addAccessLogEntry(email, 'password-reset', 'Password was reset');
+  await addUserLogEntry(user.id, 'password-reset');
 
   return {
     status: 'success',
@@ -194,34 +207,8 @@ export async function passwordResetValidateAction(
   };
 }
 
-export async function isAdmin(email: string) {
-  const redisClient = await getRedisClient();
-  const profilePath = `user:${email.toLowerCase()}:profile`;
-  const adminCheck = await redisClient.json.get(profilePath, { path: ['$.isAdmin'] }) as [boolean];
-  return (adminCheck && adminCheck[0]);
-}
-
 export async function validateAdminSession() {
   const session = await validateSession();
   if (!await isAdmin(session.email)) throw HttpError.Unauthorized('Unauthorized - Admin access required');
   return session;
-}
-
-type AccessLogActionType = 'log-in'
-| 'log-in-error'
-| 'registered'
-| 'register-error'
-| 'log-out'
-| 'password-reset';
-
-export async function addAccessLogEntry(
-  email: string,
-  action: AccessLogActionType,
-  message?: string
-) {
-  const redisClient = await getRedisClient();
-
-  // Add a log entry
-  const redisAccessLogKey = `user:${email.toLowerCase()}:log`;
-  await redisClient.hSet(redisAccessLogKey, new Date().getTime(), `access:${action}${message ? `:${message}` : ''}`);
 }

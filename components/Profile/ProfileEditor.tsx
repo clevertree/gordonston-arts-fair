@@ -16,20 +16,20 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
-import { UserProfile, UserProfileUpload } from '@util/profile';
 import {
   FormFieldValues, FormHookObject, SelectField, TextField, useFormHook
 } from '@components/FormFields';
 import type { AlertColor } from '@mui/material/Alert';
 import Link from 'next/link';
 import ReloadingImage from '@components/Image/ReloadingImage';
+import { UserFileUploadDescription, UserTableRow } from '@util/schema';
 
 interface ProfileEditorProps {
-  userProfile: UserProfile,
+  userProfile: UserTableRow,
 
-  updateProfile(newUserProfile: UserProfile): Promise<UserProfile>
+  updateProfile(newUserProfile: UserTableRow): Promise<UserTableRow>
 
-  uploadFile(file: File): Promise<UserProfile>
+  uploadFile(file: File): Promise<UserTableRow>
 
   deleteFile(filename: string): Promise<void>
 }
@@ -42,15 +42,16 @@ function ProfileEditor({
 }: ProfileEditorProps) {
   const [status, setStatus] = useState<'ready' | 'unsaved' | 'updating' | 'error'>('ready');
   const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
-  const [userProfileClient, setUserProfileClient] = useState<UserProfile>(userProfileServer);
+  const [userProfileClient, setUserProfileClient] = useState<UserTableRow>(userProfileServer);
   // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
   // const formRef = useRef<HTMLFormElement>();
-  const { uploads: profileUploads = {}, info: profileInfo = {} } = userProfileClient;
+  const { uploads: profileUploads = {} } = userProfileClient;
   const formUploadList: { [filename: string]: FormHookObject } = {};
   const formRef = useRef<HTMLFormElement>(null);
 
-  const formInfo = useFormHook(profileInfo as FormFieldValues, (formData) => {
-    setUserProfileClient((oldData) => ({ ...oldData, info: formData }));
+  const formInfo = useFormHook(userProfileClient, (formData) => {
+    setUserProfileClient((oldUserProfile) => (
+      { ...oldUserProfile, ...formData }));
     handleFormChange();
     // setMessage('')
   }, status === 'error');
@@ -75,6 +76,10 @@ function ProfileEditor({
     setStatus('updating');
     setMessage(['info', 'Submitting form...']);
     try {
+      Object.keys(profileUploads).forEach((filename) => {
+        delete profileUploads[filename].url;
+      });
+      userProfileClient.uploads = profileUploads;
       const updatedUserProfile = await updateProfile(userProfileClient);
       setStatus('ready');
       setMessage(['success', 'User profile updated successfully']);
@@ -131,17 +136,17 @@ function ProfileEditor({
         <fieldset disabled={status === 'updating'} className="grid md:grid-cols-3 gap-4">
           <TextField
             helperText="Please enter your first name"
-            {...formInfo.setupInput('firstName', 'First Name', 'required')}
+            {...formInfo.setupInput('first_name', 'First Name', 'required')}
             required
           />
           <TextField
             helperText="Please enter your first name"
-            {...formInfo.setupInput('lastName', 'Last Name', 'required')}
+            {...formInfo.setupInput('last_name', 'Last Name', 'required')}
             required
           />
           <TextField
             helperText="Optional company name"
-            {...formInfo.setupInput('companyName', 'Company Name')}
+            {...formInfo.setupInput('company_name', 'Company Name')}
           />
         </fieldset>
         <fieldset disabled={status === 'updating'} className="grid md:grid-cols-3 gap-4">
@@ -176,6 +181,7 @@ function ProfileEditor({
           />
 
           <SelectField
+            required
             helperText="Enter your state"
             {...formInfo.setupInput('state', 'State', 'required')}
           >
@@ -184,7 +190,7 @@ function ProfileEditor({
               <MenuItem
                 key={state}
                 value={state}
-                selected={state === profileInfo.state}
+                selected={state === userProfileClient.state}
               >
                 {name}
               </MenuItem>
@@ -193,7 +199,7 @@ function ProfileEditor({
           <TextField
             helperText="Enter your zipcode"
             placeholder="31404"
-            {...formInfo.setupInput('zip', 'Zipcode', 'required')}
+            {...formInfo.setupInput('zipcode', 'Zipcode', ['required', 'zipcode'])}
             required
           />
         </fieldset>
@@ -215,12 +221,12 @@ function ProfileEditor({
                 {category}
               </MenuItem>
             ))}
-            {profileInfo.category && !LIST_CATEGORIES.includes(profileInfo.category) && (
+            {userProfileClient.category && !LIST_CATEGORIES.includes(userProfileClient.category) && (
               <MenuItem
-                key={profileInfo.category}
-                value={profileInfo.category}
+                key={userProfileClient.category}
+                value={userProfileClient.category}
               >
-                {profileInfo.category}
+                  {userProfileClient.category}
               </MenuItem>
             )}
           </SelectField>
@@ -281,7 +287,7 @@ function ProfileEditor({
                   const input = e.target;
                   if (input && input.files) {
                     let count = 0;
-                    let updatedProfileData: UserProfile | null = null;
+                    let updatedProfileData: UserTableRow | null = null;
                     setStatus('updating');
                     setMessage(['info', `Uploading ${input.files.length} files...`]);
                     await Promise.all(Array.from(input.files).map(async (file) => {
@@ -330,7 +336,6 @@ function ProfileEditor({
                     onUpdate={(upload) => {
                       setUserProfileClient((oldData) => {
                         const uploads = { ...oldData.uploads };
-                        delete uploads.url;
                         uploads[filename] = upload;
                         return { ...oldData, uploads };
                       });
@@ -370,10 +375,10 @@ export default ProfileEditor;
 
 interface ProfileUploadFormProps {
   filename: string,
-  uploadInfo: UserProfileUpload,
+  uploadInfo: UserFileUploadDescription,
   uploadHooks: { [filename: string]: FormHookObject },
 
-  onUpdate(upload: UserProfileUpload): void,
+  onUpdate(upload: UserFileUploadDescription): void,
 
   onFileDeleted(): void,
 

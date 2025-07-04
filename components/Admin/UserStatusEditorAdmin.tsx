@@ -14,15 +14,16 @@ import {
   TableRow
 } from '@mui/material';
 import React, { useRef, useState } from 'react';
-import { getStatusName, profileStatuses, UserProfileStatus } from '@util/profile';
+import { getStatusName } from '@util/profile';
 import type { AlertColor } from '@mui/material/Alert';
 import { useRouter } from 'next/navigation';
 import { SelectField } from '@components/FormFields';
+import { profileStatuses, UserStatus } from '@util/schema';
 
 interface UserStatusEditorAdminProps {
-  userStatus: UserProfileStatus,
+  userStatus: UserStatus,
 
-  updateUserStatus(newStatus: UserProfileStatus): Promise<{ message: string }>
+  updateUserStatus(newStatus: UserStatus): Promise<{ message: string }>
 }
 
 const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
@@ -75,7 +76,7 @@ export default function UserStatusEditorAdmin({
                     variant="outlined"
                     value={updatedUserStatus || ''}
                     onUpdate={(value) => {
-                      if (value) setUpdatedUserStatus(value as UserProfileStatus);
+                      if (value) setUpdatedUserStatus(value as UserStatus);
                     }}
                   >
                     {profileStatuses.map((status) => (
