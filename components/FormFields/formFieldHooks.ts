@@ -68,7 +68,10 @@ export function useFormHook(
     formData,
     validationState,
     setupInput,
-    setFieldValue,
+    setFieldValue(fieldName: string, value: string) {
+      setFieldValue(fieldName, value);
+      updateFormData(formData);
+    },
   };
 
   function setFieldValue(fieldName: string, value: string | undefined) {

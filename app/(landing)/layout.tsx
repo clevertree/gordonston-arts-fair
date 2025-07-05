@@ -31,7 +31,7 @@ export default function RootLayout({
           <Link href="/#faq">FAQ</Link>
           {process.env.SHOW_LOGIN === 'true' && <Link href="/profile">Profile</Link>}
         </FloatingDiv>
-        <div className="relative">
+        <div className="relative overflow-hidden">
           <Image
             alt="Hero Image Background: Gates of Gordonston"
             src="/img/PXL_20220613_225011729.MP6_-scaled.jpg"
@@ -39,13 +39,13 @@ export default function RootLayout({
             className={styles.heroBackgroundImg}
             priority
           />
-          <div className="flex flex-col items-center relative z-10 sm:opacity-90 sm:pb-12">
+          <div className="flex flex-col items-center relative z-10 opacity-95 mx-4 sm:pb-12">
             <div className="pt-8 md:pt-12" />
-            <h1 className="text-[color:var(--gold-color-bright)] font-bold italic px-3 py-1 rounded-t-3xl bg-[#000A]">Gordonston</h1>
+            <h1 className="text-[color:var(--gold-color-bright)] italic px-3 py-1 rounded-t-3xl bg-[#000A]">Gordonston</h1>
             <h2 className="text-white text-4xl md:text-6xl px-3 py-1 rounded-t-2xl bg-[#000A]">ART FAIR</h2>
             <h3 className="text-white md:text-2xl font-bold px-3 py-1 rounded-3xl bg-[#000A]">{eventDateString}</h3>
             <div className="pt-12 md:pt-12" />
-            <DateLocationApply className="bg-white font-bold rounded-3xl px-5 py-3" />
+            <DateLocationApply className="bg-white font-bold md:rounded-3xl px-5 py-3" />
           </div>
         </div>
       </header>

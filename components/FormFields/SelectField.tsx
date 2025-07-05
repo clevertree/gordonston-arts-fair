@@ -16,6 +16,8 @@ export default function SelectField({
   required,
   onChange,
   onBlur,
+  value,
+  defaultValue,
   ...props
 }: SelectFieldProps) {
   const labelName = `${props.label}-label`;
@@ -26,6 +28,7 @@ export default function SelectField({
     >
       <InputLabel id={labelName}>{props.label}</InputLabel>
       <MUISelect
+        value={value || defaultValue} // Prevent usage of defaultValue
         labelId={labelName}
         inputRef={(inputRef) => {
           if (inputRef && inputRef.scrollIntoView && scrollIntoView) {

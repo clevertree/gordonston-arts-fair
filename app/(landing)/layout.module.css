@@ -1,38 +1,18 @@
 
 .heroBackgroundImg {
-    /*background: url("/img/PXL_20220613_225011729.MP6_-scaled.jpg") bottom;*/
-    /*background-size: 120vh;*/
-    /*position: absolute;*/
-    /*height: 36em;*/
-    /*object-position: center bottom;*/
-    /*z-index: 2;*/
-    animation: backgroundScroll 50s infinite alternate-reverse;
+    animation: backgroundScroll 50s infinite alternate;
     animation-timing-function: linear;
 }
 
-/*.heroContent {*/
-/*    display: flex;*/
-/*    flex-direction: column;*/
-/*    align-items: center;*/
-/*    !*color: var(--foreground-inverted-color);*!*/
-/*    position: relative;*/
-/*    z-index: 3;*/
-/*}*/
 
 
 @keyframes backgroundScroll {
     from {
-        /*background-size: 160vh;*/
-        object-position: 0% 0%;
-        /*top: 0;*/
-        /*left: -400px;*/
-        /*right: 0;*/
+        filter: sepia(75%) saturate(215%) hue-rotate(93deg);
+        transform: scale3d(200%, 200%, 200%);
     }
     to {
-        object-position: 100% 100%;
-        /*background-size: 300vh;*/
-        /*top: -100vh;*/
-        /*left: 0;*/
-        /*right: -400px;*/
+        filter: sepia(25%) saturate(215%) hue-rotate(93deg);
+        transform: scale3d(100%, 100%, 100%);
     }
 }
