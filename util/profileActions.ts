@@ -102,7 +102,7 @@ export async function updateUserStatus(email: string, newStatus: UserStatus) {
   await sql`UPDATE gaf_user
             SET status     = ${newStatus},
                 updated_at = NOW()
-            WHERE id = ${id} LIMIT 1`;
+            WHERE id = ${id}`;
 
   // Add a log entry
   await addUserLogEntry(id, 'status-change', `${newStatus} set  by ${adminSession.email}`);
