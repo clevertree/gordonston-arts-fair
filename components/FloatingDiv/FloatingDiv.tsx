@@ -83,7 +83,7 @@ export default function FloatingDiv({
         )}
         onClick={scrollToTop}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') scrollToTop();
+          if (e.key === 'Enter') scrollToTop();
         }}
       >
         Back to top

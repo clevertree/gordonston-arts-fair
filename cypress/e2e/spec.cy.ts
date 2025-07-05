@@ -9,6 +9,8 @@ describe('template spec', () => {
 
     it('Navigate site', () => {
         cy.visit('/test/reset');
+        cy.get('button[type="submit"]').click();
+        
         cy.visit('/');
         cy.injectAxe();
         cy.get('h1').should('contain', 'Gordonston');
@@ -27,7 +29,6 @@ describe('template spec', () => {
         cy.checkA11y();
 
         cy.get('a[href="/register"]').last().click();
-        cy.wait(100);
         // cy.get('input[name="first_name"]').type("First");
         // cy.get('input[name="last_name"]').type("Last");
         cy.get('input[name="email"]').type("test@test.com")

@@ -12,9 +12,9 @@ describe('<SelectField />', () => {
       <SelectField
         name="test"
         label="TEST"
-        focusRef={cy.stub()}
-        onUpdate={cy.stub()}
+        onBlur={cy.stub()}
         value="Item1"
+        scrollIntoView
       >
         <MenuItem>Item1</MenuItem>
         <MenuItem>Item2</MenuItem>

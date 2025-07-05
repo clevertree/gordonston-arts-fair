@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { validateByType, ValidationTypeList } from '@components/FormFields/validation';
 import { formatByType, FormatTypeList } from '@components/FormFields/formatting';
 
@@ -13,10 +13,7 @@ export interface FormFieldProps {
   helperTextError?: boolean,
   slotProps?: any,
   required?: boolean,
-  autoFocus?: boolean,
   scrollIntoView?: boolean,
-
-  // focusRef?: (e: HTMLElement | null) => void,
 
   onBlur: () => void
   onChange: (e: any) => void
@@ -26,22 +23,17 @@ export interface FormFieldValues {
   [fieldName: string]: string | undefined
 }
 
-export interface FormFieldRefs {
-  [fieldName: string]: HTMLElement
-}
-
-export interface FirstError {
-  // getRef(): HTMLElement,
-
+export interface ValidationError {
   message: string,
-  fieldName: string
+  fieldName: string,
+
+  scrollToField(): void
 }
 
 export interface FormHookObject {
-  // fieldRefs: MutableRefObject<FormFieldRefs>,
   formData: FormFieldValues,
-  isValidated: boolean,
-  firstError?: FirstError
+  validationState: ValidationState,
+  firstError?: ValidationError,
 
   setFieldValue(fieldName: string, value: string): void
 
@@ -59,18 +51,22 @@ export interface FormValues {
   [fieldName: string]: any
 }
 
+export interface ValidationState {
+  [fieldName: string]: ValidationError | undefined
+}
+
 export function useFormHook(
   defaultFormData: FormValues,
   updateFormData: FormDataUpdateCallback,
-  showError = false
+  showError: boolean,
 ) {
   if (!defaultFormData) throw new Error('Invalid form data');
-  // const fieldRefs = useRef<FormFieldRefs>({});
+  const [autoScrollField, setAutoScrollField] = useState<string | null>(null);
+  const [validationState, setValidationState] = useState<ValidationState>({});
   const formData = useMemo<FormValues>(() => ({ ...defaultFormData }), [defaultFormData]);
   const formHookObject: FormHookObject = {
     formData,
-    // fieldRefs,
-    isValidated: true,
+    validationState,
     setupInput,
     setFieldValue,
   };
@@ -103,14 +99,12 @@ export function useFormHook(
       onChange: (e: any) => {
         const { value } = e.target;
         const formattedValue = autoFormat ? formatByType(autoFormat, value) : value;
+        if (formattedValue !== value) e.target.value = formattedValue;
         setFieldValue(fieldName, formattedValue);
         if (validate) {
           // Update form data when validation changes
           const newValidationMessage = validateByType(validate, formattedValue, label || fieldName);
-          if (newValidationMessage !== validationMessage) {
-            console.info('Validation changed: ', newValidationMessage, 'old = ', validationMessage);
-            updateFormData(formData);
-          }
+          updateValidationState(newValidationMessage);
         }
       },
       onBlur: () => {
@@ -121,21 +115,37 @@ export function useFormHook(
       }
     };
 
-    // Validation
-    if (validationMessage) {
-      // const message = label + ' is required'
-      // validation[fieldName] = message;
-      formHookObject.isValidated = false;
-      if (!formHookObject.firstError) {
-        formHookObject.firstError = {
-          message: validationMessage,
-          fieldName,
-          // getRef: () => fieldRefs.current[fieldName]
-        };
-        if (showError) {
-          props.autoFocus = true;
-          props.scrollIntoView = true;
+    function updateValidationState(newValidationMessage: string | undefined) {
+      if (newValidationMessage) {
+        if (!validationState[fieldName]) {
+          setValidationState((oldState) => ({
+            ...oldState,
+            [fieldName]: {
+              message: newValidationMessage,
+              fieldName,
+              scrollToField: () => {
+                // console.log('set scrollIntoView', fieldName, currentValue, formData);
+                setAutoScrollField(fieldName);
+              },
+            } as ValidationError
+          }));
         }
+      } else if (validationState[fieldName]) {
+        // Remove resolved validation
+        setValidationState((oldState) => ({ ...oldState, [fieldName]: undefined }));
+      }
+    }
+
+    // Validation
+    updateValidationState(validationMessage);
+    if (validationMessage) {
+      if (formHookObject.firstError === undefined) {
+        if (validationState[fieldName]) {
+          formHookObject.firstError = validationState[fieldName];
+        }
+      }
+      if (autoScrollField === fieldName) {
+        props.scrollIntoView = true;
       }
       if (showError) {
         props.color = 'error';

@@ -75,7 +75,8 @@ export default function UserStatusEditorAdmin({
                     fullWidth
                     variant="outlined"
                     value={updatedUserStatus || ''}
-                    onUpdate={(value) => {
+                    onChange={(e: any) => {
+                      const { value } = e.target;
                       if (value) setUpdatedUserStatus(value as UserStatus);
                     }}
                   >

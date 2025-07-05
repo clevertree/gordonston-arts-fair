@@ -1,10 +1,9 @@
 import { TextField as MUITextField, TextFieldProps as MUITextFieldProps } from '@mui/material';
 import React from 'react';
-import { FormFieldProps } from '@components/FormFields/formFieldHooks';
-import { FormatCallback, FormatType } from '@components/FormFields/formatting';
 
-type TextFieldProps = MUITextFieldProps & FormFieldProps & {
-  autoFormat?: FormatType | FormatCallback
+type TextFieldProps = MUITextFieldProps & {
+  helperTextError?: boolean,
+  scrollIntoView?: boolean,
 };
 
 export default function TextField({
@@ -15,7 +14,7 @@ export default function TextField({
   return (
     <MUITextField
       inputRef={(inputRef) => {
-        if (inputRef && scrollIntoView) {
+        if (inputRef && inputRef.scrollIntoView && scrollIntoView) {
           inputRef.focus();
           inputRef.scrollIntoView({
             behavior: 'smooth',

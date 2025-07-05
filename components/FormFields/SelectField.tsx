@@ -3,9 +3,12 @@ import {
   FormControl, FormHelperText, InputLabel, Select as MUISelect
 } from '@mui/material';
 import React from 'react';
-import { FormFieldProps } from '@components/FormFields/formFieldHooks';
 
-type SelectFieldProps = MUISelectProps & FormFieldProps;
+type SelectFieldProps = MUISelectProps & {
+  helperText?: string,
+  helperTextError?: boolean,
+  scrollIntoView?: boolean,
+};
 export default function SelectField({
   scrollIntoView,
   helperText,
@@ -25,7 +28,7 @@ export default function SelectField({
       <MUISelect
         labelId={labelName}
         inputRef={(inputRef) => {
-          if (inputRef && scrollIntoView) {
+          if (inputRef && inputRef.scrollIntoView && scrollIntoView) {
             inputRef.focus();
             inputRef.scrollIntoView({
               behavior: 'smooth',
@@ -34,9 +37,9 @@ export default function SelectField({
             });
           }
         }}
-        onChange={(e:any) => {
-          onChange(e);
-          onBlur(e);
+        onChange={(...args) => {
+          if (onChange) onChange(...args);
+          if (onBlur) onBlur(args[0] as any);
         }}
         onBlur={onBlur}
         {...props}

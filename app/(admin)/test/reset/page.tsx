@@ -6,26 +6,34 @@ export const metadata = {
 };
 
 export default async function ResetTests() {
-  try {
-    const testProfile = await fetchProfileByEmail('test@test.com');
-    const sql = getPGSQLClient();
-    await sql`DELETE
+  async function resetTests() {
+    'use server';
+
+    try {
+      const testProfile = await fetchProfileByEmail('test@test.com');
+      const sql = getPGSQLClient();
+      await sql`DELETE
                   FROM gaf_user_log
                   WHERE user_id = ${testProfile.id}`;
-    await sql`DELETE
+      await sql`DELETE
                   FROM gaf_user
                   WHERE email = 'test@test.com'`;
-  } catch (e: any) {
-    return (
-      <h1 className="m-auto text-[color:var(--gold-color)] italic">
-        {e.message}
-      </h1>
-    );
+      // eslint-disable-next-line no-console
+      console.info('Test have been reset');
+      return true;
+    } catch (e: any) {
+      // eslint-disable-next-line no-console
+      console.info('Test could not be reset', e);
+      return false;
+    }
   }
 
   return (
-    <h1 className="m-auto text-[color:var(--gold-color)] italic">
-      Test Reset Successful
-    </h1>
+    <form
+      action={resetTests}
+      method="post"
+    >
+      <button type="submit">Reset</button>
+    </form>
   );
 }

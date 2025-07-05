@@ -70,13 +70,12 @@ function ProfileEditor({
     const allForms = [formInfo, ...Object.values(formUploadList)];
     for (let i = 0; i < allForms.length; i++) {
       const form = allForms[i];
-      if (!form.isValidated || form.firstError) {
-        const { message: firstErrorMessage } = form.firstError || { message: 'Unknown error' };
-        // const inputElm = getRef();
-        // inputElm.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Optional: Add smooth scrolling
-        // inputElm.focus();
+      const { firstError } = form;
+      if (firstError) {
+        const { message: firstErrorMessage, scrollToField } = firstError;
         setStatus('error');
         setMessage(['error', firstErrorMessage]);
+        scrollToField();
         return;
       }
     }
@@ -92,7 +91,7 @@ function ProfileEditor({
       const updatedUserProfile = await updateProfile(userProfileClient);
       setStatus('ready');
       setMessage(['success', 'User profile updated successfully']);
-      setUserProfileClient(updatedUserProfile);
+      setUserProfileClient((oldProfile) => ({ ...oldProfile, ...updatedUserProfile }));
     } catch (e: any) {
       setStatus('ready');
       setMessage(['error', e.message]);
@@ -300,18 +299,21 @@ function ProfileEditor({
                   const input = e.target;
                   if (input && input.files) {
                     let count = 0;
-                    let updatedProfileData: UserTableRow | null = null;
+                    let updatedUserProfile: UserTableRow | null = null;
                     setStatus('updating');
                     setMessage(['info', `Uploading ${input.files.length} files...`]);
                     await Promise.all(Array.from(input.files).map(async (file) => {
-                      updatedProfileData = await uploadFile(file);
+                      updatedUserProfile = await uploadFile(file);
                       count += 1;
                     }));
                     setMessage(['success', `${count} file${count === 1 ? '' : 's'} have been uploaded`]);
                     setStatus('unsaved');
                     e.target.value = '';
-                    if (updatedProfileData) {
-                      setUserProfileClient(updatedProfileData);
+                    if (updatedUserProfile) {
+                      setUserProfileClient((oldProfile) => ({
+                        ...oldProfile,
+                        ...updatedUserProfile
+                      }));
                     }
                   }
                 }}

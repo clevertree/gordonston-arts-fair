@@ -88,7 +88,8 @@ export default function SendEmailAdmin({
                     fullWidth
                     variant="outlined"
                     value={userStatus || ''}
-                    onUpdate={(templateName) => {
+                    onChange={(e: any) => {
+                      const templateName = e.target.value;
                       if (templateName) {
                         const template = templateList.find((t) => t.name === templateName);
                         if (template) {
