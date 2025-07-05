@@ -23,7 +23,7 @@ export async function loginAction(email: string, password: string): Promise<Acti
   // Fetch user from the database
   const rows = (await sql`SELECT id, password
                           FROM gaf_user
-                          WHERE email = ${email}
+                          WHERE email = ${email.toLowerCase()}
                           LIMIT 1`) as UserTableRow[];
   if (!rows[0]) {
     // Add a log entry
@@ -75,7 +75,7 @@ export async function registerAction(email: string, password: string): Promise<A
   const sql = getPGSQLClient();
   const rows = (await sql`SELECT id
                           FROM gaf_user
-                          WHERE email = ${email}
+                          WHERE email = ${email.toLowerCase()}
                           LIMIT 1`) as UserTableRow[];
   if (rows.length > 0) {
     // Add an error log entry
@@ -90,7 +90,7 @@ export async function registerAction(email: string, password: string): Promise<A
   // Store user in the database
   const hashedPassword = await bcrypt.hash(password, 10);
   const result = await sql`INSERT INTO gaf_user (email, type, status, password, created_at)
-                           VALUES (${email}, 'user', 'registered', ${hashedPassword}, now())
+                           VALUES (${email.toLowerCase()}, 'user', 'registered', ${hashedPassword}, now())
                            RETURNING id`;
   const userID = result[0].id;
   console.log(`Registered a new user (${userID}): `, email);
@@ -119,7 +119,7 @@ export async function passwordResetAction(email: string): Promise<ActionResponse
   // Fetch user from the database
   const rows = (await sql`SELECT id, password
                           FROM gaf_user
-                          WHERE email = ${email}
+                          WHERE email = ${email.toLowerCase()}
                           LIMIT 1`) as UserTableRow[];
   const message = `If a user account exists, a password reset will be sent to your email address at ${email}`;
   if (!rows[0]) {

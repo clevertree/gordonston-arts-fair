@@ -21,7 +21,7 @@ export async function listUsersAsAdmin(params: SearchParams) {
     orderBy,
     order,
     pageCount = 10,
-    page = 1
+    page = 0
   } = params;
 
   // Default sort order
@@ -57,7 +57,7 @@ export async function fetchUserResult(email: string): Promise<UserTableRow> {
                                       created_at,
                                       updated_at
                                FROM gaf_user
-                               WHERE email = ${email}
+                               WHERE email = ${email.toLowerCase()}
                                LIMIT 1`) as UserTableRow[];
   if (!userRow) throw new Error(`User not found: ${email}`);
   if (!userRow.uploads) userRow.uploads = {};
@@ -68,7 +68,7 @@ export async function fetchUserID(email: string) {
   const sql = getPGSQLClient();
   const rows = (await sql`SELECT id
                           FROM gaf_user
-                          WHERE email = ${email}
+                          WHERE email = ${email.toLowerCase()}
                           LIMIT 1`) as UserTableRow[];
   if (!rows[0]) throw new Error(`User ID not found: ${email}`);
   return rows[0].id;
@@ -78,7 +78,7 @@ export async function isAdmin(email: string) {
   const sql = getPGSQLClient();
   const rows = (await sql`SELECT type
                           FROM gaf_user
-                          WHERE email = ${email}
+                          WHERE email = ${email.toLowerCase()}
                           LIMIT 1`) as UserTableRow[];
   if (!rows[0]) throw new Error(`User Admin not found: ${email}`);
   return rows[0].type === 'admin';

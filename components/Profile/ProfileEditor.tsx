@@ -41,7 +41,11 @@ function ProfileEditor({
   deleteFile
 }: ProfileEditorProps) {
   const [status, setStatus] = useState<'ready' | 'unsaved' | 'updating' | 'error'>('ready');
-  const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
+  const [message, setMessage] = useState<[AlertColor, string]>(
+    userProfileServer.isProfileComplete === true
+      ? ['success', 'Artist profile is complete']
+      : ['info', `Please complete your artist profile. ${userProfileServer.isProfileComplete}`]
+  );
   const [userProfileClient, setUserProfileClient] = useState<UserTableRow>(userProfileServer);
   // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
   // const formRef = useRef<HTMLFormElement>();
@@ -55,17 +59,22 @@ function ProfileEditor({
     handleFormChange();
     // setMessage('')
   }, status === 'error');
+  const {
+    formData: {
+      category: categoryInput,
+    }
+  } = formInfo;
 
   const handleSubmit = async () => {
     // Validation
     const allForms = [formInfo, ...Object.values(formUploadList)];
     for (let i = 0; i < allForms.length; i++) {
       const form = allForms[i];
-      if (!form.isValidated && form.firstError) {
-        const { getRef, message: firstErrorMessage } = form.firstError;
-        const inputElm = getRef();
-        inputElm.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Optional: Add smooth scrolling
-        inputElm.focus();
+      if (!form.isValidated || form.firstError) {
+        const { message: firstErrorMessage } = form.firstError || { message: 'Unknown error' };
+        // const inputElm = getRef();
+        // inputElm.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Optional: Add smooth scrolling
+        // inputElm.focus();
         setStatus('error');
         setMessage(['error', firstErrorMessage]);
         return;
@@ -88,7 +97,10 @@ function ProfileEditor({
       setStatus('ready');
       setMessage(['error', e.message]);
     }
-    formRef.current?.scrollIntoView(true);
+    formRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
   };
 
   function handleFormChange() {
@@ -112,6 +124,7 @@ function ProfileEditor({
         e.preventDefault();
         await handleSubmit();
       }}
+      className="scroll-mt-8"
     >
       <Box
         sx={{
@@ -125,14 +138,14 @@ function ProfileEditor({
           borderRadius: 4,
         }}
       >
-        <Typography component="h2" id="step1">
-          Contact Information
-        </Typography>
         {message && message[1] && (
         <Alert severity={message[0]}>
           {message[1]}
         </Alert>
         )}
+        <Typography component="h2" id="step1">
+          Contact Information
+        </Typography>
         <fieldset disabled={status === 'updating'} className="grid md:grid-cols-3 gap-4">
           <TextField
             helperText="Please enter your first name"
@@ -152,14 +165,12 @@ function ProfileEditor({
         <fieldset disabled={status === 'updating'} className="grid md:grid-cols-3 gap-4">
           <TextField
             helperText="Primary Phone (i.e. home)"
-            {...formInfo.setupInput('phone', 'Primary Phone', ['required', 'phone'])}
-            autoFormat="phone"
+            {...formInfo.setupInput('phone', 'Primary Phone', ['required', 'phone'], 'phone')}
             required
           />
           <TextField
             helperText="Contact Phone (i.e. cell)"
-            {...formInfo.setupInput('phone2', 'Contact Phone', 'phone')}
-            autoFormat="phone"
+            {...formInfo.setupInput('phone2', 'Contact Phone', 'phone', 'phone')}
           />
           <TextField
             helperText="Artist Website"
@@ -221,13 +232,14 @@ function ProfileEditor({
                 {category}
               </MenuItem>
             ))}
-            {userProfileClient.category && !LIST_CATEGORIES.includes(userProfileClient.category) && (
-              <MenuItem
-                key={userProfileClient.category}
-                value={userProfileClient.category}
-              >
-                  {userProfileClient.category}
-              </MenuItem>
+            {categoryInput
+                && !LIST_CATEGORIES.includes(categoryInput) && (
+                <MenuItem
+                  key={categoryInput}
+                  value={categoryInput}
+                >
+                  {categoryInput}
+                </MenuItem>
             )}
           </SelectField>
           <Button
@@ -237,6 +249,7 @@ function ProfileEditor({
               const category = window.prompt('Please enter a custom art category') || '';
               if (category) {
                 formInfo.setFieldValue('category', category);
+                setStatus('unsaved');
               }
             }}
           >
@@ -295,7 +308,7 @@ function ProfileEditor({
                       count += 1;
                     }));
                     setMessage(['success', `${count} file${count === 1 ? '' : 's'} have been uploaded`]);
-                    setStatus('ready');
+                    setStatus('unsaved');
                     e.target.value = '';
                     if (updatedProfileData) {
                       setUserProfileClient(updatedProfileData);
@@ -333,6 +346,7 @@ function ProfileEditor({
                     uploadInfo={profileUploads[filename]}
                     uploadHooks={formUploadList}
                     deleteFile={deleteFile}
+                    status={status}
                     onUpdate={(upload) => {
                       setUserProfileClient((oldData) => {
                         const uploads = { ...oldData.uploads };
@@ -361,7 +375,7 @@ function ProfileEditor({
           disabled={!['unsaved', 'error'].includes(status)}
           onClick={(e) => {
             e.preventDefault();
-            handleSubmit();
+            handleSubmit().then();
           }}
         >
           Update Profile
@@ -382,7 +396,9 @@ interface ProfileUploadFormProps {
 
   onFileDeleted(): void,
 
-  deleteFile(filename: string): Promise<void>
+  deleteFile(filename: string): Promise<void>,
+
+  status: 'ready' | 'unsaved' | 'updating' | 'error'
 }
 
 function ProfileUploadForm({
@@ -391,9 +407,10 @@ function ProfileUploadForm({
   uploadHooks,
   onUpdate,
   onFileDeleted,
-  deleteFile
+  deleteFile,
+  status
 }: ProfileUploadFormProps) {
-  const formUpload = useFormHook(uploadInfo as unknown as FormFieldValues, onUpdate);
+  const formUpload = useFormHook(uploadInfo as unknown as FormFieldValues, onUpdate, status === 'error');
   // eslint-disable-next-line no-param-reassign
   uploadHooks[filename] = formUpload;
   return (
@@ -444,18 +461,18 @@ function ProfileUploadForm({
       </TableCell>
       <TableCell sx={{ position: 'relative', width: '20rem', height: '20rem' }}>
         {uploadInfo.url && (
-          <Link href={uploadInfo.url} target="_blank" rel="noreferrer">
-            <ReloadingImage
-              loading="lazy"
-              src={uploadInfo.url}
-              alt={filename}
-              width={300}
-              height={300}
-              style={{
-                height: 'auto'
-              }}
-            />
-          </Link>
+        <Link href={uploadInfo.url} target="_blank" rel="noreferrer">
+          <ReloadingImage
+            loading="lazy"
+            src={uploadInfo.url}
+            alt={filename}
+            width={300}
+            height={300}
+            style={{
+              height: 'auto'
+            }}
+          />
+        </Link>
         )}
       </TableCell>
     </TableRow>

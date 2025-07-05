@@ -6,6 +6,7 @@ import { getPGSQLClient } from '@util/pgsql';
 import { UpdatedUserTableRow, UserStatus, UserTableRow } from '@util/schema';
 import { fetchUserID } from '@util/userActions';
 import { addUserLogEntry } from '@util/logActions';
+import { isProfileComplete } from '@util/profile';
 
 export async function fetchProfileByEmail(email: string) {
   // Get db client
@@ -13,7 +14,7 @@ export async function fetchProfileByEmail(email: string) {
 
   const rows = (await sql`SELECT *
                           FROM gaf_user
-                          WHERE email = ${email} LIMIT 1`) as UserTableRow[];
+                          WHERE email = ${email.toLowerCase()} LIMIT 1`) as UserTableRow[];
   if (!rows[0]) throw new Error(`User not found: ${email}`);
   return rows[0];
 }
@@ -51,7 +52,7 @@ export async function fetchProfileAndUploads(email: string) {
       profileData.uploads[filename].url = upload.url;
     }
   }
-
+  profileData.isProfileComplete = isProfileComplete(profileData);
   return profileData;
 }
 
@@ -63,7 +64,7 @@ export async function updateProfile(email: string, updatedUserRow: UpdatedUserTa
     first_name, last_name, company_name,
     address, city, state, zipcode, phone, phone2, website,
     description, category, uploads
-  } = { ...userRow, ...updatedUserRow };
+  } = userRow;
 
   await sql`UPDATE gaf_user
             SET first_name   = ${first_name},

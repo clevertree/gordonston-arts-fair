@@ -89,7 +89,7 @@ async function insertUser(email: string, row: RowData) {
   return sql`INSERT INTO gaf_user (email, type, status, first_name, last_name, company_name,
                                    address, city, state, zipcode, phone, phone2, website,
                                    description, category, uploads, created_at)
-             VALUES (${email}, 'user', 'imported', ${fname}, ${lname}, ${company},
+             VALUES (${email.toLowerCase()}, 'user', 'imported', ${fname}, ${lname}, ${company},
                      ${address}, ${city}, ${state}, ${zip}, ${phone}, ${phone2}, ${website},
                      ${comment}, ${category}, ${uploads}, now()) ON CONFLICT (email) DO NOTHING;`;
 }

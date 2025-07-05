@@ -57,7 +57,6 @@ describe('template spec', () => {
         cy.get('div').should('contain', 'Primary Phone is a required field');
         cy.get('input[name="phone"]').type("1234");
         cy.get('button[type="submit"]').click();
-        cy.get('button[type="submit"]').click(); // Need to submit twice for some reason
         cy.get('div').should('contain', 'Please enter a valid Primary Phone');
         cy.get('input[name="phone"]').type("1234342345");
         cy.get('input[name="phone2"]').type("1234342345");
@@ -68,7 +67,6 @@ describe('template spec', () => {
         cy.get('input[name="address"]').type("Address");
         cy.get('input[name="city"]').type("City");
         cy.get('button[type="submit"]').click();
-        cy.get('button[type="submit"]').click();
 
         cy.get('div').should('contain', 'State is a required field');
         cy.get('[name="state"]').parent().click();
@@ -78,18 +76,16 @@ describe('template spec', () => {
         cy.get('div').should('contain', 'Zipcode is a required field');
         cy.get('input[name="zipcode"]').type("abcde");
         cy.get('button[type="submit"]').click();
-        cy.get('button[type="submit"]').click(); // Need to submit twice for some reason
         cy.get('div').should('contain', 'Please enter a valid Zipcode');
         cy.get('input[name="zipcode"]').clear().type("31404");
         cy.get('button[type="submit"]').click();
-        cy.get('button[type="submit"]').click(); // Need to submit twice for some reason
 
 
         cy.get('div').should('contain', 'Category is a required field');
         cy.get('[name="category"]').parent().click();
         cy.get('li[role="option"]').contains("Painting").click();
         cy.get('textarea[name="description"]').type("Description")
-        cy.get('button[type="submit"]').click().click();
+        cy.get('button[type="submit"]').click();
 
         cy.get('div').should('contain', 'User profile updated successfully');
 

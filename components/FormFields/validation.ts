@@ -1,5 +1,7 @@
 export type ValidationType = 'required' | 'phone' | 'zipcode';
 export type ValidationCallback = (value: string, labelOrFieldName: string) => string | undefined;
+export type ValidationTypeList = (ValidationType | ValidationCallback)
+| (ValidationType | ValidationCallback)[];
 
 export function validateRequired(value: string, labelOrFieldName: string) {
   if (!value) return `${labelOrFieldName} is a required field`;
@@ -27,7 +29,25 @@ export function validateZipcode(zipcodeString: string, labelOrFieldName: string 
   return undefined;
 }
 
-export function validateByType(type: ValidationType, value: string, labelOrFieldName: string) {
+export function validateByType(
+  type: ValidationTypeList,
+  value: string,
+  labelOrFieldName: string
+): string | undefined {
+  if (Array.isArray(type)) {
+    for (let i = 0; i < type.length; i++) {
+      const validationCallback = type[i];
+      if (typeof validationCallback === 'string') {
+        const message = validateByType(validationCallback, value, labelOrFieldName);
+        if (message) return message;
+      } else {
+        const message = validationCallback(value, labelOrFieldName);
+        if (message) return message;
+      }
+    }
+    return undefined; // all validation passed
+  }
+
   switch (type) {
     case 'phone':
       return validatePhone(value, labelOrFieldName);

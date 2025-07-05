@@ -1,21 +1,25 @@
 'use client';
 
-import { MutableRefObject, useRef } from 'react';
-import { validateByType, ValidationCallback, ValidationType } from '@components/FormFields/validation';
+import { useMemo } from 'react';
+import { validateByType, ValidationTypeList } from '@components/FormFields/validation';
+import { formatByType, FormatTypeList } from '@components/FormFields/formatting';
 
 export interface FormFieldProps {
   name: string,
   label: string,
-  value: string,
+  defaultValue: string,
   color?: 'error' | 'primary',
   helperText?: string,
   helperTextError?: boolean,
   slotProps?: any,
   required?: boolean,
+  autoFocus?: boolean,
+  scrollIntoView?: boolean,
 
-  focusRef?: (e: HTMLElement | null) => void,
+  // focusRef?: (e: HTMLElement | null) => void,
 
-  onUpdate?: (value: string | undefined) => void
+  onBlur: () => void
+  onChange: (e: any) => void
 }
 
 export interface FormFieldValues {
@@ -27,14 +31,15 @@ export interface FormFieldRefs {
 }
 
 export interface FirstError {
-  getRef(): HTMLElement,
+  // getRef(): HTMLElement,
 
   message: string,
   fieldName: string
 }
 
 export interface FormHookObject {
-  fieldRefs: MutableRefObject<FormFieldRefs>,
+  // fieldRefs: MutableRefObject<FormFieldRefs>,
+  formData: FormFieldValues,
   isValidated: boolean,
   firstError?: FirstError
 
@@ -42,102 +47,103 @@ export interface FormHookObject {
 
   setupInput(fieldName: string,
     label?: string,
-    validate?: (ValidationType | ValidationCallback)
-    | (ValidationType | ValidationCallback)[]
+    validate?: ValidationTypeList,
+    autoFormat?:FormatTypeList,
+
   ): FormFieldProps,
 }
 
 export type FormDataUpdateCallback = (formData: any) => any;
 
-export interface FormValue {
+export interface FormValues {
   [fieldName: string]: any
 }
 
 export function useFormHook(
-  formData: FormValue,
+  defaultFormData: FormValues,
   updateFormData: FormDataUpdateCallback,
   showError = false
 ) {
-  if (!formData) throw new Error('Invalid form data');
-  const fieldRefs = useRef<FormFieldRefs>({});
-
+  if (!defaultFormData) throw new Error('Invalid form data');
+  // const fieldRefs = useRef<FormFieldRefs>({});
+  const formData = useMemo<FormValues>(() => ({ ...defaultFormData }), [defaultFormData]);
   const formHookObject: FormHookObject = {
-    fieldRefs,
+    formData,
+    // fieldRefs,
     isValidated: true,
     setupInput,
     setFieldValue,
   };
 
   function setFieldValue(fieldName: string, value: string | undefined) {
-    const newFormData = { ...formData };
     if (value !== undefined) {
-      newFormData[fieldName] = value;
+      formData[fieldName] = value;
     } else {
-      delete newFormData[fieldName];
+      delete formData[fieldName];
     }
-    updateFormData(newFormData);
   }
 
   function setupInput(
     fieldName: string,
     label?: string,
-    validate?: ValidationCallback | ValidationCallback[]
+    validate?: ValidationTypeList,
+    autoFormat?:FormatTypeList,
+
   ) {
+    const currentValue: string = formData[fieldName] || '';
+    // Validation
+    let validationMessage: string | undefined;
+    if (validate) {
+      validationMessage = validateByType(validate, currentValue, label || fieldName);
+    }
     const props: FormFieldProps = {
       name: fieldName,
       label: label || fieldName,
-      focusRef: (input: HTMLElement | null) => {
-        if (input) {
-          fieldRefs.current[fieldName] = input.querySelector('[tabindex="0"]') || input;
-        } else {
-          delete fieldRefs.current[fieldName];
+      defaultValue: currentValue,
+      onChange: (e: any) => {
+        const { value } = e.target;
+        const formattedValue = autoFormat ? formatByType(autoFormat, value) : value;
+        setFieldValue(fieldName, formattedValue);
+        if (validate) {
+          // Update form data when validation changes
+          const newValidationMessage = validateByType(validate, formattedValue, label || fieldName);
+          if (newValidationMessage !== validationMessage) {
+            console.info('Validation changed: ', newValidationMessage, 'old = ', validationMessage);
+            updateFormData(formData);
+          }
         }
       },
-      value: formData[fieldName] || '',
-      onUpdate: (value: string | undefined) => {
-        if (value !== formData[fieldName]) {
-          setFieldValue(fieldName, value);
+      onBlur: () => {
+        // Update form data if the value changed
+        if (JSON.stringify(defaultFormData[fieldName]) !== JSON.stringify(formData[fieldName])) {
+          updateFormData(formData);
         }
-      },
+      }
     };
 
     // Validation
-    if (validate) {
-      let message: string | undefined;
-      const validateList: (ValidationType | ValidationCallback)[] = Array.isArray(validate)
-        ? validate
-        : [validate];
-      const value: string = formData[fieldName] || '';
-      for (let i = 0; i < validateList.length; i++) {
-        const validationCallback = validateList[i];
-        const labelOrFieldName = label || fieldName;
-        if (typeof validationCallback === 'string') {
-          message = validateByType(validationCallback, value, labelOrFieldName);
-        } else {
-          message = validationCallback(value, labelOrFieldName);
-        }
-        if (message) break;
-      }
-      if (message) {
-        // const message = label + ' is required'
-        // validation[fieldName] = message;
-        formHookObject.isValidated = false;
-        if (!formHookObject.firstError) {
-          formHookObject.firstError = {
-            message,
-            fieldName,
-            getRef: () => fieldRefs.current[fieldName]
-          };
-        }
+    if (validationMessage) {
+      // const message = label + ' is required'
+      // validation[fieldName] = message;
+      formHookObject.isValidated = false;
+      if (!formHookObject.firstError) {
+        formHookObject.firstError = {
+          message: validationMessage,
+          fieldName,
+          // getRef: () => fieldRefs.current[fieldName]
+        };
         if (showError) {
-          props.color = 'error';
-          props.helperText = message;
-          props.helperTextError = true;
+          props.autoFocus = true;
+          props.scrollIntoView = true;
         }
-      } else {
-        // console.info(fieldName + " passed validation", value)
+      }
+      if (showError) {
+        props.color = 'error';
+        props.helperText = validationMessage;
+        props.helperTextError = true;
       }
     }
+    // console.log(fieldName, props, validate, currentValue, validationMessage);
     return props;
   }
 

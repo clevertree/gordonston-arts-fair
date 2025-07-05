@@ -58,7 +58,7 @@ export default function SendEmailAdmin({
           });
           setStatus('ready');
           setMessage([success ? 'success' : 'error', updateMessage]);
-          formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
           router.refresh(); // Refresh the current page
         }}
         method="POST"
