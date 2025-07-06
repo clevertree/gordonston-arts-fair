@@ -23,7 +23,8 @@ export interface UserFileUploadDescription {
   title: string,
   description?: string,
   url?: string
-  // path: string
+  width: number,
+  height: number,
 }
 
 export type UserTableRow = {

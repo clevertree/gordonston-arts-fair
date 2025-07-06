@@ -461,15 +461,15 @@ function ProfileUploadForm({
           </div>
         </Stack>
       </TableCell>
-      <TableCell sx={{ position: 'relative', width: '20rem', height: '20rem' }}>
+      <TableCell sx={{ position: 'relative', width: '50%' }}>
         {uploadInfo.url && (
         <Link href={uploadInfo.url} target="_blank" rel="noreferrer">
           <ReloadingImage
             loading="lazy"
             src={uploadInfo.url}
             alt={filename}
-            width={300}
-            height={300}
+            width={uploadInfo.width}
+            height={uploadInfo.height}
             style={{
               height: 'auto'
             }}

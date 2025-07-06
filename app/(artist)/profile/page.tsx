@@ -1,10 +1,8 @@
-import ProfileEditor from '@components/Profile/ProfileEditor';
 import { validateSession } from '@util/session';
-import {
-  deleteFile, fetchProfileAndUploads, updateProfile, uploadFile
-} from '@util/profileActions';
+import { fetchProfileAndUploads } from '@util/profileActions';
 import { redirect } from 'next/navigation';
-import { UserTableRow } from '@util/schema';
+import ProfileView from '@components/Profile/ProfileView';
+import Link from 'next/link';
 
 export const metadata = {
   title: 'Artist Profile',
@@ -22,27 +20,12 @@ export default async function ProfilePage() {
 
   return (
     <>
-      <h1 className="m-auto text-[color:var(--gold-color)] italic">Artist Profile</h1>
+      <h1 className="m-auto text-[color:var(--gold-color)] italic">Artist Dashboard</h1>
 
-      <ProfileEditor
+      <ProfileView
         userProfile={profileData}
-        uploadFile={async (file: File) => {
-          'use server';
-
-          await uploadFile(sessionEmail, file);
-          return fetchProfileAndUploads(sessionEmail);
-        }}
-        deleteFile={async (filename: string) => {
-          'use server';
-
-          return deleteFile(sessionEmail, filename);
-        }}
-        updateProfile={async (newUserProfile: UserTableRow) => {
-          'use server';
-
-          return updateProfile(sessionEmail, newUserProfile);
-        }}
       />
+      <Link href="/profile/edit">Click here to edit your profile</Link>
     </>
   );
 }

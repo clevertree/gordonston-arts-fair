@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 'use server';
 
 import { del, list, put } from '@vercel/blob';
@@ -7,6 +9,7 @@ import { UpdatedUserTableRow, UserStatus, UserTableRow } from '@util/schema';
 import { fetchUserID } from '@util/userActions';
 import { addUserLogEntry } from '@util/logActions';
 import { isProfileComplete } from '@util/profile';
+import { imageDimensionsFromStream } from 'image-dimensions';
 
 export async function fetchProfileByEmail(email: string) {
   // Get db client
@@ -34,22 +37,30 @@ export async function fetchProfileAndUploads(email: string) {
   if (!profileData.uploads) profileData.uploads = {};
 
   // Get uploaded images
-  const imagePath = `profile/${email.toLowerCase()}/uploads`;
+  const imagePath = `uploads/${email.toLowerCase()}/`;
   const uploadList = await list({
     prefix: imagePath
   });
   const oldUploads = profileData.uploads || {};
   profileData.uploads = {};
-  for (const upload of uploadList.blobs) {
-    const filename = upload.pathname.split('/').pop();
+  for (let i = 0; i < uploadList.blobs.length; i++) {
+    const upload = uploadList.blobs[i];
+    const [, , dimensionString, filename] = upload.pathname.split('/');
     if (filename) {
+      const [widthString, heightString] = dimensionString.split('-');
+      const width = parseInt(widthString, 10);
+      const height = parseInt(heightString, 10);
       if (!profileData.uploads[filename]) {
         profileData.uploads[filename] = {
-          title: filename
+          title: filename,
+          width,
+          height
         };
       }
       profileData.uploads[filename] = oldUploads[filename] || { title: filename };
       profileData.uploads[filename].url = upload.url;
+      profileData.uploads[filename].width = width;
+      profileData.uploads[filename].height = height;
     }
   }
   profileData.isProfileComplete = isProfileComplete(profileData);
@@ -61,6 +72,7 @@ export async function updateProfile(email: string, updatedUserRow: UpdatedUserTa
   const userRow = await fetchProfileByEmail(email);
   Object.assign(userRow, updatedUserRow);
   const {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     first_name, last_name, company_name,
     address, city, state, zipcode, phone, phone2, website,
     description, category, uploads
@@ -80,18 +92,56 @@ export async function updateProfile(email: string, updatedUserRow: UpdatedUserTa
                 description  = ${description},
                 category     = ${category},
                 uploads      = ${uploads},
-                updated_at   = NOW()`;
+                updated_at   = NOW()
+                WHERE id = ${userRow.id}`;
   return userRow;
 }
 
 export async function uploadFile(email: string, file: File) {
-  const imagePath = `profile/${email.toLowerCase()}/uploads`;
+  const imagePath = `uploads/${email.toLowerCase()}`;
+  const imageDimensions = await imageDimensionsFromStream(file.stream());
+  if (!imageDimensions) throw new Error('Failed to get image dimensions');
+  const { width, height } = imageDimensions;
   // eslint-disable-next-line no-console
-  console.log('Uploading file: ', file.name);
-  return put(`${imagePath}/${file.name}`, file, {
+  const fileName = `${width}-${height}/${file.name}`;
+
+  console.log('Storing file: ', fileName, width, height);
+  await put(`${imagePath}/${fileName}`, file, {
     access: 'public',
     contentType: file.type,
     allowOverwrite: true
+  });
+}
+
+interface ImageDimensions {
+  width: number;
+  height: number;
+}
+
+function getImageDimensions(file: File): Promise<ImageDimensions> {
+  return new Promise((resolve, reject) => {
+    // Create a temporary URL for the file
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = () => {
+      // Get the dimensions
+      const dimensions = {
+        width: img.width,
+        height: img.height
+      };
+
+      // Clean up by revoking the temporary URL
+      URL.revokeObjectURL(url);
+      resolve(dimensions);
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Failed to load image'));
+    };
+
+    img.src = url;
   });
 }
 

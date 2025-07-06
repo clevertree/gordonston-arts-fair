@@ -1,5 +1,6 @@
 import { importDBFromCSV } from '@util/importActions';
 import { validateAdminSession } from '@util/sessionActions';
+import { redirect } from 'next/navigation';
 
 export const metadata = {
   title: 'Admin User List',
@@ -7,16 +8,23 @@ export const metadata = {
 
 export default async function InsertDBAdmin() {
   await validateAdminSession();
-  const csvExport = await importDBFromCSV();
+  async function importDB() {
+    'use server';
+
+    await importDBFromCSV();
+    redirect('/db?success=true');
+  }
   return (
     <>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">
-        Insert DB
+        Import DB
       </h1>
-
-      Export:
-      {' '}
-      {JSON.stringify(csvExport)}
+      <form
+        action={importDB}
+        method="post"
+      >
+        <button type="submit">Import DB</button>
+      </form>
     </>
   );
 }

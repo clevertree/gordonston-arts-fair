@@ -90,7 +90,9 @@ function ProfileView({ userProfile }: ProfileViewProps) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {uploadList.map(({ title, description, url }) => (
+            {uploadList.map(({
+              title, description, url, width, height
+            }) => (
               <TableRow key={url + title}>
                 <TableCell component="th" scope="row" sx={{ verticalAlign: 'top' }}>
                   <Typography component="h2">
@@ -102,14 +104,15 @@ function ProfileView({ userProfile }: ProfileViewProps) {
                   </Typography>
                   )}
                 </TableCell>
-                <TableCell sx={{ position: 'relative', width: '20rem', height: '20rem' }}>
+                <TableCell sx={{ position: 'relative', width: '50%', }}>
                   {url && (
-                  <Link href={url} target="_blank" rel="noreferrer">
+                  <Link href={url} target="_blank" rel="noreferrer" tabIndex={0}>
                     <ReloadingImage
                       loading="lazy"
                       src={url}
                       alt={title}
-                      fill
+                      width={width}
+                      height={height}
                     />
                   </Link>
                   )}

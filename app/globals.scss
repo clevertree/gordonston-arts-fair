@@ -175,3 +175,20 @@ h2 + p, h2 + div,
 h3 + p, h3 + div, {
   padding-top: 1rem
 }
+
+
+
+/* Focus styles for keyboard navigation */
+a:focus-visible {
+  outline: 2px solid var(--link-color-hover);
+  outline-offset: 2px;
+  border-radius: 2px;
+  text-decoration: underline;
+  transition: outline-offset 0.2s ease;
+}
+
+/* Special handling for links in header/footer with inverted colors */
+.header-container a:focus-visible,
+.footer-container a:focus-visible {
+  outline-color: var(--link-color-inverted);
+}
