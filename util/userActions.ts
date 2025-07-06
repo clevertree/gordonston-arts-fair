@@ -5,7 +5,7 @@
 import { getPGSQLClient } from '@util/pgsql';
 import { UserTableRow } from '@util/schema';
 
-interface SearchParams {
+export interface UserSearchParams {
   status?: string,
   order?: 'asc' | 'desc',
   orderBy?: string,
@@ -13,7 +13,7 @@ interface SearchParams {
   pageCount?: number
 }
 
-export async function listUsersAsAdmin(params: SearchParams) {
+export async function listUsersAsAdmin(params: UserSearchParams) {
   const sql = getPGSQLClient();
 
   const {
@@ -21,17 +21,24 @@ export async function listUsersAsAdmin(params: SearchParams) {
     orderBy,
     order,
     pageCount = 10,
-    page = 0
+    page = 1
   } = params;
 
   // Default sort order
   const orderByClause = `ORDER BY ${orderBy || 'id'} ${order || 'desc'}`;
   let whereClause = '';
   if (status && status !== 'all') whereClause = `WHERE status = '${status}'`;
-
-  return (await sql.query(`SELECT *
+  const pageOffset = page ? page - 1 : 0;
+  const [{ count }] = (await sql.query(`SELECT COUNT(*)
+                                      FROM gaf_user ${whereClause}`));
+  const userList = (await sql.query(`SELECT *
                                      FROM gaf_user ${whereClause} ${orderByClause}
-                                     LIMIT ${pageCount} OFFSET ${page * pageCount}`)) as UserTableRow[];
+                                     LIMIT ${pageCount} OFFSET ${pageOffset * pageCount}`)) as UserTableRow[];
+  return {
+    userList,
+    totalCount: count,
+    pageCount: Math.ceil(count / pageCount)
+  };
 }
 
 export async function fetchUserResult(email: string): Promise<UserTableRow> {

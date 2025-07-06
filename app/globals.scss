@@ -157,9 +157,9 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 400;
   font-style: normal;
   letter-spacing: 2px;
-  display: flex;
-  align-items: center;
-  white-space: break-spaces;
+  //display: flex;
+  //align-items: center;
+  //white-space: break-spaces;
 }
 
 h1 {
@@ -180,6 +180,7 @@ h3 + p, h3 + div, {
 
 /* Focus styles for keyboard navigation */
 a:focus-visible {
+  display: block;
   outline: 2px solid var(--link-color-hover);
   outline-offset: 2px;
   border-radius: 2px;

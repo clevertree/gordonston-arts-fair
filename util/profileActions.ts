@@ -34,10 +34,14 @@ export async function fetchProfileByID(userID: number) {
 
 export async function fetchProfileAndUploads(email: string) {
   const profileData = await fetchProfileByEmail(email);
+  return fetchProfileUploads(profileData);
+}
+
+export async function fetchProfileUploads(profileData: UserTableRow) {
   if (!profileData.uploads) profileData.uploads = {};
 
   // Get uploaded images
-  const imagePath = `uploads/${email.toLowerCase()}/`;
+  const imagePath = `uploads/${profileData.email.toLowerCase()}/`;
   const uploadList = await list({
     prefix: imagePath
   });

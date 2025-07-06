@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Alert,
   Box,
-  Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -41,10 +41,10 @@ function ProfileView({ userProfile }: ProfileViewProps) {
 
   return (
     <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
-      <TableContainer component={Paper}>
+      <TableContainer>
         <Table>
           <TableHead>
-            <TableRow className="bg-blue-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
+            <TableRow className="bg-blue-600 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
               <TableCell colSpan={2}>
                 Contact Information
               </TableCell>
@@ -79,49 +79,56 @@ function ProfileView({ userProfile }: ProfileViewProps) {
         Uploaded files
       </Typography>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow className="bg-green-700 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
-              <TableCell colSpan={2}>
-                File uploads:
-                {uploadList.length}
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {uploadList.map(({
-              title, description, url, width, height
-            }) => (
-              <TableRow key={url + title}>
-                <TableCell component="th" scope="row" sx={{ verticalAlign: 'top' }}>
-                  <Typography component="h2">
-                    {title}
-                  </Typography>
-                  {description && (
-                  <Typography variant="body2">
-                    {description}
-                  </Typography>
-                  )}
-                </TableCell>
-                <TableCell sx={{ position: 'relative', width: '50%', }}>
-                  {url && (
-                  <Link href={url} target="_blank" rel="noreferrer" tabIndex={0}>
-                    <ReloadingImage
-                      loading="lazy"
-                      src={url}
-                      alt={title}
-                      width={width}
-                      height={height}
-                    />
-                  </Link>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Stack direction="column">
+        <Box className="bg-green-700 bold text-white p-4 py-2 rounded-md">
+          File uploads:
+          {uploadList.length}
+        </Box>
+        {uploadList.map(({
+          title, description, url, width, height
+        }) => (
+          <Stack
+            padding={1}
+            spacing={2}
+            key={url + title}
+            direction={{ xs: 'column', sm: 'row' }}
+          >
+            <Stack
+              spacing={2}
+              sx={{
+                width: { xs: '100%', sm: '50%' },
+              }}
+            >
+              <Typography component="h2" className="break-words">
+                {title}
+              </Typography>
+              {description && (
+              <Typography variant="body2">
+                {description}
+              </Typography>
+              )}
+            </Stack>
+            {url && (
+            <Box
+              sx={{
+                width: { xs: '100%', sm: '50%' },
+              }}
+            >
+              <Link href={url} target="_blank" rel="noreferrer" tabIndex={0}>
+                <ReloadingImage
+                  loading="lazy"
+                  src={url}
+                  alt={title}
+                  width={width}
+                  height={height}
+                />
+              </Link>
+            </Box>
+            )}
+          </Stack>
+        ))}
+      </Stack>
+
     </Box>
   );
 }

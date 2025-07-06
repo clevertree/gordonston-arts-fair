@@ -1,0 +1,11 @@
+.hideOnMobile {
+    @media screen and ( max-width: 736px ) {
+        display: none !important;
+    }
+}
+
+.hideOnTablet {
+    @media screen and ( max-width: 480px ) {
+        display: none !important;
+    }
+}

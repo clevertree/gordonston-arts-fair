@@ -8,9 +8,10 @@ describe('template spec', () => {
     // });
 
     it('Navigate site', () => {
+        // TODO: bad idea
         cy.visit('/test/reset');
         cy.get('button[type="submit"]').click();
-        
+
         cy.visit('/');
         cy.injectAxe();
         cy.get('h1').should('contain', 'Gordonston');
@@ -40,9 +41,12 @@ describe('template spec', () => {
         // cy.get('input[name="password"]').type("password")
         // cy.get('button[type="submit"]').click();
 
-        cy.get('h1').should('contain', 'Artist Profile');
+        cy.get('h1').should('contain', 'Artist Dashboard');
         cy.injectAxe();
         cy.checkA11y();
+
+        cy.get('a[href="/profile/edit"]').last().click();
+        cy.get('h1').should('contain', 'Edit Artist Profile');
 
         cy.get('input[name="phone2"]').type("123");
         cy.get('button[type="submit"]').click();
