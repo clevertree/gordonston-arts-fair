@@ -29,10 +29,9 @@ export async function listUsersAsAdmin(params: SearchParams) {
   let whereClause = '';
   if (status && status !== 'all') whereClause = `WHERE status = '${status}'`;
 
-  const response = (await sql.query(`SELECT *
+  return (await sql.query(`SELECT *
                                      FROM gaf_user ${whereClause} ${orderByClause}
                                      LIMIT ${pageCount} OFFSET ${page * pageCount}`)) as UserTableRow[];
-  return response;
 }
 
 export async function fetchUserResult(email: string): Promise<UserTableRow> {

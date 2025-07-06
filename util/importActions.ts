@@ -60,28 +60,26 @@ async function insertUser(email: string, row: RowData) {
   const uploads: { [key: string]: UserFileUploadDescription } = {};
   if (name1 && description1) {
     uploads[name1] = {
-      title: name1, description: description1
+      title: name1, description: description1, width: -1, height: -1
     };
   }
 
   if (name2 && description2) {
     uploads[name2] = {
-      title: name2,
-      description: description2
+      title: name2, description: description2, width: -1, height: -1
+
     };
   }
 
   if (name3 && description3) {
     uploads[name3] = {
-      title: name3,
-      description: description3
+      title: name3, description: description3, width: -1, height: -1
     };
   }
 
   if (name4 && description4) {
     uploads[name4] = {
-      title: name4,
-      description: description4
+      title: name4, description: description4, width: -1, height: -1
     };
   }
 
