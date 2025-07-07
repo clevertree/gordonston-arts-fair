@@ -17,7 +17,7 @@ import {
   Typography
 } from '@mui/material';
 import {
-  FormFieldValues, FormHookObject, SelectField, TextField, useFormHook
+  FormHookObject, SelectField, TextField, useFormHook
 } from '@components/FormFields';
 import type { AlertColor } from '@mui/material/Alert';
 import Link from 'next/link';
@@ -50,7 +50,7 @@ function ProfileEditor({
   // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
   // const formRef = useRef<HTMLFormElement>();
   const { uploads: profileUploads = {} } = userProfileClient;
-  const formUploadList: { [filename: string]: FormHookObject } = {};
+  const formUploadList: { [filename: string]: FormHookObject<UserFileUploadDescription> } = {};
   const formRef = useRef<HTMLFormElement>(null);
 
   const formInfo = useFormHook(userProfileClient, (formData, isFormUnsaved) => {
@@ -393,7 +393,7 @@ export default ProfileEditor;
 interface ProfileUploadFormProps {
   filename: string,
   userProfile: UserTableRow,
-  uploadHooks: { [filename: string]: FormHookObject },
+  uploadHooks: { [filename: string]: FormHookObject<UserFileUploadDescription> },
 
   onUpdate(updatedUserRow: UserTableRow, isFormUnsaved: boolean): void,
 
@@ -415,8 +415,8 @@ function ProfileUploadForm({
 }: ProfileUploadFormProps) {
   const uploadInfo = userProfile.uploads[filename];
   const formUpload = useFormHook(
-    uploadInfo as unknown as FormFieldValues,
-    (updatedUploadInfo: UserFileUploadDescription) => {
+    uploadInfo,
+    (updatedUploadInfo) => {
       const uploads = { ...userProfile.uploads };
       uploads[filename] = updatedUploadInfo;
       onUpdate({

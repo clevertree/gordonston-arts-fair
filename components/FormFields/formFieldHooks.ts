@@ -19,10 +19,6 @@ export interface FormFieldProps {
   onChange: (e: any) => void
 }
 
-export interface FormFieldValues {
-  [fieldName: string]: string | undefined
-}
-
 export interface ValidationError {
   message: string,
   fieldName: string,
@@ -30,14 +26,14 @@ export interface ValidationError {
   scrollToField(): void
 }
 
-export interface FormHookObject {
-  formData: FormFieldValues,
+export interface FormHookObject<T extends object> {
+  formData: T,
   validationState: ValidationState,
   firstError?: ValidationError,
 
-  setFieldValue(fieldName: string, value: string): void
+  setFieldValue(fieldName: keyof T, value: string): void
 
-  setupInput(fieldName: string,
+  setupInput(fieldName: keyof T,
     label?: string,
     validate?: ValidationTypeList,
     autoFormat?:FormatTypeList,
@@ -45,7 +41,7 @@ export interface FormHookObject {
   ): FormFieldProps,
 }
 
-export type FormDataUpdateCallback = (formData: any, isFormUnsaved: boolean) => any;
+export type FormDataUpdateCallback<T extends object> = (formData: T, isFormUnsaved: boolean) => any;
 
 export interface FormValues {
   [fieldName: string]: any
@@ -55,41 +51,41 @@ export interface ValidationState {
   [fieldName: string]: ValidationError | undefined
 }
 
-export function useFormHook(
-  defaultFormData: FormValues,
-  updateFormData: FormDataUpdateCallback,
+export function useFormHook<T extends object>(
+  defaultFormData: T,
+  updateFormData: FormDataUpdateCallback<T>,
   showError: boolean,
 ) {
   if (!defaultFormData) throw new Error('Invalid form data');
   const [autoScrollField, setAutoScrollField] = useState<string | null>(null);
   const [validationState, setValidationState] = useState<ValidationState>({});
-  const formData = useMemo<FormValues>(() => ({ ...defaultFormData }), [defaultFormData]);
-  const formHookObject: FormHookObject = {
+  const formData = useMemo<T>(() => ({ ...defaultFormData }), [defaultFormData]);
+  const formHookObject: FormHookObject<T> = {
     formData,
     validationState,
     setupInput,
-    setFieldValue(fieldName: string, value: string) {
+    setFieldValue(fieldName: keyof T, value: string) {
       setFieldValue(fieldName, value);
       updateFormData(formData, true);
     },
   };
 
-  function setFieldValue(fieldName: string, value: string | undefined) {
+  function setFieldValue(fieldName: keyof T, value: string | undefined) {
     if (value !== undefined) {
-      formData[fieldName] = value;
+      formData[fieldName] = value as any;
     } else {
       delete formData[fieldName];
     }
   }
 
   function setupInput(
-    fieldName: string,
+    fieldName: Extract<keyof T, string>,
     label?: string,
     validate?: ValidationTypeList,
     autoFormat?:FormatTypeList,
 
   ) {
-    const currentValue: string = formData[fieldName] || '';
+    const currentValue = formData[fieldName] as string || '';
     // Validation
     let validationMessage: string | undefined;
     if (validate) {
