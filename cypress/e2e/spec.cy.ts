@@ -32,8 +32,8 @@ describe('template spec', () => {
 
         cy.get('a[href="/login"]').last().click();
         cy.get('input[name="email"]').type("test@test.com{enter}")
-        cy.get('input[name="password"]').type("password{enter}")
-        // cy.get('button[type="submit"]').click();
+        cy.get('input[name="password"]').type("password")
+        cy.get('button[type="submit"]').click();
 
         cy.get('h1').should('contain', 'Artist Dashboard');
         cy.injectAxe();
