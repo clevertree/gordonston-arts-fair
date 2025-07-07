@@ -44,7 +44,7 @@ function ProfileEditor({
   const [message, setMessage] = useState<[AlertColor, string]>(
     userProfileServer.isProfileComplete === true
       ? ['success', 'Artist profile is complete']
-      : ['info', 'Please complete your artist profile.']
+      : ['info', `Please complete your artist profile. ${userProfileServer.isProfileComplete || ''}`]
   );
   const [userProfileClient, setUserProfileClient] = useState<UserTableRow>(userProfileServer);
   // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
@@ -116,6 +116,7 @@ function ProfileEditor({
 
   return (
     <form
+      method="post"
       ref={formRef}
         // onChange={handleFormChange}
       onSubmit={async (e: any) => {
@@ -146,6 +147,7 @@ function ProfileEditor({
         </Typography>
         <fieldset disabled={status === 'updating'} className="grid md:grid-cols-3 gap-4">
           <TextField
+            autoFocus
             helperText="Please enter your first name"
             {...formInfo.setupInput('first_name', 'First Name', 'required')}
             required

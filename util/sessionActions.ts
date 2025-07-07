@@ -28,6 +28,8 @@ export async function loginAction(email: string, password: string): Promise<Acti
                           LIMIT 1`) as UserTableRow[];
   if (!rows[0]) {
     // Add a log entry
+    // eslint-disable-next-line no-console
+    console.error('User not found: ', email);
     await addUserLogEntry(null, 'log-in-error', `Email not found: ${email}`);
     return {
       message: LOGIN_ERROR_MESSAGE,
@@ -40,6 +42,8 @@ export async function loginAction(email: string, password: string): Promise<Acti
   if (!passwordResult) {
     // Add an error log entry
     await addUserLogEntry(id, 'log-in-error', `Invalid password: ${email}`);
+    // eslint-disable-next-line no-console
+    console.error('Invalid password: ', email);
     return {
       message: LOGIN_ERROR_MESSAGE,
       status: 'error'
@@ -51,6 +55,8 @@ export async function loginAction(email: string, password: string): Promise<Acti
   // Add a log entry
   await addUserLogEntry(id, 'log-in');
 
+  // eslint-disable-next-line no-console
+  console.error('User logged in: ', email);
   return {
     status: 'success',
     message: 'Login successful. Redirecting...',

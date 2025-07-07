@@ -45,6 +45,7 @@ export default function SendEmailAdmin({
   return (
     <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
       <form
+        method="post"
         ref={formRef}
         action={async () => {
           setStatus('submitting');
@@ -61,7 +62,6 @@ export default function SendEmailAdmin({
           formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
           router.refresh(); // Refresh the current page
         }}
-        method="POST"
       >
         {message && message[1] && (
         <Alert severity={message[0]}>

@@ -21,6 +21,7 @@ export default function SelectField({
   ...props
 }: SelectFieldProps) {
   const labelName = `${props.label}-label`;
+
   return (
     <FormControl
       required={required}
@@ -30,14 +31,21 @@ export default function SelectField({
       <MUISelect
         value={value || defaultValue} // Prevent usage of defaultValue
         labelId={labelName}
-        inputRef={(inputRef) => {
-          if (inputRef && inputRef.scrollIntoView && scrollIntoView) {
-            inputRef.focus();
-            inputRef.scrollIntoView({
+        inputRef={(inputRef: any) => {
+          if (inputRef && scrollIntoView) {
+            const scrollOptions: ScrollIntoViewOptions = {
               behavior: 'smooth',
               block: 'center',
               inline: 'center'
-            });
+            };
+            if (inputRef.node) {
+              inputRef.node.scrollIntoView(scrollOptions);
+              inputRef.focus();
+            } else {
+              const input = inputRef.querySelector('[tabindex="0"]') || inputRef;
+              input.focus();
+              input.scrollIntoView(scrollOptions);
+            }
           }
         }}
         onChange={(...args) => {

@@ -23,6 +23,13 @@ export default function TextField({
           });
         }
       }}
+      onKeyDown={(e) => {
+        const inputField = e.target as HTMLInputElement;
+        if (e.key === 'Enter' && inputField.form) {
+          // Trigger onBlur if Enter key is pressed
+          if (props.onBlur) props.onBlur(e as any);
+        }
+      }}
       slotProps={{
         formHelperText: {
           sx: {
