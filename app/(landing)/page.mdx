@@ -12,34 +12,35 @@ export const metadata = {
 
 export {formatDate};
 export const eventDate = new Date(process.env.NEXT_PUBLIC_EVENT_DATE);
+export const eventDayBeforeDate = new Date(eventDate.getTime() - 1000 * 60 * 60 * 24);
 export const registrationOpenDate = new Date(process.env.NEXT_PUBLIC_REGISTRATION_OPEN_DATE);
 export const registrationTimeUntil = getTimeSpan(new Date(), registrationOpenDate);
 export const registrationEndDate = new Date(process.env.NEXT_PUBLIC_REGISTRATION_END_DATE);
 export const registrationFee = process.env.NEXT_PUBLIC_REGISTRATION_FEE;
 export const registrationFeeDate = new Date(process.env.NEXT_PUBLIC_REGISTRATION_FEE_DATE);
+export const notifyStatusDate = new Date(process.env.NEXT_PUBLIC_NOTIFY_DATE);
 export const boothFee = process.env.NEXT_PUBLIC_BOOTH_FEE;
 
 
 <h2 className='m-auto text-[color:var(--gold-color)] font-bold italic'>Gordonston Art Fair</h2>
 
 You are warmly welcomed to our annual fine arts and crafts fair, hosted in historic Gordonston's Juliette Gordon Low
-Park. There will be food trucks, live music, and a supervised children's crafts area.
+Park. In addition to juried local and regional artists and artisans, we will hold a gently used book sales.
+There will be food trucks, live music, and a supervised children's crafts area.
 
 # Artist Application for the 2026 Gordonston Art Fair
 
 Welcome to the application page. Please carefully read the following:
 
-* This event takes place on {formatDate(eventDate)}
-* Online applications will be accepted on {formatDate(registrationOpenDate)}.
-* Applications must be submitted by {formatDate(registrationEndDate)} with a non-refundable fee of ${registrationFee}`.
+* This event takes place on {formatDate(eventDate)}.
+* Online applications will be accepted beginning {formatDate(registrationOpenDate)}.
+* Applications must be submitted by {formatDate(registrationEndDate)} with a non-refundable fee of ${registrationFee}.
 * Artists/artisans will be notified of their status (accepted, declined, or waiting list) by {formatDate(registrationEndDate)}.
-* We will then be expecting an ${boothFee} booth fee to be made by {formatDate(registrationFeeDate)}
+* If you are accepted, the ${boothFee} booth fee must be paid by {formatDate(registrationFeeDate)}.
 * As our vending space is limited, we may fill up before the deadline. In this event, we will maintain a
 waiting list.
+* Only online applications will be accepted.
 
-Only online applications will be accepted. The registration fee is ${registrationFee}.00.
-If accepted, the booth fee is ${boothFee}.00 and must
-be paid upon acceptance.
 
 Application deadline is {formatDate(registrationEndDate)};
 however, artists will be informed in a timely manner whether they have
@@ -47,6 +48,7 @@ been selected so that they may plan accordingly.
 Spaces may fill up before the deadline.
 We will close/extend submissions at our discretion.
 We will keep artists on a waitlist in the event spaces become available.
+We will notify applicants by {formatDate(notifyStatusDate)}.
 
 
 <h2 className='m-auto text-[color:var(--gold-color)] italic pt-8 md:pt-18'>History of Gordonston</h2>
@@ -92,11 +94,10 @@ also contains a playground.
 
 <p className='m-auto sm:text-2xl pt-8 md:pt-18'>1948</p>
 <h2 className='m-auto text-[color:var(--gold-color)] italic'>A Community Structure</h2>
-<h3 className='m-auto text-2xl sm:text-4xl tracking-widest uppercase'>New Cottage</h3>
+<h3 className='m-auto text-2xl sm:text-4xl tracking-widest uppercase'>Cottage</h3>
 
 The cottage in the park was built in 1948 by Union Camp Corporation and donated to the Girl Scouts who have been holding
-meetings in it for generations. Resident-sponsored, cottage rental is available by visiting
-[Gordonston.com](http://www.Gordonston.com).
+meetings in it for generations.
 
 
 
@@ -128,14 +129,15 @@ media or genre.
     </div>
     <div>
         * Tents and displays must be secured (stakes allowed) and able to withstand strong winds and all-weather
-        conditions – we
-        are a rain or shine event.
-        * Artist booths must remain open for the duration of the event. No early teardowns
-        * Artist vehicles must be off the park grounds by 7:00 pm on Friday, February 27th, 2026 and by 9:30 am on
-        Saturday,
-        Feb 28nd and are not permitted to return until after 4:00 pm on Saturday. It is suggested that to
-        avoid
-        congestion, artists completely teardown their booths before bringing in vehicles for load in.
+        conditions – we are a rain or shine event.
+        * Early artist setup on Friday (Feb 27th) is strongly suggested.
+        * Artist booths must remain open for the duration of the event. No early tear-downs.
+        * Security will be provided on Friday night.
+        * Artist vehicles must be off the park grounds by 7:00 pm on {formatDate(eventDayBeforeDate, true, false)} and
+        by 9:30 am on
+        {formatDate(eventDate, true, false)} and are not permitted to return until after 4:00 pm on Saturday. It is
+        suggested that to
+        avoid congestion, artists completely teardown their booths before bringing in vehicles for load in.
     </div>
 
 </div>
@@ -150,11 +152,7 @@ Artists will be offered a number of amenities to make their experience as enjoya
 
 <div className='grid sm:grid-cols-2 gap-8'>
     <div>
-
         ## Early Setup
-
-        >Early artist setup on Friday (Feb 27th) is strongly suggested.
-        Please make arrangements for accommodations.
 
         ## Security
 
@@ -202,7 +200,7 @@ Artists will be offered a number of amenities to make their experience as enjoya
         * Booth sitters
         * Park clean-up before and after the fair
         * Trash collection
-        * Book and flower sales
+        * Book sale
 
     </div>
     <div>
@@ -239,8 +237,11 @@ Ave. at #10 Edgewood Road, Savannah, Georgia 31404
 
 ## I would like an exhibitor booth, what do I do?
 
-First, you need to apply for an exhibitor booth. Only online applications will be accepted. The application fee is
-${registrationFee}.00. If accepted, the booth fee is ${boothFee}.00 and must be paid upon acceptance. The application deadline is July 31st.
 The website will begin accepting applications for artists on {formatDate(registrationOpenDate)}.
+
+First, you need to apply for an exhibitor booth. Only online applications will be accepted. The application fee is
+${registrationFee}.00. If accepted, the booth fee is ${boothFee}.00 and must be paid upon acceptance.
+The application deadline is {formatDate(registrationEndDate)} .
+
 
 <div className='pb-16'/>
