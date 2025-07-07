@@ -8,9 +8,10 @@ import { HttpError } from '@util/exception/httpError';
 import { UserPasswordResetEmailTemplate, UserRegistrationEmailTemplate } from '@email';
 import { getPGSQLClient } from '@util/pgsql';
 import { UserTableRow } from '@util/schema';
-import { fetchUserID, fetchUserResult, isAdmin } from '@util/userActions';
+import { fetchUserID, isAdmin } from '@util/userActions';
 import { addUserLogEntry } from '@util/logActions';
 import { LOGIN_ERROR_MESSAGE } from '@util/messageUtil';
+import { fetchProfileByEmail } from '@util/profileActions';
 
 export type ActionResponse = {
   status: 'success' | 'error';
@@ -182,7 +183,7 @@ export async function passwordResetValidateAction(
     };
   }
 
-  const user = await fetchUserResult(email);
+  const user = await fetchProfileByEmail(email);
 
   // Delete the reset request
   delete PASSWORD_RESET_REQUESTS[email];

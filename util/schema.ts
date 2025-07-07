@@ -22,7 +22,7 @@ export const profileStatuses: UserStatus[] = [
 export interface UserFileUploadDescription {
   title: string,
   description?: string,
-  url?: string
+  url: string
   width: number,
   height: number,
 }

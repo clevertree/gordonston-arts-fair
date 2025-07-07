@@ -41,35 +41,6 @@ export async function listUsersAsAdmin(params: UserSearchParams) {
   };
 }
 
-export async function fetchUserResult(email: string): Promise<UserTableRow> {
-  const sql = getPGSQLClient();
-  const [userRow] = (await sql`SELECT id,
-                                      type,
-                                      email,
-                                      first_name,
-                                      last_name,
-                                      company_name,
-                                      address,
-                                      city,
-                                      state,
-                                      zipcode,
-                                      phone,
-                                      phone2,
-                                      website,
-                                      description,
-                                      category,
-                                      uploads,
-                                      status,
-                                      created_at,
-                                      updated_at
-                               FROM gaf_user
-                               WHERE email = ${email.toLowerCase()}
-                               LIMIT 1`) as UserTableRow[];
-  if (!userRow) throw new Error(`User not found: ${email}`);
-  if (!userRow.uploads) userRow.uploads = {};
-  return userRow;
-}
-
 export async function fetchUserID(email: string) {
   const sql = getPGSQLClient();
   const rows = (await sql`SELECT id

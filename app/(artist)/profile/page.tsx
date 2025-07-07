@@ -1,5 +1,5 @@
 import { validateSession } from '@util/session';
-import { fetchProfileAndUploads } from '@util/profileActions';
+import { fetchProfileByEmail } from '@util/profileActions';
 import { redirect } from 'next/navigation';
 import ProfileView from '@components/Profile/ProfileView';
 import Link from 'next/link';
@@ -16,7 +16,7 @@ export default async function ProfilePage() {
   } catch (e: any) {
     return redirect(`/login?message=${e.message}`);
   }
-  const profileData = await fetchProfileAndUploads(sessionEmail);
+  const profileData = await fetchProfileByEmail(sessionEmail);
 
   return (
     <>

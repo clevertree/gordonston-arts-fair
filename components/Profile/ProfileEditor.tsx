@@ -84,9 +84,6 @@ function ProfileEditor({
     setStatus('updating');
     setMessage(['info', 'Submitting form...']);
     try {
-      Object.keys(profileUploads).forEach((filename) => {
-        delete profileUploads[filename].url;
-      });
       userProfileClient.uploads = profileUploads;
       const updatedUserProfile = await updateProfile(userProfileClient);
       setStatus('ready');

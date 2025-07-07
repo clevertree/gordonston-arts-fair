@@ -1,7 +1,7 @@
 import ProfileEditor from '@components/Profile/ProfileEditor';
 import { validateSession } from '@util/session';
 import {
-  deleteFile, fetchProfileAndUploads, updateProfile, uploadFile
+  deleteFile, fetchProfileByEmail, updateProfile, uploadFile
 } from '@util/profileActions';
 import { redirect } from 'next/navigation';
 import { UserTableRow } from '@util/schema';
@@ -19,7 +19,7 @@ export default async function ProfilePage() {
   } catch (e: any) {
     return redirect(`/login?message=${e.message}`);
   }
-  const profileData = await fetchProfileAndUploads(sessionEmail);
+  const profileData = await fetchProfileByEmail(sessionEmail);
 
   return (
     <>
@@ -31,7 +31,7 @@ export default async function ProfilePage() {
           'use server';
 
           await uploadFile(sessionEmail, file);
-          return fetchProfileAndUploads(sessionEmail);
+          return fetchProfileByEmail(sessionEmail);
         }}
         deleteFile={async (filename: string) => {
           'use server';

@@ -1,6 +1,5 @@
-import { fetchUserResult } from '@util/userActions';
 import { validateAdminSession } from '@util/sessionActions';
-import { fetchProfileUploads, updateUserStatus } from '@util/profileActions';
+import { fetchProfileByEmail, updateUserStatus } from '@util/profileActions';
 import Link from 'next/link';
 import UserStatusEditorAdmin from '@components/Admin/UserStatusEditorAdmin';
 import ProfileView from '@components/Profile/ProfileView';
@@ -26,8 +25,7 @@ export default async function AdminUserManagementPage({
 
   const { email } = await params;
   const emailFormatted = email.replace('%40', '@');
-  const profile = await fetchUserResult(emailFormatted);
-  await fetchProfileUploads(profile);
+  const profile = await fetchProfileByEmail(emailFormatted);
   const userLogs = await fetchUserLogs(profile.id);
 
   return (
