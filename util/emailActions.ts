@@ -6,7 +6,7 @@ import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 import { EmailTemplate } from '@email';
 import { addUserLogEntry } from '@util/logActions';
-import { fetchProfileByID } from '@util/profileActions';
+import { fetchProfileByEmail } from '@util/profileActions';
 
 const { SMTP_SERVER_HOST } = process.env;
 const { SMTP_SERVER_USERNAME } = process.env;
@@ -25,8 +25,8 @@ const transporter = nodemailer.createTransport({
 });
 
 // TODO: allow overrides
-export async function sendTemplateMail(userID: number, template: EmailTemplate, props: any = {}) {
-  const { email } = await fetchProfileByID(userID);
+export async function sendTemplateMail(email: string, template: EmailTemplate, props: any = {}) {
+  const { id: userID } = await fetchProfileByEmail(email);
   try {
     const messageInfo = {
       to: email,

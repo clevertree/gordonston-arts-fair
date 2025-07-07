@@ -47,11 +47,11 @@ export type UserTableRow = {
   status: UserStatus;
   created_at?: string; // Required timestamp in ISO format
   updated_at?: string | null; // Optional timestamp in ISO format
-  uploads?: {
+  uploads: {
     [filename: string]: UserFileUploadDescription
   },
   // Non DB fields
-  isProfileComplete?: true | string
+  isProfileComplete: true | string
 };
 
 export type NewUserTableRow = Omit<UserTableRow, 'id' | 'created_at' | 'updated_at'>;

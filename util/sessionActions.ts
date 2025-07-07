@@ -103,7 +103,7 @@ export async function registerAction(email: string, password: string): Promise<A
   await addUserLogEntry(userID, 'register');
 
   // Send the registration email
-  await sendTemplateMail(userID, UserRegistrationEmailTemplate);
+  await sendTemplateMail(email, UserRegistrationEmailTemplate);
 
   return {
     status: 'success',
@@ -148,7 +148,7 @@ export async function passwordResetAction(email: string): Promise<ActionResponse
 
   // Send the password reset email
   const validationURL = `${process.env.NEXT_PUBLIC_METADATA_URL}/password/validate/${email}/${resetCode}`;
-  await sendTemplateMail(id, UserPasswordResetEmailTemplate, { validationURL });
+  await sendTemplateMail(email, UserPasswordResetEmailTemplate, { validationURL });
   // await sendMail({
   //   to: email,
   //   html: `<a href='${url}'>Click here to reset your password</a>`,

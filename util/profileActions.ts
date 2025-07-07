@@ -9,27 +9,19 @@ import { UpdatedUserTableRow, UserStatus, UserTableRow } from '@util/schema';
 import { fetchUserID } from '@util/userActions';
 import { addUserLogEntry } from '@util/logActions';
 import { imageDimensionsFromStream } from 'image-dimensions';
+import { isProfileComplete } from '@util/profile';
 
 export async function fetchProfileByEmail(email: string) {
   // Get db client
   const sql = getPGSQLClient();
 
-  const [userRow] = (await sql`SELECT *
-                          FROM gaf_user
+  const [userRow] = (await sql`SELECT u.*
+                               FROM gaf_user as u
                           WHERE email = ${email.toLowerCase()} LIMIT 1`) as UserTableRow[];
   if (!userRow) throw new Error(`User not found: ${email}`);
   if (!userRow.uploads) userRow.uploads = {};
+  userRow.isProfileComplete = isProfileComplete(userRow);
   return userRow;
-}
-
-export async function fetchProfileByID(userID: number) {
-  // Get db client
-  const sql = getPGSQLClient();
-  const rows = (await sql`SELECT *
-                          FROM gaf_user
-                          WHERE id = ${userID} LIMIT 1`) as UserTableRow[];
-  if (!rows[0]) throw new Error(`User ID not found: ${userID}`);
-  return rows[0];
 }
 
 export async function updateProfile(email: string, updatedUserRow: UpdatedUserTableRow) {
@@ -114,7 +106,8 @@ export async function deleteFile(email: string, filename: string) {
     console.log('Deleted file: ', `${imagePath}/${filename}`);
   } catch (error: any) {
     console.error('Error deleting file: ', error);
-  } return userRow;
+  }
+  return userRow;
 }
 
 export async function updateUserStatus(email: string, newStatus: UserStatus) {

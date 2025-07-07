@@ -14,10 +14,12 @@ describe('<ProfileEditor />', () => {
     zipcode: '',
     phone: '',
     type: 'admin',
-    status: 'submitted'
+    status: 'submitted',
+    isProfileComplete: 'false',
+    uploads: {}
   };
   beforeEach(() => {
-    cy.viewport(1080, 1080);
+    cy.viewport(600, 600);
     cy.injectAxe();
   });
   it('renders', () => {

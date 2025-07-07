@@ -31,7 +31,7 @@ interface ProfileEditorProps {
 
   uploadFile(file: File): Promise<UserTableRow>
 
-  deleteFile(filename: string): Promise<void>
+  deleteFile(filename: string): Promise<UserTableRow>
 }
 
 function ProfileEditor({
@@ -44,7 +44,7 @@ function ProfileEditor({
   const [message, setMessage] = useState<[AlertColor, string]>(
     userProfileServer.isProfileComplete === true
       ? ['success', 'Artist profile is complete']
-      : ['info', `Please complete your artist profile. ${userProfileServer.isProfileComplete}`]
+      : ['info', 'Please complete your artist profile.']
   );
   const [userProfileClient, setUserProfileClient] = useState<UserTableRow>(userProfileServer);
   // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
@@ -53,10 +53,12 @@ function ProfileEditor({
   const formUploadList: { [filename: string]: FormHookObject } = {};
   const formRef = useRef<HTMLFormElement>(null);
 
-  const formInfo = useFormHook(userProfileClient, (formData) => {
+  const formInfo = useFormHook(userProfileClient, (formData, isFormUnsaved) => {
     setUserProfileClient((oldUserProfile) => (
       { ...oldUserProfile, ...formData }));
-    handleFormChange();
+    if (isFormUnsaved) {
+      handleFormChange();
+    }
     // setMessage('')
   }, status === 'error');
   const {
@@ -115,7 +117,7 @@ function ProfileEditor({
   return (
     <form
       ref={formRef}
-      onChange={handleFormChange}
+        // onChange={handleFormChange}
       onSubmit={async (e: any) => {
         e.preventDefault();
         await handleSubmit();
@@ -303,8 +305,8 @@ function ProfileEditor({
                       updatedUserProfile = await uploadFile(file);
                       count += 1;
                     }));
+                    setStatus('ready');
                     setMessage(['success', `${count} file${count === 1 ? '' : 's'} have been uploaded`]);
-                    setStatus('unsaved');
                     e.target.value = '';
                     if (updatedUserProfile) {
                       setUserProfileClient((oldProfile) => ({
@@ -342,25 +344,25 @@ function ProfileEditor({
                   <ProfileUploadForm
                     key={filename}
                     filename={filename}
-                    uploadInfo={profileUploads[filename]}
+                    userProfile={userProfileClient}
                     uploadHooks={formUploadList}
                     deleteFile={deleteFile}
                     status={status}
-                    onUpdate={(upload) => {
-                      setUserProfileClient((oldData) => {
-                        const uploads = { ...oldData.uploads };
-                        uploads[filename] = upload;
-                        return { ...oldData, uploads };
-                      });
+                    onUpdate={(updatedUserProfile, isFormUnsaved) => {
+                      setUserProfileClient((oldProfile) => ({
+                        ...oldProfile,
+                        ...updatedUserProfile
+                      }));
+                      if (isFormUnsaved) handleFormChange();
                     }}
-                    onFileDeleted={() => {
-                      setUserProfileClient((oldData) => {
-                        const uploads = { ...oldData.uploads };
-                        delete uploads[filename];
-                        setMessage(['success', `File deleted successfully: ${filename}`]);
-                        return { ...oldData, uploads };
-                      });
-                    }}
+                      // onFileDeleted={() => {
+                      //   setUserProfileClient((oldData) => {
+                      //     const uploads = { ...oldData.uploads };
+                      //     delete uploads[filename];
+                      //     setMessage(['success', `File deleted successfully: ${filename}`]);
+                      //     return { ...oldData, uploads };
+                      //   });
+                      // }}
                   />
                 ))}
               </TableBody>
@@ -388,28 +390,40 @@ export default ProfileEditor;
 
 interface ProfileUploadFormProps {
   filename: string,
-  uploadInfo: UserFileUploadDescription,
+  userProfile: UserTableRow,
   uploadHooks: { [filename: string]: FormHookObject },
 
-  onUpdate(upload: UserFileUploadDescription): void,
+  onUpdate(updatedUserRow: UserTableRow, isFormUnsaved: boolean): void,
 
-  onFileDeleted(): void,
+  // onFileDeleted(): void,
 
-  deleteFile(filename: string): Promise<void>,
+  deleteFile(filename: string): Promise<UserTableRow>,
 
   status: 'ready' | 'unsaved' | 'updating' | 'error'
 }
 
 function ProfileUploadForm({
   filename,
-  uploadInfo,
+  userProfile,
   uploadHooks,
   onUpdate,
-  onFileDeleted,
+  // onFileDeleted,
   deleteFile,
   status
 }: ProfileUploadFormProps) {
-  const formUpload = useFormHook(uploadInfo as unknown as FormFieldValues, onUpdate, status === 'error');
+  const uploadInfo = userProfile.uploads[filename];
+  const formUpload = useFormHook(
+    uploadInfo as unknown as FormFieldValues,
+    (updatedUploadInfo: UserFileUploadDescription) => {
+      const uploads = { ...userProfile.uploads };
+      uploads[filename] = updatedUploadInfo;
+      onUpdate({
+        ...userProfile,
+        uploads
+      }, true);
+    },
+    status === 'error'
+  );
   // eslint-disable-next-line no-param-reassign
   uploadHooks[filename] = formUpload;
   return (
@@ -449,8 +463,8 @@ function ProfileUploadForm({
                 if (!window.confirm(
                   `Are you sure you want to permanently delete this file: ${filename}`
                 )) return;
-                await deleteFile(filename);
-                onFileDeleted();
+                const userRow = await deleteFile(filename);
+                onUpdate(userRow, false);
               }}
             >
               Delete Image
