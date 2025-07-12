@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import * as process from 'node:process';
+import { validateSession } from '@util/session';
+import { redirect } from 'next/navigation';
+import { fetchProfileByEmail } from '@util/profileActions';
 
 const stripe = new Stripe(`${process.env.STRIPE_SECRET_KEY}`, {
   // apiVersion: '2025-06-30.basil',
@@ -12,6 +15,14 @@ export async function POST(
   request: Request,
   { params }: { params: Params }
 ) {
+  let sessionEmail: string | undefined;
+  try {
+    const session = await validateSession();
+    sessionEmail = session.email;
+  } catch (e: any) {
+    return redirect(`/login?message=${e.message}`);
+  }
+  const profileData = await fetchProfileByEmail(sessionEmail);
   const { feeType } = await params;
   const lineItem = {
     price_data: {
@@ -47,6 +58,9 @@ export async function POST(
   const session = await stripe.checkout.sessions.create({
     // payment_method_types: ['card'],
     line_items: [lineItem],
+    metadata: {
+      userID: profileData.id,
+    },
     mode: 'payment',
     success_url: `${BASE_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${BASE_URL}/payment/cancel`,

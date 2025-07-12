@@ -3,7 +3,6 @@ import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { addTransaction } from '@util/transActions';
-import { fetchProfileByEmail } from '@util/profileActions';
 
 // Initialize Stripe with type checking for the secret key
 if (!process.env.STRIPE_SECRET_WEBHOOK_KEY) {
@@ -58,19 +57,18 @@ export async function POST(request: Request) {
     case 'charge.refunded':
     case 'charge.succeeded': {
       const {
-        amount, billing_details: {
-          email: userEmail,
-        }
+        amount,
+        metadata
       } = event.data.object;
-      let userID: number | null = null;
-      if (userEmail) {
-        try {
-          const profile = await fetchProfileByEmail(userEmail);
-          userID = profile.id;
-        } catch (e: any) {
-          console.error('Error fetching user profile by email. ', e.message);
-        }
-      }
+      const userID: number | null = metadata?.userID as unknown as number || null;
+      // if (userEmail) {
+      //   try {
+      //     const profile = await fetchProfileByEmail(userEmail);
+      //     userID = profile.id;
+      //   } catch (e: any) {
+      //     console.error('Error fetching user profile by email. ', e.message);
+      //   }
+      // }
       await addTransaction(userID, event.type, amount / 100, event.type, event.data.object);
       console.log('event.type', amount / 100, event.type);
       // Then define and call a function to handle the event charge.succeeded
