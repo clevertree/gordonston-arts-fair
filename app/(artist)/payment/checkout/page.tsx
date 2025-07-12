@@ -5,8 +5,12 @@ import Link from 'next/link';
 import Checkout from '@components/Payment/Checkout';
 
 export const metadata = {
-  title: 'Artist Profile',
+  title: 'Artist Checkout',
 };
+
+const stripePublishableKey = `${process.env.TEST_MODE === 'true'
+  ? process.env.STRIPE_PUBLISHABLE_KEY_LIVE
+  : process.env.STRIPE_PUBLISHABLE_KEY_TEST}`;
 
 // TODO: setup userID in checkout session
 export default async function CheckoutPage() {
@@ -23,7 +27,7 @@ export default async function CheckoutPage() {
     <>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">Artist Checkout</h1>
 
-      <Checkout />
+      <Checkout stripePublishableKey={stripePublishableKey} />
 
       <Link href="/profile/edit">Click here to edit your profile</Link>
       {JSON.stringify(profileData)}

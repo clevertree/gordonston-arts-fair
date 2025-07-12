@@ -8,7 +8,7 @@ import { UserTableRow } from '@util/schema';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Artist Profile',
+  title: 'Edit Artist Profile',
 };
 
 export default async function ProfilePage() {

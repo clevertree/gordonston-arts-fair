@@ -10,9 +10,9 @@ import UserLogAdmin from '@components/Admin/UserLogAdmin';
 import React from 'react';
 import { fetchUserLogs } from '@util/logActions';
 
-// export const metadata = {
-//     title: 'Manage an Artist',
-// }
+export const metadata = {
+  title: 'Manage an Artist',
+};
 
 const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
