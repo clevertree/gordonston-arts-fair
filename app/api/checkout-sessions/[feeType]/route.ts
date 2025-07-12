@@ -59,14 +59,16 @@ export async function POST(
       message: 'Invalid fee amount'
     }, { status: 400 });
   }
+  const metadata = {
+    userID: profileData.id,
+  };
   const session = await stripe.checkout.sessions.create({
     // payment_method_types: ['card'],
     line_items: [lineItem],
     payment_intent_data: {
-      metadata: {
-        userID: profileData.id,
-      },
+      metadata,
     },
+    metadata,
     mode: 'payment',
     success_url: `${BASE_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${BASE_URL}/payment/cancel`,
