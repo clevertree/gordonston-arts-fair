@@ -121,6 +121,7 @@ export async function registerAction(email: string, password: string): Promise<A
 const PASSWORD_RESET_REQUESTS: {
   [email: string]: string;
 } = {};
+
 export async function passwordResetAction(email: string): Promise<ActionResponse> {
   const sql = getPGSQLClient();
   // Fetch user from the database
@@ -153,7 +154,7 @@ export async function passwordResetAction(email: string): Promise<ActionResponse
   console.log('Password reset request: ', email, resetCode);
 
   // Send the password reset email
-  const validationURL = `${process.env.NEXT_PUBLIC_METADATA_URL}/password/validate/${email}/${resetCode}`;
+  const validationURL = `${process.env.NEXT_PUBLIC_BASE_URL}/password/validate/${email}/${resetCode}`;
   await sendTemplateMail(email, UserPasswordResetEmailTemplate, { validationURL });
   // await sendMail({
   //   to: email,

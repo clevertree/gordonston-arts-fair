@@ -3,7 +3,7 @@ import { formatDate } from '@util/date';
 const eventDate = new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`);
 const boothFee = process.env.NEXT_PUBLIC_BOOTH_FEE;
 const registrationFeeDate = new Date(`${process.env.NEXT_PUBLIC_REGISTRATION_FEE_DATE}`);
-const paymentURL = `${process.env.NEXT_PUBLIC_METADATA_URL}/payment`;
+const paymentURL = `${process.env.NEXT_PUBLIC_BASE_URL}/payment`;
 
 export const name = 'exhibit-accepted';
 export const subject = 'Your exhibit has been accepted';

@@ -45,28 +45,16 @@ CREATE TABLE IF NOT EXISTS gaf_user
 );
 
 
-CREATE TYPE gaf_user_log_type AS ENUM (
-    'log-in',
-    'log-in-error',
-    'log-out',
-    'register',
-    'register-error',
-    'password-reset',
-    'password-reset-error',
-    'message' ,
-    'message-error',
-    'status-change'
-    );
-CREATE TABLE IF NOT EXISTS gaf_user_log
+CREATE TABLE IF NOT EXISTS gaf_transactions
 (
     id         SERIAL PRIMARY KEY,
-    user_id    INT               NULL,
-    type       gaf_user_log_type NOT NULL,
-    message    VARCHAR(256)      NOT NULL,
-    created_at TIMESTAMP         NOT NULL,
-    CONSTRAINT fk_artist
-        FOREIGN KEY (user_id)
-            REFERENCES gaf_user (id)
+    user_id    INT            NULL,
+    email      VARCHAR(256)   NOT NULL,
+    type       VARCHAR(256)   NOT NULL,
+    amount     DECIMAL(10, 2) NULL,
+    status     VARCHAR(256)   NOT NULL,
+    created_at TIMESTAMP      NOT NULL,
+    content    JSON           NOT NULL
 );
 
 -- DROP FUNCTION search_path_by_keywords;

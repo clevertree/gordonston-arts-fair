@@ -1,0 +1,84 @@
+/* eslint-disable no-console */
+import { headers } from 'next/headers';
+import { NextResponse } from 'next/server';
+import Stripe from 'stripe';
+import { addTransaction } from '@util/transActions';
+import { fetchProfileByEmail } from '@util/profileActions';
+
+// Initialize Stripe with type checking for the secret key
+if (!process.env.STRIPE_SECRET_WEBHOOK_KEY) {
+  throw new Error('STRIPE_SECRET_WEBHOOK_KEY is not defined');
+}
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_WEBHOOK_KEY);
+
+// Type check webhook secret
+if (!process.env.STRIPE_SECRET_WEBHOOK_KEY) {
+  throw new Error('STRIPE_SECRET_WEBHOOK_KEY is not defined');
+}
+
+const endpointSecret = process.env.STRIPE_SECRET_WEBHOOK_KEY;
+
+export async function POST(request: Request) {
+  const body = await request.text();
+  const sig = (await headers()).get('stripe-signature');
+
+  if (!sig) {
+    console.error('No stripe signature found');
+    return NextResponse.json(
+      { error: 'No stripe signature found' },
+      { status: 400 }
+    );
+  }
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
+  } catch (err) {
+    const error = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Error verifying webhook signature:', error);
+    return NextResponse.json(
+      { error: `Webhook Error: ${error}` },
+      { status: 400 }
+    );
+  }
+
+  // Handle the event
+  switch (event.type) {
+    case 'checkout.session.completed':
+      console.log('Checkout complete', event);
+      // Handle successful payment
+      break;
+      // case 'charge.dispute.funds_reinstated':
+      // case 'charge.dispute.funds_withdrawn':
+      // case 'charge.refund.updated':
+    case 'charge.expired':
+    case 'charge.pending':
+    case 'charge.refunded':
+    case 'charge.succeeded': {
+      const {
+        amount, billing_details: {
+          email: userEmail,
+        }
+      } = event.data.object;
+      let userID: number | null = null;
+      if (userEmail) {
+        try {
+          const profile = await fetchProfileByEmail(userEmail);
+          userID = profile.id;
+        } catch (e: any) {
+          console.error('Error fetching user profile by email. ', e.message);
+        }
+      }
+      await addTransaction(userID, event.type, amount / 100, event.type, event.data.object);
+      console.log('event.type', amount / 100, event.type);
+      // Then define and call a function to handle the event charge.succeeded
+      break;
+    }
+    default:
+      console.log(`Unhandled event type: ${event.type}`);
+  }
+
+  return NextResponse.json({ message: 'Webhook received' });
+}
