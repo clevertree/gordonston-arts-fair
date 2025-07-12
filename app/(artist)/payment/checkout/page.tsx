@@ -8,7 +8,7 @@ export const metadata = {
   title: 'Artist Checkout',
 };
 
-const stripePublishableKey = `${process.env.TEST_MODE === 'true'
+const stripePublishableKey = `${process.env.TEST_MODE === 'false'
   ? process.env.STRIPE_PUBLISHABLE_KEY_LIVE
   : process.env.STRIPE_PUBLISHABLE_KEY_TEST}`;
 

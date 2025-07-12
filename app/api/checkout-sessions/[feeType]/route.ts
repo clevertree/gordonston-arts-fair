@@ -5,7 +5,11 @@ import { validateSession } from '@util/session';
 import { redirect } from 'next/navigation';
 import { fetchProfileByEmail } from '@util/profileActions';
 
-const stripe = new Stripe(`${process.env.STRIPE_SECRET_KEY}`, {
+const stripeSecretKey = `${process.env.TEST_MODE === 'false'
+  ? process.env.STRIPE_SECRET_KEY_LIVE
+  : process.env.STRIPE_SECRET_KEY_TEST}`;
+
+const stripe = new Stripe(stripeSecretKey, {
   // apiVersion: '2025-06-30.basil',
 });
 const BASE_URL = `${process.env.NEXT_PUBLIC_BASE_URL}`;
