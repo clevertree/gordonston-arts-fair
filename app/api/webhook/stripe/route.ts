@@ -3,6 +3,8 @@ import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { addTransaction } from '@util/transActions';
+import { FeeMetaData } from '@app/api/checkout-sessions/[feeType]/route';
+import { fetchProfileByID, updateProfile } from '@util/profileActions';
 
 // Initialize Stripe with type checking for the secret key
 if (!process.env.STRIPE_SECRET_WEBHOOK_KEY) {
@@ -60,18 +62,21 @@ export async function POST(request: Request) {
         amount,
         metadata
       } = event.data.object;
-      const userID: number | null = metadata?.userID as unknown as number || null;
-      // if (userEmail) {
-      //   try {
-      //     const profile = await fetchProfileByEmail(userEmail);
-      //     userID = profile.id;
-      //   } catch (e: any) {
-      //     console.error('Error fetching user profile by email. ', e.message);
-      //   }
-      // }
+      const {
+        userID,
+        feeType
+      } = metadata as unknown as FeeMetaData;
       await addTransaction(userID, event.type, amount / 100, event.type, event.data.object);
-      console.log('event.type', amount / 100, event.type);
-      // Then define and call a function to handle the event charge.succeeded
+      console.log('STRIPE', amount / 100, event.type);
+      const profileInfo = await fetchProfileByID(userID);
+
+      switch (feeType) {
+        case 'registration':
+          if (profileInfo.status === 'registered') {
+            updateProfile();
+          }
+      }
+
       break;
     }
     default:

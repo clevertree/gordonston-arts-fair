@@ -19,6 +19,8 @@ export type ActionResponse = {
   redirectURL?: string;
 };
 
+
+refactor into login/phone 2 factor
 export async function loginAction(email: string, password: string): Promise<ActionResponse> {
   const sql = getPGSQLClient();
   // Fetch user from the database

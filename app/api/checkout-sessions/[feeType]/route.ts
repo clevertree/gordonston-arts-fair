@@ -15,6 +15,11 @@ const stripe = new Stripe(stripeSecretKey, {
 const BASE_URL = `${process.env.NEXT_PUBLIC_BASE_URL}`;
 type Params = Promise<{ feeType: string }>;
 
+export interface FeeMetaData {
+  userID: number;
+  feeType: string;
+}
+
 export async function POST(
   request: Request,
   { params }: { params: Params }
@@ -59,8 +64,9 @@ export async function POST(
       message: 'Invalid fee amount'
     }, { status: 400 });
   }
-  const metadata = {
+  const metadata:FeeMetaData = {
     userID: profileData.id,
+    feeType
   };
   const session = await stripe.checkout.sessions.create({
     // payment_method_types: ['card'],
