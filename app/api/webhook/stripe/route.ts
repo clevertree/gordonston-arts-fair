@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { addTransaction } from '@util/transActions';
 import { FeeMetaData } from '@app/api/checkout-sessions/[feeType]/route';
-import { fetchProfileByID, updateProfile } from '@util/profileActions';
+import { fetchProfileByID, updateUserStatus } from '@util/profileActions';
 
 // Initialize Stripe with type checking for the secret key
 if (!process.env.STRIPE_SECRET_WEBHOOK_KEY) {
@@ -73,8 +73,15 @@ export async function POST(request: Request) {
       switch (feeType) {
         case 'registration':
           if (profileInfo.status === 'registered') {
-            updateProfile();
+            await updateUserStatus(userID, 'submitted', 'Registration fee paid');
           }
+          break;
+        case 'booth':
+          if (profileInfo.status === 'approved') {
+            await updateUserStatus(userID, 'paid', 'Booth fee paid');
+          }
+          break;
+        default:
       }
 
       break;

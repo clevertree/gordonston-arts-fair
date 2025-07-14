@@ -10,14 +10,14 @@ export const registrationOpenDateString = formatDate(new Date(`${process.env.NEX
 {
 <div className={clsx(`grid md:grid-cols-3 gap-4 p-3 pl-[24px] w-[100vw] md:w-auto`, props.className)}>
     <div className='pl-[12px]'>
-        <h2 className='ml-[-24px] uppercase'><CiCalendarDate/> Festival Date</h2>
+        <h2 className='uppercase'><CiCalendarDate/> Festival Date</h2>
         <div>
             {eventDateString}<br/>
             10:00am until 4:00pm
         </div>
     </div>
     <div className='pl-[12px]'>
-        <h2 className='ml-[-24px] uppercase'><MdLocationPin/> Location</h2>
+        <h2 className='uppercase'><MdLocationPin/> Location</h2>
         <address>
             <a href='https://maps.app.goo.gl/bzvrR3X1hCpNhFjB6'>
                 Juliette Gordon Low Park<br/>
@@ -27,7 +27,7 @@ export const registrationOpenDateString = formatDate(new Date(`${process.env.NEX
         </address>
     </div>
     <div className='pl-[12px]'>
-        <h2 className='ml-[-24px] uppercase'><IoEnterOutline/> Artist Application</h2>
+        <h2 className='uppercase'><IoEnterOutline/> Artist Application</h2>
         <div>
             Accepting applications for artists<br/>
             starting on {registrationOpenDateString}.

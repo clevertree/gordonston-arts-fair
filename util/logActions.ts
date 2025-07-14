@@ -7,8 +7,6 @@ export type LogType = 'log-in' |
 'log-out' |
 'register' |
 'register-error' |
-'password-reset' |
-'password-reset-error' |
 'message' |
 'message-error' |
 'status-change';

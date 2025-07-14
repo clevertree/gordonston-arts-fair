@@ -51,12 +51,12 @@ export async function fetchUserID(email: string) {
   return rows[0].id;
 }
 
-export async function isAdmin(email: string) {
+export async function isAdmin(userID: number) {
   const sql = getPGSQLClient();
   const rows = (await sql`SELECT type
                           FROM gaf_user
-                          WHERE email = ${email.toLowerCase()}
+                          WHERE id = ${userID}
                           LIMIT 1`) as UserTableRow[];
-  if (!rows[0]) throw new Error(`User Admin not found: ${email}`);
+  if (!rows[0]) throw new Error(`User ID not found: ${userID}`);
   return rows[0].type === 'admin';
 }

@@ -1,11 +1,9 @@
 import { validateAdminSession } from '@util/sessionActions';
-import { fetchProfileByEmail, updateUserStatus } from '@util/profileActions';
+import { fetchProfileByID, updateUserStatus } from '@util/profileActions';
 import Link from 'next/link';
 import UserStatusEditorAdmin from '@components/Admin/UserStatusEditorAdmin';
 import ProfileView from '@components/Profile/ProfileView';
 import { Stack } from '@mui/material';
-import SendEmailAdmin from '@components/Admin/SendEmailAdmin';
-import { sendMail } from '@util/emailActions';
 import UserLogAdmin from '@components/Admin/UserLogAdmin';
 import React from 'react';
 import { fetchUserLogs } from '@util/logActions';
@@ -19,13 +17,12 @@ const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 export default async function AdminUserManagementPage({
   params,
 }: {
-  params: Promise<{ email: string }>
+  params: Promise<{ userID: number }>
 }) {
-  await validateAdminSession();
+  const adminSession = await validateAdminSession();
 
-  const { email } = await params;
-  const emailFormatted = email.replace('%40', '@');
-  const profile = await fetchProfileByEmail(emailFormatted);
+  const { userID } = await params;
+  const profile = await fetchProfileByID(userID);
   const userLogs = await fetchUserLogs(profile.id);
 
   return (
@@ -46,16 +43,16 @@ export default async function AdminUserManagementPage({
           updateUserStatus={async (newStatus) => {
             'use server';
 
-            return updateUserStatus(profile.email, newStatus);
+            return updateUserStatus(profile.id, newStatus, `${newStatus} set by admin #${adminSession.userID}`);
           }}
         />
         <ProfileView userProfile={profile} />
 
-        <SendEmailAdmin
-          userStatus={profile.status}
-          userEmail={profile.email}
-          sendMail={sendMail}
-        />
+        {/* <SendEmailAdmin */}
+        {/*  userStatus={profile.status} */}
+        {/*  userEmail={profile.email} */}
+        {/*  sendMail={sendMail} */}
+        {/* /> */}
 
         <UserLogAdmin logs={userLogs} email={profile.email} />
 

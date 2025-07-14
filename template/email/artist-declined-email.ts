@@ -1,7 +1,11 @@
-export const name = 'exhibit-declined';
-export const subject = 'Your exhibit has been declined';
+import Mail from 'nodemailer/lib/mailer';
 
-export const htmlBody = () => `<p>Dear Artist,</p>
+export default function ArtistDeclinedEmailTemplate(
+  to: string,
+):Mail.Options {
+  const subject = 'Your exhibit has been declined';
+
+  const html = `<p>Dear Artist,</p>
 
 <p>After thoughtful consideration, the Gordonston Art Fair regrets to inform you that your work was not accepted for our show this year.</p>
 
@@ -10,4 +14,12 @@ export const htmlBody = () => `<p>Dear Artist,</p>
 <p>Kind regards,<br/>
 The Gordonston Art Fair Committee</p>`;
 
-export const textBody = () => htmlBody().replace(/<[^>]*>/g, '');
+  const text = html.replace(/<[^>]*>/g, '');
+
+  return {
+    to,
+    subject,
+    html,
+    text,
+  };
+}

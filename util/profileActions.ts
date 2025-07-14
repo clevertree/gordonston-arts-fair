@@ -3,10 +3,8 @@
 'use server';
 
 import { del, put } from '@vercel/blob';
-import { validateAdminSession } from '@util/sessionActions';
 import { getPGSQLClient } from '@util/pgsql';
 import { UpdatedUserTableRow, UserStatus, UserTableRow } from '@util/schema';
-import { fetchUserID } from '@util/userActions';
 import { addUserLogEntry } from '@util/logActions';
 import { imageDimensionsFromStream } from 'image-dimensions';
 import { isProfileComplete } from '@util/profile';
@@ -38,9 +36,9 @@ export async function fetchProfileByID(userID: number) {
   return userRow;
 }
 
-export async function updateProfile(email: string, updatedUserRow: UpdatedUserTableRow) {
+export async function updateProfile(userID: number, updatedUserRow: UpdatedUserTableRow) {
   const sql = getPGSQLClient();
-  const userRow = await fetchProfileByEmail(email);
+  const userRow = await fetchProfileByID(userID);
   Object.assign(userRow, updatedUserRow);
   const {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -68,14 +66,14 @@ export async function updateProfile(email: string, updatedUserRow: UpdatedUserTa
   return userRow;
 }
 
-export async function uploadFile(email: string, file: File) {
+export async function uploadFile(userID: number, file: File) {
   const sql = getPGSQLClient();
-  const userRow = await fetchProfileByEmail(email);
+  const userRow = await fetchProfileByID(userID);
   const {
     uploads = {}
   } = userRow;
 
-  const imagePath = `uploads/${email.toLowerCase()}`;
+  const imagePath = `uploads/${userID}`;
   const imageDimensions = await imageDimensionsFromStream(file.stream());
   if (!imageDimensions) throw new Error('Failed to get image dimensions');
   const { width, height } = imageDimensions;
@@ -102,9 +100,9 @@ export async function uploadFile(email: string, file: File) {
   return userRow;
 }
 
-export async function deleteFile(email: string, filename: string) {
+export async function deleteFile(userID: number, filename: string) {
   const sql = getPGSQLClient();
-  const userRow = await fetchProfileByEmail(email);
+  const userRow = await fetchProfileByID(userID);
   const {
     uploads = {}
   } = userRow;
@@ -114,7 +112,7 @@ export async function deleteFile(email: string, filename: string) {
                 updated_at   = NOW()
                 WHERE id = ${userRow.id}`;
   try {
-    const imagePath = `profile/${email.toLowerCase()}/uploads`;
+    const imagePath = `profile/${userID}/uploads`;
     // eslint-disable-next-line no-console
     await del(`${imagePath}/${filename}`);
     console.log('Deleted file: ', `${imagePath}/${filename}`);
@@ -124,17 +122,15 @@ export async function deleteFile(email: string, filename: string) {
   return userRow;
 }
 
-export async function updateUserStatus(email: string, newStatus: UserStatus) {
-  const adminSession = await validateAdminSession();
+export async function updateUserStatus(userID: number, newStatus: UserStatus, message:string) {
   const sql = getPGSQLClient();
-  const id = await fetchUserID(email);
   await sql`UPDATE gaf_user
             SET status     = ${newStatus},
                 updated_at = NOW()
-            WHERE id = ${id}`;
+            WHERE id = ${userID}`;
 
   // Add a log entry
-  await addUserLogEntry(id, 'status-change', `${newStatus} set  by ${adminSession.email}`);
+  await addUserLogEntry(userID, 'status-change', message);
 
   return {
     message: 'Status updated successfully',

@@ -1,10 +1,12 @@
 import { formatDate } from '@util/date';
+import Mail from 'nodemailer/lib/mailer';
 
-const eventDate = new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`);
-
-export const name = 'exhibit-standby';
-export const subject = 'Your exhibit has been put on standby';
-export const htmlBody = () => `<p>Dear Artist,</p>
+export default function ArtistAcceptedEmailTemplate(
+  to: string,
+):Mail.Options {
+  const eventDate = new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`);
+  const subject = 'Your exhibit has been put on standby';
+  const html = `<p>Dear Artist,</p>
 
 <p>The jury results for the Gordonston Art Fair to be held on ${formatDate(eventDate)} are as follows:</p>
 
@@ -13,4 +15,12 @@ export const htmlBody = () => `<p>Dear Artist,</p>
 <p>Kind regards,<br/>
 The Gordonston Art Fair Committee</p>`;
 
-export const textBody = () => htmlBody().replace(/<[^>]*>/g, '');
+  const text = html.replace(/<[^>]*>/g, '');
+
+  return {
+    to,
+    subject,
+    html,
+    text,
+  };
+}

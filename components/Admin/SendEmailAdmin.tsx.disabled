@@ -19,7 +19,7 @@ import { UserStatus } from '@util/schema';
 import type { AlertColor } from '@mui/material/Alert';
 import Mail from 'nodemailer/lib/mailer';
 import { useRouter } from 'next/navigation';
-import { templateList } from '@email';
+import { templateList } from '../../template/email';
 import SelectField from '../FormFields/SelectField';
 
 interface SendEmailAdminProps {
@@ -93,7 +93,7 @@ export default function SendEmailAdmin({
                       if (templateName) {
                         const template = templateList.find((t) => t.name === templateName);
                         if (template) {
-                          setBody(template.textBody);
+                          setBody(template);
                           setSubject(template.subject);
                         }
                       }

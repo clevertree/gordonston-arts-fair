@@ -1,84 +1,89 @@
-CREATE TYPE gaf_user_status AS ENUM (
-    'unregistered',
-    'registered',
-    'submitted',
-    'approved',
-    'standby',
-    'declined',
-    'paid',
-    'imported'
+    DROP TABLE IF EXISTS gaf_transactions;
+    DROP TABLE IF EXISTS gaf_user;
+    DROP TABLE IF EXISTS gaf_user_log;
+    DROP TYPE IF EXISTS gaf_user_status;
+    DROP TYPE IF EXISTS gaf_user_type;
+    DROP TYPE IF EXISTS gaf_user_log_type;
+
+    CREATE TYPE gaf_user_status AS ENUM (
+        'unregistered',
+        'registered',
+        'submitted',
+        'approved',
+        'standby',
+        'declined',
+        'paid',
+        'imported',
+        'admin'
+        );
+
+    CREATE TYPE gaf_user_type AS ENUM (
+        'user',
+        'admin'
+        );
+
+
+    CREATE TABLE IF NOT EXISTS gaf_user
+    (
+        id           SERIAL PRIMARY KEY,
+        type         gaf_user_type      NOT NULL,
+        email        VARCHAR(64) UNIQUE NULL,
+        phone        VARCHAR(64) UNIQUE NULL,
+        first_name   VARCHAR(64)        NULL,
+        last_name    VARCHAR(64)        NULL,
+        company_name VARCHAR(64)        NULL,
+        address      VARCHAR(128)       NULL,
+        city         VARCHAR(32)        NULL,
+        state        VARCHAR(10)        NULL,
+        zipcode      VARCHAR(10)        NULL,
+        phone2       VARCHAR(64)        NULL,
+        website      VARCHAR(256)       NULL,
+        description  TEXT               NULL,
+        category     VARCHAR(128)       NULL,
+        status       gaf_user_status    NOT NULL,
+        created_at   TIMESTAMP          NOT NULL,
+        updated_at   TIMESTAMP          NULL,
+        uploads      JSON               NULL
     );
 
-CREATE TYPE gaf_user_type AS ENUM (
-    'user',
-    'admin'
+
+
+    CREATE TYPE gaf_user_log_type AS ENUM (
+        'log-in',
+        'log-in-error',
+        'log-out',
+        'register',
+        'register-error',
+        'password-reset',
+        'password-reset-error',
+        'message' ,
+        'message-error',
+        'status-change'
+        );
+    CREATE TABLE IF NOT EXISTS gaf_user_log
+    (
+        id        SERIAL PRIMARY KEY,
+        user_id INT               NULL,
+        type      gaf_user_log_type NOT NULL,
+        message   VARCHAR(256)      NOT NULL,
+        created_at TIMESTAMP         NOT NULL,
+        CONSTRAINT fk_user
+            FOREIGN KEY (user_id)
+                REFERENCES gaf_user (id)
     );
 
 
-
-DROP TABLE gaf_user_log;
-DROP TYPE gaf_user_log_type;
-DROP TABLE gaf_user;
-
-CREATE TABLE IF NOT EXISTS gaf_user
-(
-    id           SERIAL PRIMARY KEY,
-    type         gaf_user_type      NOT NULL,
-    email        VARCHAR(64) UNIQUE NOT NULL,
-    password     VARCHAR(256)       NULL,
-    first_name   VARCHAR(64)        NULL,
-    last_name    VARCHAR(64)        NULL,
-    company_name VARCHAR(64)        NULL,
-    address      VARCHAR(128)       NULL,
-    city         VARCHAR(32)        NULL,
-    state        VARCHAR(10)        NULL,
-    zipcode      VARCHAR(10)        NULL,
-    phone        VARCHAR(16)        NULL,
-    phone2       VARCHAR(16)        NULL,
-    website      VARCHAR(256)       NULL,
-    description  TEXT               NULL,
-    category     VARCHAR(128)       NULL,
-    status       gaf_user_status    NOT NULL,
-    created_at   TIMESTAMP          NOT NULL,
-    updated_at   TIMESTAMP          NULL,
-    uploads      JSON               NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS gaf_transactions
-(
-    id         SERIAL PRIMARY KEY,
-    user_id    INT            NULL,
-    email      VARCHAR(256)   NOT NULL,
-    type       VARCHAR(256)   NOT NULL,
-    amount     DECIMAL(10, 2) NULL,
-    status     VARCHAR(256)   NOT NULL,
-    created_at TIMESTAMP      NOT NULL,
-    content    JSON           NOT NULL
-);
-
--- DROP FUNCTION search_path_by_keywords;
--- CREATE FUNCTION search_path_by_keywords(keywordList TEXT, resultLimit INTEGER default 15)
---     RETURNS TABLE
---             (
---                 path  VARCHAR(64),
---                 count BIGINT
---             )
---     AS
--- $$
--- DECLARE
--- keywords VARCHAR(64)[];
--- --     searchKeywords      VARCHAR(256);
--- BEGIN
---     keywords = string_to_array(lower(keywordList), ',');
--- RETURN QUERY
--- SELECT sp.path, sum(spk.count) as count
--- FROM search_path_keywords spk
---     JOIN search_paths sp ON sp.id = spk.path_id
---     JOIN search_keywords sk on spk.keyword_id = sk.id
--- WHERE sk.keyword = ANY (keywords)
--- GROUP BY sp.path
--- ORDER BY count DESC
---     LIMIT resultLimit;
--- END
--- $$ LANGUAGE plpgsql;
+    CREATE TABLE IF NOT EXISTS gaf_transactions
+    (
+        id         SERIAL PRIMARY KEY,
+        user_id    INT            NULL,
+        email      VARCHAR(256)   NOT NULL,
+        type       VARCHAR(256)   NOT NULL,
+        amount     DECIMAL(10, 2) NULL,
+        status     VARCHAR(256)   NOT NULL,
+        created_at TIMESTAMP      NOT NULL,
+        content    JSON           NOT NULL,
+            CONSTRAINT fk_user
+            FOREIGN KEY (user_id)
+                REFERENCES gaf_user (id)
+    );

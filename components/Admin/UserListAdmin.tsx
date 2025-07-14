@@ -103,6 +103,7 @@ export default async function UserListAdmin({
           </TableHead>
           <TableBody>
             {userList.map(({
+              id,
               first_name, last_name, email,
               type, created_at, status, uploads
             }) => (
@@ -111,7 +112,7 @@ export default async function UserListAdmin({
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell scope="row">
-                  <Link href={`/user/${email}`}>{email}</Link>
+                  <Link href={`/user/${id}`}>{email}</Link>
                 </TableCell>
                 <TableCell className={styles.hideOnMobile}>
                   {getFullName(first_name, last_name)}
@@ -131,7 +132,7 @@ export default async function UserListAdmin({
                   {Object.keys(uploads || {}).length}
                 </TableCell>
                 <TableCell className={styles.hideOnMobile}>
-                  <Link href={`/user/${email}`}>✎</Link>
+                  <Link href={`/user/${id}`}>✎</Link>
                 </TableCell>
               </TableRow>
             ))}

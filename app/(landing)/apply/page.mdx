@@ -1,8 +1,9 @@
 import {formatDate, getTimeSpan} from "../../../util/date";
-import RegisterForm from "../../../components/SessionForms/RegisterForm";
-import {registerAction} from "../../../util/sessionActions";
 import {Stack} from "@mui/material";
 import Link from "next/link";
+import {loginEmailAction, loginPhoneAction} from "../../../util/sessionActions";
+import LoginEmailForm from "../../../components/SessionForms/LoginEmailForm";
+import LoginPhoneForm from "../../../components/SessionForms/LoginPhoneForm";
 
 export const metadata = {
     title: 'Apply to Gordonston Art Fair',
@@ -102,13 +103,13 @@ must be present for the duration of the event.
 By registering as an artist,
 I accept and agree to the terms and conditions above.
 
-## Register
+## Log in to Register as an Artist
 
-<RegisterForm registerAction={registerAction}/>
+<LoginEmailForm loginEmailAction={loginEmailAction} />
+<LoginPhoneForm loginPhoneAction={loginPhoneAction} />
 
 <Stack sx={{margin: 'auto'}} direction='column'>
     <Link href='/login'>Click here to log in as an Artist</Link>
-    <Link href='/password'>Click here to reset your password</Link>
 </Stack>
 
 If you have problems with this registration system and need assistance

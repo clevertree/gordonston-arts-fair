@@ -1,17 +1,19 @@
+/* eslint-disable no-console */
+
 'use server';
 
-import bcrypt from 'bcrypt';
 import { endSession, startSession, validateSession } from '@util/session';
-import { sendTemplateMail } from '@util/emailActions';
-import { randomBytes } from 'node:crypto';
+import { sendMail } from '@util/emailActions';
+import { randomInt } from 'node:crypto';
 import { HttpError } from '@util/exception/httpError';
-import { UserPasswordResetEmailTemplate, UserRegistrationEmailTemplate } from '@email';
 import { getPGSQLClient } from '@util/pgsql';
 import { UserTableRow } from '@util/schema';
-import { fetchUserID, isAdmin } from '@util/userActions';
+import { isAdmin } from '@util/userActions';
 import { addUserLogEntry } from '@util/logActions';
-import { LOGIN_ERROR_MESSAGE } from '@util/messageUtil';
-import { fetchProfileByEmail } from '@util/profileActions';
+import { formatPhoneInput, sendSMSMessage } from '@util/phoneActions';
+import { User2FactorEmailTemplate, UserRegistrationEmailTemplate } from '../template/email';
+import User2FactorSMSTemplate from '../template/sms/user-2factor-sms';
+import UserRegistrationSMSTemplate from '../template/sms/user-registration-sms';
 
 export type ActionResponse = {
   status: 'success' | 'error';
@@ -19,59 +21,216 @@ export type ActionResponse = {
   redirectURL?: string;
 };
 
+const LOGIN_EMAIL_REQUESTS: {
+  [email: string]: number;
+} = {};
 
-refactor into login/phone 2 factor
-export async function loginAction(email: string, password: string): Promise<ActionResponse> {
+export async function loginEmailAction(email: string): Promise<ActionResponse> {
+  const loginCode = randomInt(100000, 999999 + 1);
+  const timeout = process.env.TIMEOUT_2FACTOR_MINUTES || '15';
+  // const redisPasswordResetKey = `user:${email.toLowerCase()}:reset-password`;
+  // await redisClient.set(redisPasswordResetKey, resetCode, { EX: 60 * 15 });
+  if (!LOGIN_EMAIL_REQUESTS[email]) {
+    LOGIN_EMAIL_REQUESTS[email] = loginCode;
+    setTimeout(() => {
+      if (LOGIN_EMAIL_REQUESTS[email]) {
+        delete LOGIN_EMAIL_REQUESTS[email];
+        console.log('Email login request expired: ', email);
+      }
+    }, (parseInt(timeout, 10)) * 60 * 1000);
+    const validationURL = `${process.env.NEXT_PUBLIC_BASE_URL}/login/validate/email/?email=${email}&code=${loginCode}`;
+    try {
+      const emailTemplate = User2FactorEmailTemplate(email, loginCode, validationURL);
+      await sendMail(emailTemplate);
+      console.log('Sent email: ', emailTemplate.subject);
+    } catch (e:any) {
+      console.error('Unable to send email: ', e.message);
+      return {
+        status: 'error',
+        message: 'Unable to send email. Please try again later',
+      };
+    }
+  } else {
+    console.log('Email 2-Factor re-requested: ', email);
+  }
+
+  return {
+    status: 'success',
+    message: 'A code has been sent to your email. Please enter it to continue',
+    redirectURL: `/login/validate/email?email=${email}`
+  };
+}
+
+export async function loginEmailValidationAction(
+  email: string,
+  code: number
+): Promise<ActionResponse> {
+  const storedCode = LOGIN_EMAIL_REQUESTS[email];
+  if (!storedCode || (storedCode !== code)) {
+    // eslint-disable-next-line no-console
+    console.error('Invalid email login request:', email, storedCode, code);
+    // Add an error log entry
+    await addUserLogEntry(null, 'log-in-error', 'Invalid login request');
+    return {
+      message: 'Invalid login request',
+      status: 'error',
+    };
+  }
+
+  // Delete Login Request
+  delete LOGIN_EMAIL_REQUESTS[email];
+
   const sql = getPGSQLClient();
   // Fetch user from the database
-  const rows = (await sql`SELECT id, password
+  const rows = (await sql`SELECT id
                           FROM gaf_user
                           WHERE email = ${email.toLowerCase()}
                           LIMIT 1`) as UserTableRow[];
-  if (!rows[0]) {
+  let userID: number = -1;
+  if (rows.length > 0) {
+    // User already exists
+    userID = rows[0].id;
     // Add a log entry
-    // eslint-disable-next-line no-console
-    console.error('User not found: ', email);
-    await addUserLogEntry(null, 'log-in-error', `Email not found: ${email}`);
-    return {
-      message: LOGIN_ERROR_MESSAGE,
-      status: 'error'
-    };
-  }
-  const { id, password: passwordHash } = rows[0];
+    await addUserLogEntry(userID, 'log-in');
+  } else {
+    // Register a new user
+    const result = await sql`INSERT INTO gaf_user (email, type, status, created_at)
+                           VALUES (${email.toLowerCase()}, 'user', 'registered', now())
+                           RETURNING id`;
+    userID = result[0].id;
+    console.log(`Registered a new user (${userID}): `, email);
 
-  const passwordResult = passwordHash && await bcrypt.compare(password, passwordHash);
-  if (!passwordResult) {
-    // Add an error log entry
-    await addUserLogEntry(id, 'log-in-error', `Invalid password: ${email}`);
-    // eslint-disable-next-line no-console
-    console.error('Invalid password: ', email);
-    return {
-      message: LOGIN_ERROR_MESSAGE,
-      status: 'error'
-    };
+    // Add a log entry
+    await addUserLogEntry(userID, 'register');
+
+    // Send the registration email
+    const loginURL = `${process.env.NEXT_PUBLIC_BASE_URL}/login`;
+    const emailTemplate = UserRegistrationEmailTemplate(email, loginURL);
+    const mailResult = await sendMail(emailTemplate);
+    await addUserLogEntry(userID, mailResult.success ? 'message' : 'message-error', mailResult.message);
   }
 
-  await startSession(email);
-
-  // Add a log entry
-  await addUserLogEntry(id, 'log-in');
+  await startSession(userID);
 
   // eslint-disable-next-line no-console
-  console.error('User logged in: ', email);
+  console.error('User logged in by email: ', email);
   return {
     status: 'success',
     message: 'Login successful. Redirecting...',
-    redirectURL: (await isAdmin(email)) ? '/user' : '/profile'
+    redirectURL: (await isAdmin(userID)) ? '/user' : '/profile'
+  };
+}
+
+/** Phone Validation * */
+
+const LOGIN_PHONE_REQUESTS: {
+  [phone: string]: number;
+} = {};
+
+export async function loginPhoneAction(unformattedPhone: string): Promise<ActionResponse> {
+  const phone = formatPhoneInput(unformattedPhone);
+  const loginCode = randomInt(100000, 999999 + 1);
+  const timeout = process.env.TIMEOUT_2FACTOR_MINUTES || '15';
+  // const redisPasswordResetKey = `user:${phone.toLowerCase()}:reset-password`;
+  // await redisClient.set(redisPasswordResetKey, resetCode, { EX: 60 * 15 });
+  if (!LOGIN_PHONE_REQUESTS[phone]) {
+    LOGIN_PHONE_REQUESTS[phone] = loginCode;
+
+    setTimeout(() => {
+      if (LOGIN_EMAIL_REQUESTS[phone]) {
+        delete LOGIN_PHONE_REQUESTS[phone];
+        console.log('Phone login request expired: ', phone);
+      }
+    }, (parseInt(timeout, 10)) * 60 * 1000);
+    const validationURL = `${process.env.NEXT_PUBLIC_BASE_URL}/login/validate/phone/?phone=${phone}&code=${loginCode}`;
+    try {
+      const phoneTemplate = User2FactorSMSTemplate(phone, loginCode, validationURL);
+      await sendSMSMessage(phoneTemplate);
+      console.log('Sent phone: ', phoneTemplate.message);
+    } catch (e:any) {
+      console.error('Unable to send phone: ', e.message);
+      return {
+        status: 'error',
+        message: 'Unable to send phone. Please try again later',
+      };
+    }
+  } else {
+    console.log('Phone 2-Factor re-requested: ', phone);
+  }
+
+  return {
+    status: 'success',
+    message: 'A code has been sent to your phone. Please enter it to continue',
+    redirectURL: `/login/validate/phone?phone=${phone}`
+  };
+}
+
+export async function loginPhoneValidationAction(
+  phone: string,
+  code: number
+): Promise<ActionResponse> {
+  const storedCode = LOGIN_PHONE_REQUESTS[phone];
+  if (!storedCode || (storedCode !== code)) {
+    // eslint-disable-next-line no-console
+    console.error('Invalid phone login request:', phone, storedCode, code, LOGIN_PHONE_REQUESTS);
+    // Add an error log entry
+    await addUserLogEntry(null, 'log-in-error', 'Invalid login request');
+    return {
+      message: 'Invalid login request',
+      status: 'error',
+    };
+  }
+
+  // Delete Login Request
+  delete LOGIN_PHONE_REQUESTS[phone];
+
+  const sql = getPGSQLClient();
+  // Fetch user from the database
+  const rows = (await sql`SELECT id
+                          FROM gaf_user
+                          WHERE phone = ${phone}
+                          LIMIT 1`) as UserTableRow[];
+  let userID: number = -1;
+  if (rows.length > 0) {
+    // User already exists
+    userID = rows[0].id;
+    // Add a log entry
+    await addUserLogEntry(userID, 'log-in');
+  } else {
+    // Register a new user
+    const result = await sql`INSERT INTO gaf_user (phone, type, status, created_at)
+                           VALUES (${phone}, 'user', 'registered', now())
+                           RETURNING id`;
+    userID = result[0].id;
+    console.log(`Registered a new user (${userID}): `, phone);
+
+    // Add a log entry
+    await addUserLogEntry(userID, 'register');
+
+    // Send the registration SMS
+    const loginURL = `${process.env.NEXT_PUBLIC_BASE_URL}/login`;
+    const phoneTemplate = UserRegistrationSMSTemplate(phone, loginURL);
+    const smsResult = await sendSMSMessage(phoneTemplate);
+    await addUserLogEntry(userID, smsResult.success ? 'message' : 'message-error', smsResult.message);
+  }
+
+  await startSession(userID);
+
+  // eslint-disable-next-line no-console
+  console.error('User logged in by phone: ', phone);
+  return {
+    status: 'success',
+    message: 'Login successful. Redirecting...',
+    redirectURL: (await isAdmin(userID)) ? '/user' : '/profile'
   };
 }
 
 export async function logoutAction(): Promise<ActionResponse> {
   const oldSession = await endSession();
-  const id = await fetchUserID(oldSession.email);
+  const { userID } = oldSession;
 
   // Add a log entry
-  await addUserLogEntry(id, 'log-out');
+  await addUserLogEntry(userID, 'log-out');
 
   return {
     status: 'success',
@@ -80,145 +239,8 @@ export async function logoutAction(): Promise<ActionResponse> {
   };
 }
 
-export async function registerAction(email: string, password: string): Promise<ActionResponse> {
-  const sql = getPGSQLClient();
-  const rows = (await sql`SELECT id
-                          FROM gaf_user
-                          WHERE email = ${email.toLowerCase()}
-                          LIMIT 1`) as UserTableRow[];
-  if (rows.length > 0) {
-    // Add an error log entry
-    await addUserLogEntry(rows[0].id, 'register-error', 'User already exists');
-    console.error('User already exists:', email);
-    return {
-      message: 'User already exists with this email. Please log in or reset your password',
-      status: 'error'
-    };
-  }
-
-  // Store user in the database
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const result = await sql`INSERT INTO gaf_user (email, type, status, password, created_at)
-                           VALUES (${email.toLowerCase()}, 'user', 'registered', ${hashedPassword}, now())
-                           RETURNING id`;
-  const userID = result[0].id;
-  console.log(`Registered a new user (${userID}): `, email);
-
-  // Create the user session
-  await startSession(email);
-
-  // Add a log entry
-  await addUserLogEntry(userID, 'register');
-
-  // Send the registration email
-  await sendTemplateMail(email, UserRegistrationEmailTemplate);
-
-  return {
-    status: 'success',
-    message: 'Registration complete. Please check your email for a confirmation link',
-    redirectURL: '/profile'
-  };
-}
-
-const PASSWORD_RESET_REQUESTS: {
-  [email: string]: string;
-} = {};
-
-export async function passwordResetAction(email: string): Promise<ActionResponse> {
-  const sql = getPGSQLClient();
-  // Fetch user from the database
-  const rows = (await sql`SELECT id, password
-                          FROM gaf_user
-                          WHERE email = ${email.toLowerCase()}
-                          LIMIT 1`) as UserTableRow[];
-  const message = `If a user account exists, a password reset will be sent to your email address at ${email}`;
-  if (!rows[0]) {
-    // Add a log entry
-    await addUserLogEntry(null, 'password-reset-error', `Email not found: ${email}`);
-    return {
-      message,
-      status: 'error'
-    };
-  }
-  const { id } = rows[0];
-
-  // Store password reset request
-  const resetCode = Buffer.from(randomBytes(36)).toString('hex');
-  const timeout = process.env.PASSWORD_RESET_TIMEOUT_MINUTES || '15';
-  // const redisPasswordResetKey = `user:${email.toLowerCase()}:reset-password`;
-  // await redisClient.set(redisPasswordResetKey, resetCode, { EX: 60 * 15 });
-  PASSWORD_RESET_REQUESTS[email] = resetCode;
-  setTimeout(() => {
-    delete PASSWORD_RESET_REQUESTS[email];
-  }, (parseInt(timeout, 10)) * 60 * 1000);
-
-  // eslint-disable-next-line no-console
-  console.log('Password reset request: ', email, resetCode);
-
-  // Send the password reset email
-  const validationURL = `${process.env.NEXT_PUBLIC_BASE_URL}/password/validate/${email}/${resetCode}`;
-  await sendTemplateMail(email, UserPasswordResetEmailTemplate, { validationURL });
-  // await sendMail({
-  //   to: email,
-  //   html: `<a href='${url}'>Click here to reset your password</a>`,
-  //   text: `Open this link to reset your password: ${url}`,
-  //   subject: 'Password Reset Request'
-  // });
-
-  // Add a log entry
-  await addUserLogEntry(id, 'password-reset');
-
-  return {
-    status: 'success',
-    message,
-    // redirectURL: "/login"
-  };
-}
-
-export async function passwordResetValidateAction(
-  email: string,
-  code: string,
-  password: string
-): Promise<ActionResponse> {
-  const storedCode = PASSWORD_RESET_REQUESTS[email];
-  if (!storedCode || (storedCode !== code)) {
-    // eslint-disable-next-line no-console
-    console.error('Invalid reset request:', email, storedCode, code);
-    // Add an error log entry
-    await addUserLogEntry(null, 'password-reset-error', 'Invalid password reset request');
-    return {
-      message: 'Invalid reset request',
-      status: 'error',
-    };
-  }
-
-  const user = await fetchProfileByEmail(email);
-
-  // Delete the reset request
-  delete PASSWORD_RESET_REQUESTS[email];
-
-  // Update password in the database
-  const sql = getPGSQLClient();
-  const hashedPassword = await bcrypt.hash(password, 10);
-  await sql`UPDATE gaf_user
-            SET password   = ${hashedPassword},
-                updated_at = NOW()
-            WHERE id = ${user.id}`;
-
-  console.log('Password was reset: ', email);
-
-  // Add a log entry
-  await addUserLogEntry(user.id, 'password-reset');
-
-  return {
-    status: 'success',
-    message: 'Password was reset successfully. Please Log in',
-    redirectURL: '/login'
-  };
-}
-
 export async function validateAdminSession() {
   const session = await validateSession();
-  if (!await isAdmin(session.email)) throw HttpError.Unauthorized('Unauthorized - Admin access required');
+  if (!await isAdmin(session.userID)) throw HttpError.Unauthorized('Unauthorized - Admin access required');
   return session;
 }

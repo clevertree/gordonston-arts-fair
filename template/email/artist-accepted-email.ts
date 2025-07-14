@@ -1,14 +1,17 @@
 import { formatDate } from '@util/date';
+import Mail from 'nodemailer/lib/mailer';
 
-const eventDate = new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`);
-const boothFee = process.env.NEXT_PUBLIC_BOOTH_FEE;
-const registrationFeeDate = new Date(`${process.env.NEXT_PUBLIC_REGISTRATION_FEE_DATE}`);
-const paymentURL = `${process.env.NEXT_PUBLIC_BASE_URL}/payment`;
+export default function ArtistAcceptedEmailTemplate(
+  to: string,
+):Mail.Options {
+  const eventDate = new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`);
+  const boothFee = process.env.NEXT_PUBLIC_BOOTH_FEE;
+  const registrationFeeDate = new Date(`${process.env.NEXT_PUBLIC_REGISTRATION_FEE_DATE}`);
+  const paymentURL = `${process.env.NEXT_PUBLIC_BASE_URL}/payment`;
 
-export const name = 'accepted';
-export const subject = 'Your exhibit has been accepted';
+  const subject = 'Your exhibit has been accepted';
 
-export const htmlBody = () => `<p>Dear Artist,</p>
+  const html = `<p>Dear Artist,</p>
 
 <p>Congratulations! After thoughtful consideration, the Gordonston Art Fair is pleased to inform you that you have been accepted to participate in our show on ${formatDate(eventDate)}. We are looking forward to an amazing, and successful day, we are thrilled that you will be a part of it!</p>
 
@@ -23,4 +26,12 @@ export const htmlBody = () => `<p>Dear Artist,</p>
 <p>Kind regards,<br/>
 The Gordonston Art Fair Committee</p>`;
 
-export const textBody = () => htmlBody().replace(/<[^>]*>/g, '');
+  const text = html.replace(/<[^>]*>/g, '');
+
+  return {
+    to,
+    subject,
+    html,
+    text,
+  };
+}

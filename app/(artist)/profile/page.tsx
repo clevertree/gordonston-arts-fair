@@ -1,22 +1,22 @@
 import { validateSession } from '@util/session';
-import { fetchProfileByEmail } from '@util/profileActions';
+import { fetchProfileByID } from '@util/profileActions';
 import { redirect } from 'next/navigation';
 import ProfileView from '@components/Profile/ProfileView';
 import Link from 'next/link';
+import { SessionPayload } from '../../../types';
 
 export const metadata = {
   title: 'Artist Profile',
 };
 
 export default async function ProfilePage() {
-  let sessionEmail: string | undefined;
+  let session: SessionPayload | undefined;
   try {
-    const session = await validateSession();
-    sessionEmail = session.email;
+    session = await validateSession();
   } catch (e: any) {
     return redirect(`/login?message=${e.message}`);
   }
-  const profileData = await fetchProfileByEmail(sessionEmail);
+  const profileData = await fetchProfileByID(session.userID);
 
   return (
     <>

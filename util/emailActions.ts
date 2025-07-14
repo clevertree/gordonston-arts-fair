@@ -4,9 +4,6 @@
 
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
-import { EmailTemplate } from '@email';
-import { addUserLogEntry } from '@util/logActions';
-import { fetchProfileByEmail } from '@util/profileActions';
 
 const { SMTP_SERVER_HOST } = process.env;
 const { SMTP_SERVER_USERNAME } = process.env;
@@ -23,32 +20,6 @@ const transporter = nodemailer.createTransport({
     pass: SMTP_SERVER_PASSWORD,
   },
 });
-
-// TODO: allow overrides
-export async function sendTemplateMail(email: string, template: EmailTemplate, props: any = {}) {
-  const { id: userID } = await fetchProfileByEmail(email);
-  try {
-    const messageInfo = {
-      to: email,
-      html: template.htmlBody(props),
-      text: template.textBody(props),
-      subject: template.subject
-    };
-    await sendMail(messageInfo);
-
-    // Add a log entry
-    const testMode = process.env.TEST_MODE !== 'false';
-    await addUserLogEntry(userID, 'message', `${testMode ? 'TEST ONLY: ' : ''}${messageInfo.subject}`);
-
-    return {
-      success: true,
-      message: 'Email sent successfully',
-    };
-  } catch (error: any) {
-    await addUserLogEntry(userID, 'message-error', error.message);
-    return { success: false, message: `Unable to send email: ${error.message}` };
-  }
-}
 
 export async function sendMail(options: Mail.Options) {
   const email = `${options.to}`;
@@ -76,6 +47,8 @@ export async function sendMail(options: Mail.Options) {
 
   return {
     success: true,
-    message: 'Email sent successfully',
+    message: testMode
+      ? `Email sent: ${subject}`
+      : `TEST MODE: ${subject}`,
   };
 }

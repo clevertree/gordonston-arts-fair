@@ -1,25 +1,25 @@
 import ProfileEditor from '@components/Profile/ProfileEditor';
 import { validateSession } from '@util/session';
 import {
-  deleteFile, fetchProfileByEmail, updateProfile, uploadFile
+  deleteFile, fetchProfileByID, updateProfile, uploadFile
 } from '@util/profileActions';
 import { redirect } from 'next/navigation';
 import { UserTableRow } from '@util/schema';
 import Link from 'next/link';
+import { SessionPayload } from '../../../../types';
 
 export const metadata = {
   title: 'Edit Artist Profile',
 };
 
 export default async function ProfilePage() {
-  let sessionEmail: string | undefined;
+  let session: SessionPayload | undefined;
   try {
-    const session = await validateSession();
-    sessionEmail = session.email;
+    session = await validateSession();
   } catch (e: any) {
     return redirect(`/login?message=${e.message}`);
   }
-  const profileData = await fetchProfileByEmail(sessionEmail);
+  const profileData = await fetchProfileByID(session.userID);
 
   return (
     <>
@@ -30,18 +30,18 @@ export default async function ProfilePage() {
         uploadFile={async (file: File) => {
           'use server';
 
-          await uploadFile(sessionEmail, file);
-          return fetchProfileByEmail(sessionEmail);
+          await uploadFile(session.userID, file);
+          return fetchProfileByID(session.userID);
         }}
         deleteFile={async (filename: string) => {
           'use server';
 
-          return deleteFile(sessionEmail, filename);
+          return deleteFile(session.userID, filename);
         }}
         updateProfile={async (newUserProfile: UserTableRow) => {
           'use server';
 
-          return updateProfile(sessionEmail, newUserProfile);
+          return updateProfile(session.userID, newUserProfile);
         }}
       />
       <Link href="/profile">Click here to return to your dashboard</Link>

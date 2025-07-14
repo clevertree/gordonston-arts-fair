@@ -28,7 +28,6 @@
     "@vercel/analytics": "^1.2.2",
     "@vercel/blob": "^1.1.1",
     "@vercel/speed-insights": "^1.0.12",
-    "bcrypt": "^6.0.0",
     "clsx": "^2.1.0",
     "image-dimensions": "^2.3.0",
     "jose": "^6.0.11",

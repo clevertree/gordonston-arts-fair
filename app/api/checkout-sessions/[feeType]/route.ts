@@ -3,7 +3,8 @@ import Stripe from 'stripe';
 import * as process from 'node:process';
 import { validateSession } from '@util/session';
 import { redirect } from 'next/navigation';
-import { fetchProfileByEmail } from '@util/profileActions';
+import { fetchProfileByID } from '@util/profileActions';
+import { SessionPayload } from 'types';
 
 const stripeSecretKey = `${process.env.TEST_MODE === 'false'
   ? process.env.STRIPE_SECRET_KEY_LIVE
@@ -24,14 +25,13 @@ export async function POST(
   request: Request,
   { params }: { params: Params }
 ) {
-  let sessionEmail: string | undefined;
+  let session: SessionPayload | undefined;
   try {
-    const session = await validateSession();
-    sessionEmail = session.email;
+    session = await validateSession();
   } catch (e: any) {
     return redirect(`/login?message=${e.message}`);
   }
-  const profileData = await fetchProfileByEmail(sessionEmail);
+  const profileData = await fetchProfileByID(session.userID);
   const { feeType } = await params;
   const lineItem = {
     price_data: {
@@ -64,11 +64,12 @@ export async function POST(
       message: 'Invalid fee amount'
     }, { status: 400 });
   }
-  const metadata:FeeMetaData = {
+  const metadata:Stripe.MetadataParam = {
     userID: profileData.id,
     feeType
   };
-  const session = await stripe.checkout.sessions.create({
+
+  const sessionParams:Stripe.Checkout.SessionCreateParams = {
     // payment_method_types: ['card'],
     line_items: [lineItem],
     payment_intent_data: {
@@ -78,7 +79,8 @@ export async function POST(
     mode: 'payment',
     success_url: `${BASE_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${BASE_URL}/payment/cancel`,
-  });
+  };
+  const stripeSession = await stripe.checkout.sessions.create(sessionParams, {});
 
-  return NextResponse.json({ sessionId: session.id });
+  return NextResponse.json({ sessionId: stripeSession.id });
 }
