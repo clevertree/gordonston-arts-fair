@@ -66,35 +66,52 @@ const LOGIN_EMAIL_REQUESTS: {
 } = {};
 
 export async function loginEmailAction(email: string): Promise<ActionResponse> {
-  const loginCode = randomInt(100000, 999999 + 1);
-  const timeout = process.env.TIMEOUT_2FACTOR_MINUTES || '15';
   // const redisPasswordResetKey = `user:${email.toLowerCase()}:reset-password`;
   // await redisClient.set(redisPasswordResetKey, resetCode, { EX: 60 * 15 });
-  if (!LOGIN_EMAIL_REQUESTS[email]) {
-    LOGIN_EMAIL_REQUESTS[email] = loginCode;
-    setTimeout(() => {
-      if (LOGIN_EMAIL_REQUESTS[email]) {
-        delete LOGIN_EMAIL_REQUESTS[email];
-        console.log('Email login request expired: ', email);
-      }
-    }, (parseInt(timeout, 10)) * 60 * 1000);
-    const validationURL = `${process.env.NEXT_PUBLIC_BASE_URL}/login/validate/email/?email=${email}&code=${loginCode}`;
-    try {
-      const emailTemplate = User2FactorEmailTemplate(email, loginCode, validationURL);
-      await sendMail(emailTemplate);
-      console.log('Sent email: ', emailTemplate.subject);
-    } catch (e: any) {
-      console.error('Unable to send email: ', e.message);
+  const testMode = process.env.TEST_MODE !== 'false';
+  if (LOGIN_EMAIL_REQUESTS[email]) {
+    const loginCode = LOGIN_EMAIL_REQUESTS[email];
+    console.log('Email 2-Factor re-requested: ', email);
+    return {
+      status: 'success',
+      message: 'A code has been sent to your email. Please enter it to continue',
+      redirectURL: `/login/validate/email?email=${email}${
+        testMode ? `&code=${loginCode}` : ''}\`,`
+    };
+  }
+
+  const loginCode = randomInt(100000, 999999 + 1);
+  const timeout = process.env.TIMEOUT_2FACTOR_MINUTES || '15';
+
+  const validationURL = `${process.env.NEXT_PUBLIC_BASE_URL}/login/validate/email/?email=${email}&code=${loginCode}`;
+  try {
+    const emailTemplate = User2FactorEmailTemplate(email, loginCode, validationURL);
+    const emailResult = await sendMail(emailTemplate);
+    if (!emailResult.success) {
       return {
         status: 'error',
         message: 'Unable to send email. Please try again later',
       };
     }
-  } else {
-    console.log('Email 2-Factor re-requested: ', email);
+    console.log('Sent email: ', emailTemplate.subject);
+  } catch (e: any) {
+    console.error('Unable to send email: ', e.message);
+    return {
+      status: 'error',
+      message: 'Unable to send email. Please try again later',
+    };
   }
 
-  const testMode = process.env.TEST_MODE !== 'false';
+  // Store validation code
+  LOGIN_EMAIL_REQUESTS[email] = loginCode;
+
+  setTimeout(() => {
+    if (LOGIN_EMAIL_REQUESTS[email]) {
+      delete LOGIN_EMAIL_REQUESTS[email];
+      console.log('Email login request expired: ', email);
+    }
+  }, (parseInt(timeout, 10)) * 60 * 1000);
+
   return {
     status: 'success',
     message: 'A code has been sent to your email. Please enter it to continue',

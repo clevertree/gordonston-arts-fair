@@ -66,42 +66,52 @@ const LOGIN_PHONE_REQUESTS: {
 
 export async function loginPhoneAction(unformattedPhone: string): Promise<ActionResponse> {
   const phone = unformattedPhone.replace(/\D/g, '');
-  const loginCode = randomInt(100000, 999999 + 1);
-  const timeout = process.env.TIMEOUT_2FACTOR_MINUTES || '15';
   // const redisPasswordResetKey = `user:${phone.toLowerCase()}:reset-password`;
   // await redisClient.set(redisPasswordResetKey, resetCode, { EX: 60 * 15 });
-  if (!LOGIN_PHONE_REQUESTS[phone]) {
-    LOGIN_PHONE_REQUESTS[phone] = loginCode;
-
-    setTimeout(() => {
-      if (LOGIN_PHONE_REQUESTS[phone]) {
-        delete LOGIN_PHONE_REQUESTS[phone];
-        console.log('Phone login request expired: ', phone);
-      }
-    }, (parseInt(timeout, 10)) * 60 * 1000);
-    const validationURL = `${process.env.NEXT_PUBLIC_BASE_URL}/login/validate/phone/?phone=${phone}&code=${loginCode}`;
-    try {
-      const phoneTemplate = User2FactorSMSTemplate(phone, loginCode, validationURL);
-      const phoneRequest = await sendSMSMessage(phoneTemplate);
-      console.log('Sent sms: ', phoneTemplate.message, phoneRequest);
-      if (!phoneRequest.success) {
-        return {
-          status: 'error',
-          message: 'Unable to send sms request. Please try again later',
-        };
-      }
-    } catch (e: any) {
-      console.error('Unable to send sms: ', e.message);
-      return {
-        status: 'error',
-        message: 'Unable to send sms. Please try again later',
-      };
-    }
-  } else {
+  const testMode = process.env.TEST_MODE !== 'false';
+  if (LOGIN_PHONE_REQUESTS[phone]) {
+    const loginCode = LOGIN_PHONE_REQUESTS[phone];
     console.log('Phone 2-Factor re-requested: ', phone);
+    return {
+      status: 'success',
+      message: 'A code has been sent to your phone. Please enter it to continue',
+      redirectURL: `/login/validate/phone?phone=${phone}${
+        testMode ? `&code=${loginCode}` : ''}\`,`
+    };
   }
 
-  const testMode = process.env.TEST_MODE !== 'false';
+  const loginCode = randomInt(100000, 999999 + 1);
+  const timeout = process.env.TIMEOUT_2FACTOR_MINUTES || '15';
+
+  const validationURL = `${process.env.NEXT_PUBLIC_BASE_URL}/login/validate/phone/?phone=${phone}&code=${loginCode}`;
+  try {
+    const phoneTemplate = User2FactorSMSTemplate(phone, loginCode, validationURL);
+    const phoneRequest = await sendSMSMessage(phoneTemplate);
+    console.log('Sent sms: ', phoneTemplate.message, phoneRequest);
+    if (!phoneRequest.success) {
+      return {
+        status: 'error',
+        message: 'Unable to send sms request. Please try again later',
+      };
+    }
+  } catch (e: any) {
+    console.error('Unable to send sms: ', e.message);
+    return {
+      status: 'error',
+      message: 'Unable to send sms. Please try again later',
+    };
+  }
+
+  // Store validation code
+  LOGIN_PHONE_REQUESTS[phone] = loginCode;
+
+  setTimeout(() => {
+    if (LOGIN_PHONE_REQUESTS[phone]) {
+      delete LOGIN_PHONE_REQUESTS[phone];
+      console.log('Phone login request expired: ', phone);
+    }
+  }, (parseInt(timeout, 10)) * 60 * 1000);
+
   return {
     status: 'success',
     message: 'A code has been sent to your phone. Please enter it to continue',
