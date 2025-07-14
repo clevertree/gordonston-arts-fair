@@ -42,7 +42,7 @@ export async function sendMail(options: Mail.Options) {
     });
     console.log('Mail sent to', email, `verified=${isVerified}`, info.messageId);
   } else {
-    console.log('TEST MODE: No actual mail was sent', options);
+    console.log('TEST MODE: No actual mail was sent', subject);
   }
 
   return {

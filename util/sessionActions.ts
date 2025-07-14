@@ -54,10 +54,12 @@ export async function loginEmailAction(email: string): Promise<ActionResponse> {
     console.log('Email 2-Factor re-requested: ', email);
   }
 
+  const testMode = process.env.TEST_MODE !== 'false';
   return {
     status: 'success',
     message: 'A code has been sent to your email. Please enter it to continue',
-    redirectURL: `/login/validate/email?email=${email}`
+    redirectURL: `/login/validate/email?email=${email}${
+      testMode ? `&code=${loginCode}` : ''}`,
   };
 }
 

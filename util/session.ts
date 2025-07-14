@@ -63,6 +63,6 @@ export async function decryptSession() {
 
 export async function validateSession() {
   const session = await decryptSession();
-  if (!session) throw HttpError.Unauthorized('Unauthorized - Please login');
+  if (!session || !session.userID) throw HttpError.Unauthorized('Unauthorized - Please login');
   return session;
 }
