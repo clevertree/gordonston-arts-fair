@@ -5,6 +5,7 @@ import { validateByType, ValidationTypeList } from '@components/FormFields/valid
 import { formatByType, FormatTypeList } from '@components/FormFields/formatting';
 
 export interface FormFieldProps {
+  key: string,
   name: string,
   label: string,
   defaultValue: string,
@@ -92,6 +93,7 @@ export function useFormHook<T extends object>(
       validationMessage = validateByType(validate, currentValue, label || fieldName);
     }
     const props: FormFieldProps = {
+      key: fieldName,
       name: fieldName,
       label: label || fieldName,
       defaultValue: currentValue,

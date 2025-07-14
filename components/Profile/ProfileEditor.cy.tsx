@@ -43,6 +43,11 @@ describe('<ProfileEditor />', () => {
     cy.get('input[name="last_name"]').type('Last{enter}');
     cy.get('button[type="submit"]').click();
 
+    cy.focused().should('have.attr', 'name', 'email');
+    cy.get('div').should('contain', 'Email is a required field');
+    cy.get('input[name="email"]').type('test@test.com{enter}');
+    cy.get('button[type="submit"]').click();
+
     cy.focused().should('have.attr', 'name', 'phone');
     cy.get('div').should('contain', 'Primary Phone is a required field');
     cy.get('input[name="phone"]').type('1234{enter}');

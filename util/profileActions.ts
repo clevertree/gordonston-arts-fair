@@ -43,9 +43,13 @@ export async function updateProfile(userID: number, updatedUserRow: UpdatedUserT
   const {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     first_name, last_name, company_name,
-    address, city, state, zipcode, phone, phone2, website,
+    address, city, state, zipcode,
+    phone: unformattedPhone = '',
+    phone2: unformattedPhone2 = '', website,
     description, category, uploads
   } = userRow;
+  const phone = `${unformattedPhone || ''}`.replace(/\D/g, '');
+  const phone2 = `${unformattedPhone2 || ''}`.replace(/\D/g, '');
 
   await sql`UPDATE gaf_user
             SET first_name   = ${first_name},

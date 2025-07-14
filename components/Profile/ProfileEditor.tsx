@@ -145,7 +145,7 @@ function ProfileEditor({
         <Typography component="h2" id="step1">
           Contact Information
         </Typography>
-        <fieldset disabled={status === 'updating'} className="grid md:grid-cols-3 gap-4">
+        <fieldset disabled={status === 'updating'} className="grid md:grid-cols-4 gap-4">
           <TextField
             autoFocus
             helperText="Please enter your first name"
@@ -161,8 +161,17 @@ function ProfileEditor({
             helperText="Optional company name"
             {...formInfo.setupInput('company_name', 'Company Name')}
           />
+          <TextField
+            helperText="Artist Website"
+            {...formInfo.setupInput('website', 'Website')}
+          />
         </fieldset>
         <fieldset disabled={status === 'updating'} className="grid md:grid-cols-3 gap-4">
+          <TextField
+            helperText="Primary Email"
+            {...formInfo.setupInput('email', 'Primary Email', ['required', 'email'])}
+            required
+          />
           <TextField
             helperText="Primary Phone (i.e. home)"
             {...formInfo.setupInput('phone', 'Primary Phone', ['required', 'phone'], 'phone')}
@@ -171,10 +180,6 @@ function ProfileEditor({
           <TextField
             helperText="Contact Phone (i.e. cell)"
             {...formInfo.setupInput('phone2', 'Contact Phone', 'phone', 'phone')}
-          />
-          <TextField
-            helperText="Artist Website"
-            {...formInfo.setupInput('website', 'Website')}
           />
         </fieldset>
         <fieldset disabled={status === 'updating'} className="grid md:grid-cols-4 gap-4">
@@ -559,7 +564,6 @@ const LIST_CATEGORIES = [
   'Jewelry', //  Artistic jewelry pieces
   'Fibers/Textiles',
   'Leather',
-  'Ceramic',
   'Glass',
   'Metals',
   'Woodworking',
