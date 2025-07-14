@@ -6,20 +6,6 @@ import { addTransaction } from '@util/transActions';
 import { FeeMetaData } from '@app/api/checkout-sessions/[feeType]/route';
 import { fetchProfileByID, updateUserStatus } from '@util/profileActions';
 
-// Initialize Stripe with type checking for the secret key
-if (!process.env.STRIPE_SECRET_WEBHOOK_KEY) {
-  throw new Error('STRIPE_SECRET_WEBHOOK_KEY is not defined');
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_WEBHOOK_KEY);
-
-// Type check webhook secret
-if (!process.env.STRIPE_SECRET_WEBHOOK_KEY) {
-  throw new Error('STRIPE_SECRET_WEBHOOK_KEY is not defined');
-}
-
-const endpointSecret = process.env.STRIPE_SECRET_WEBHOOK_KEY;
-
 export async function POST(request: Request) {
   const body = await request.text();
   const sig = (await headers()).get('stripe-signature');
@@ -33,6 +19,20 @@ export async function POST(request: Request) {
   }
 
   let event;
+
+  // Initialize Stripe with type checking for the secret key
+  if (!process.env.STRIPE_SECRET_WEBHOOK_KEY) {
+    throw new Error('STRIPE_SECRET_WEBHOOK_KEY is not defined');
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_WEBHOOK_KEY);
+
+  // Type check webhook secret
+  if (!process.env.STRIPE_SECRET_WEBHOOK_KEY) {
+    throw new Error('STRIPE_SECRET_WEBHOOK_KEY is not defined');
+  }
+
+  const endpointSecret = process.env.STRIPE_SECRET_WEBHOOK_KEY;
 
   try {
     event = stripe.webhooks.constructEvent(body, sig, endpointSecret);

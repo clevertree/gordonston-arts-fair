@@ -555,73 +555,12 @@ const LIST_CATEGORIES = [
   'Printmaking', //  Covers etching, lithography, woodcut, and other print methods
   'Drawing', //  Includes dry media like charcoal, pastels, pencil, etc.
   'Ceramics', // Original clay and porcelain work
-  'Textile Art', // Such as tapestries, quilts, and embroidery
-  'Digital Art', //  Art created or manipulated using computer technology
   'Mixed Media', //  Art using a combination of materials and techniques
-  'Installations', // Large-scale works that transform spaces
-  'Video Art', //  Art in video format
-  'Sound Art', //  Art incorporating sound
-  'Performance Art', //  Art involving live performance
-  'New Media Art', //  Art that utilizes new media technologies
-  'Applied Arts', //  Art with practical applications
-  'Design', //  Can include various design disciplines
   'Jewelry', //  Artistic jewelry pieces
-  'Comic Art', //  Art related to comics
-  'Film & Animation', //  Art in film and animation format
-  'Emerging Artists', // Often a specific section focusing on new talent
-  'Modern Art', // Art from a specific historical period
-  'Contemporary Art', //  Art from the current era
-  'Conceptual Art', // Art focused on ideas and concepts
-  'Street Art', //  Art created in public spaces
-  'Fine Craft', //  Contemporary crafts
-  'Traditional Crafts', //  Country and traditional crafts
-  'Graphics',
-  'Wood',
   'Fibers/Textiles',
   'Leather',
   'Ceramic',
   'Glass',
-  'Metalsmithing',
-  'Ceramics/Enamel',
-  'Metal',
-  'Traditional Acrylic/Oil',
-  'Conceptual Acrylic/Oil',
-  'Watercolor',
-  'Graphics/Drawing',
-  'Multiple Images (digital & photography)',
-  'Whimsical',
-  'Clay',
-  'Wearable Fibers',
-  'Furniture',
-  'Non-Wearable Fibers',
-  'Photo',
-  'Stone',
-  'Oil on Canvas',
-  'Pastel',
-  'Iron',
-  'Fiber',
-  'Apparel',
-  'Drawings/Pastels',
-  'Traditional Photography',
-  'Digital Photography',
-  'Homemade - Describe your product in the Comments field.',
-  'Other - Describe your product in the Comments field.',
-  'Fine Art (watercolor, acrylic, oils, pencil)',
-  'Food Vendor',
-  'Soaps/Lotions',
-  'Food Truck',
-  'Fine Art',
-  'Antiques',
-  'Vintage Décor',
+  'Metals',
   'Woodworking',
-  'Art',
-  'Crafts',
-  'Clothing',
-  'Plants',
-  'Fine Art (e.g., Dry-Wet Media, Pastel, Pencil, Oil, Digital, Mixed Media)',
-  'Fine Craft (Glass)',
-  'Fine Craft (Metal)',
-  'Fine Craft (Wood)',
-  'Fine Craft (Ceramics/Pottery)',
-  'Fine Craft (Fiber/Clothing)'
 ];
