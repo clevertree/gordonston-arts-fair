@@ -22,7 +22,7 @@ function LoginForm({
   const handleSubmit = async (event: any) => {
     event.preventDefault();
     setStatus('submitting');
-    setMessage(['info', 'Submitting log in form...']);
+    setMessage(['info', 'Submitting log-in form...']);
 
     try {
       const response = await loginAction(email, password);

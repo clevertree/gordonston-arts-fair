@@ -5,8 +5,8 @@ import {
   Alert, Box, Button, TextField, Typography
 } from '@mui/material';
 import type { AlertColor } from '@mui/material/Alert';
-import { ActionResponse } from '@util/sessionActions';
 import { validateEmail } from '@components/FormFields/validation';
+import { ActionResponse } from '../../types';
 
 interface LoginEmailFormProps {
   loginEmailAction(email: string): Promise<ActionResponse>
@@ -29,7 +29,7 @@ function LoginEmailForm({
     }
 
     setStatus('submitting');
-    setMessage(['info', 'Submitting log in form...']);
+    setMessage(['info', 'Submitting log-in form...']);
 
     try {
       const response = await loginEmailAction(email);

@@ -6,12 +6,7 @@ import { endSession, validateSession } from '@util/session';
 import { HttpError } from '@util/exception/httpError';
 import { isAdmin } from '@util/userActions';
 import { addUserLogEntry } from '@util/logActions';
-
-export type ActionResponse = {
-  status: 'success' | 'error';
-  message: string;
-  redirectURL?: string;
-};
+import { ActionResponse } from '../types';
 
 export async function logoutAction(): Promise<ActionResponse> {
   const oldSession = await endSession();

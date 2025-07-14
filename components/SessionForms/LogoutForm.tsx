@@ -5,7 +5,8 @@ import {
   Alert, Box, Button, Typography
 } from '@mui/material';
 import type { AlertColor } from '@mui/material/Alert';
-import { ActionResponse } from '@util/sessionActions';
+
+import { ActionResponse } from '../../types';
 
 interface LogoutFormProps {
   logoutAction(): Promise<ActionResponse>

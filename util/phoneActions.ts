@@ -5,18 +5,19 @@
 import { randomInt } from 'node:crypto';
 import { addUserLogEntry } from '@util/logActions';
 import { getPGSQLClient } from '@util/pgsql';
-import { UserTableRow } from '@util/schema';
+import {
+  add2FACode, delete2FACode, fetch2FACode, UserTableRow
+} from '@util/schema';
 import { startSession } from '@util/session';
 import { isAdmin } from '@util/userActions';
-import { ActionResponse } from '@util/sessionActions';
 import UserRegistrationSMSTemplate from '../template/sms/user-registration-sms';
 import User2FactorSMSTemplate from '../template/sms/user-2factor-sms';
-import { SMSMessage } from '../types';
+import { ActionResponse, SMSMessage } from '../types';
 
 export async function sendSMSMessage({
   phone,
   message,
-}:SMSMessage) {
+}: SMSMessage): Promise<ActionResponse> {
   if (!process.env.TEXTBEE_API_KEY) {
     throw new Error('TEXTBEE_API_KEY is not defined');
   }
@@ -39,44 +40,56 @@ export async function sendSMSMessage({
       })
     });
     const responseJSON:SMSMessageResult = await response.json();
+    const responseMessage = responseJSON.error
+        || responseJSON?.data?.message
+        || JSON.stringify(responseJSON);
+    if (!responseJSON?.data?.success) {
+      return {
+        status: 'error',
+        message: `Error sending SMS: ${responseMessage}`,
+      };
+    }
+    console.log('SMS sent to', phone, message);
 
-    console.log('SMS sent to', phone, responseJSON.message);
-    return responseJSON;
+    return {
+      status: 'success',
+      message: responseMessage,
+    };
   }
+
   console.log('TEST MODE: No actual SMS was sent');
   return {
-    success: true,
+    status: 'success',
     message: `TEST MODE: ${message}`,
   };
 }
 
 interface SMSMessageResult {
-  success: boolean;
-  message: string;
-  smsBatchId: string;
-  recipientCount: number,
+  data?: {
+    success: boolean;
+    message: string;
+    smsBatchId: string;
+    recipientCount: number,
+  }
+  error?: string
   statusCode?: number
 }
 
 /** Phone Validation * */
-
-const LOGIN_PHONE_REQUESTS: {
-  [phone: string]: number;
-} = {};
 
 export async function loginPhoneAction(unformattedPhone: string): Promise<ActionResponse> {
   const phone = unformattedPhone.replace(/\D/g, '');
   // const redisPasswordResetKey = `user:${phone.toLowerCase()}:reset-password`;
   // await redisClient.set(redisPasswordResetKey, resetCode, { EX: 60 * 15 });
   const testMode = process.env.TEST_MODE !== 'false';
-  if (LOGIN_PHONE_REQUESTS[phone]) {
-    const loginCode = LOGIN_PHONE_REQUESTS[phone];
-    console.log('Phone 2-Factor re-requested: ', phone);
+  const twoFactorResult = await fetch2FACode('phone', phone.toLowerCase());
+  if (twoFactorResult) {
+    console.log('Phone 2-Factor re-requested: ', phone, twoFactorResult);
     return {
       status: 'success',
       message: 'A code has been sent to your phone. Please enter it to continue',
       redirectURL: `/login/validate/phone?phone=${phone}${
-        testMode ? `&code=${loginCode}` : ''}\`,`
+        testMode ? `&code=${twoFactorResult.code}` : ''}`
     };
   }
 
@@ -87,13 +100,11 @@ export async function loginPhoneAction(unformattedPhone: string): Promise<Action
   try {
     const phoneTemplate = User2FactorSMSTemplate(phone, loginCode, validationURL);
     const phoneRequest = await sendSMSMessage(phoneTemplate);
-    console.log('Sent sms: ', phoneTemplate.message, phoneRequest);
-    if (!phoneRequest.success) {
-      return {
-        status: 'error',
-        message: 'Unable to send sms request. Please try again later',
-      };
+    if (phoneRequest.status === 'error') {
+      console.log('SMS Error: ', phoneTemplate.message, phoneRequest);
+      return phoneRequest;
     }
+    console.log('Sent sms: ', phoneTemplate.message, phoneRequest);
   } catch (e: any) {
     console.error('Unable to send sms: ', e.message);
     return {
@@ -103,20 +114,13 @@ export async function loginPhoneAction(unformattedPhone: string): Promise<Action
   }
 
   // Store validation code
-  LOGIN_PHONE_REQUESTS[phone] = loginCode;
-
-  setTimeout(() => {
-    if (LOGIN_PHONE_REQUESTS[phone]) {
-      delete LOGIN_PHONE_REQUESTS[phone];
-      console.log('Phone login request expired: ', phone);
-    }
-  }, (parseInt(timeout, 10)) * 60 * 1000);
+  await add2FACode('phone', phone, loginCode);
 
   return {
     status: 'success',
     message: 'A code has been sent to your phone. Please enter it to continue',
     redirectURL: `/login/validate/phone?phone=${phone}${
-      testMode ? `&code=${loginCode}` : ''}\`,`
+      testMode ? `&code=${loginCode}` : ''}`
   };
 }
 
@@ -124,12 +128,12 @@ export async function loginPhoneValidationAction(
   phone: string,
   code: number
 ): Promise<ActionResponse> {
-  const storedCode = LOGIN_PHONE_REQUESTS[phone];
-  if (!storedCode || (storedCode !== code)) {
+  const twoFactorResult = await fetch2FACode('phone', phone.toLowerCase());
+  if (!twoFactorResult || (twoFactorResult.code !== code)) {
     // eslint-disable-next-line no-console
-    console.error('Invalid phone login request:', phone, storedCode, code, LOGIN_PHONE_REQUESTS);
+    console.error('Invalid phone login request:', phone, code, twoFactorResult);
     // Add an error log entry
-    await addUserLogEntry(null, 'log-in-error', 'Invalid login request');
+    await addUserLogEntry(null, 'log-in-error', 'Invalid phone login request');
     return {
       message: 'Invalid login request',
       status: 'error',
@@ -137,7 +141,7 @@ export async function loginPhoneValidationAction(
   }
 
   // Delete Login Request
-  delete LOGIN_PHONE_REQUESTS[phone];
+  await delete2FACode('phone', phone);
 
   const sql = getPGSQLClient();
   // Fetch user from the database
@@ -166,13 +170,13 @@ export async function loginPhoneValidationAction(
     const loginURL = `${process.env.NEXT_PUBLIC_BASE_URL}/login`;
     const phoneTemplate = UserRegistrationSMSTemplate(phone, loginURL);
     const smsResult = await sendSMSMessage(phoneTemplate);
-    await addUserLogEntry(userID, smsResult.success ? 'message' : 'message-error', smsResult.message);
+    await addUserLogEntry(userID, smsResult.status === 'success' ? 'message' : 'message-error', smsResult.message);
   }
 
   await startSession(userID);
 
   // eslint-disable-next-line no-console
-  console.error('User logged in by phone: ', phone);
+  console.info('User logged in by phone: ', phone);
   return {
     status: 'success',
     message: 'Login successful. Redirecting...',

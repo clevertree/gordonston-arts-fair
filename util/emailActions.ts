@@ -6,12 +6,14 @@ import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 import { addUserLogEntry } from '@util/logActions';
 import { getPGSQLClient } from '@util/pgsql';
-import { UserTableRow } from '@util/schema';
+import {
+  add2FACode, delete2FACode, fetch2FACode, UserTableRow
+} from '@util/schema';
 import { startSession } from '@util/session';
 import { isAdmin } from '@util/userActions';
 import { randomInt } from 'node:crypto';
-import { ActionResponse } from '@util/sessionActions';
 import { User2FactorEmailTemplate, UserRegistrationEmailTemplate } from '../template/email';
+import { ActionResponse } from '../types';
 
 const { SMTP_SERVER_HOST } = process.env;
 const { SMTP_SERVER_USERNAME } = process.env;
@@ -61,27 +63,27 @@ export async function sendMail(options: Mail.Options) {
   };
 }
 
-const LOGIN_EMAIL_REQUESTS: {
-  [email: string]: number;
-} = {};
+// const LOGIN_EMAIL_REQUESTS: {
+//   [email: string]: number;
+// } = {};
 
 export async function loginEmailAction(email: string): Promise<ActionResponse> {
   // const redisPasswordResetKey = `user:${email.toLowerCase()}:reset-password`;
   // await redisClient.set(redisPasswordResetKey, resetCode, { EX: 60 * 15 });
+
   const testMode = process.env.TEST_MODE !== 'false';
-  if (LOGIN_EMAIL_REQUESTS[email]) {
-    const loginCode = LOGIN_EMAIL_REQUESTS[email];
-    console.log('Email 2-Factor re-requested: ', email);
+  const twoFactorResult = await fetch2FACode('email', email.toLowerCase());
+  if (twoFactorResult) {
+    console.log('Email 2-Factor re-requested: ', email, twoFactorResult);
     return {
       status: 'success',
       message: 'A code has been sent to your email. Please enter it to continue',
       redirectURL: `/login/validate/email?email=${email}${
-        testMode ? `&code=${loginCode}` : ''}\`,`
+        testMode ? `&code=${twoFactorResult.code}` : ''}`
     };
   }
 
   const loginCode = randomInt(100000, 999999 + 1);
-  const timeout = process.env.TIMEOUT_2FACTOR_MINUTES || '15';
 
   const validationURL = `${process.env.NEXT_PUBLIC_BASE_URL}/login/validate/email/?email=${email}&code=${loginCode}`;
   try {
@@ -103,14 +105,7 @@ export async function loginEmailAction(email: string): Promise<ActionResponse> {
   }
 
   // Store validation code
-  LOGIN_EMAIL_REQUESTS[email] = loginCode;
-
-  setTimeout(() => {
-    if (LOGIN_EMAIL_REQUESTS[email]) {
-      delete LOGIN_EMAIL_REQUESTS[email];
-      console.log('Email login request expired: ', email);
-    }
-  }, (parseInt(timeout, 10)) * 60 * 1000);
+  await add2FACode('email', email.toLowerCase(), loginCode);
 
   return {
     status: 'success',
@@ -124,12 +119,12 @@ export async function loginEmailValidationAction(
   email: string,
   code: number
 ): Promise<ActionResponse> {
-  const storedCode = LOGIN_EMAIL_REQUESTS[email];
-  if (!storedCode || (storedCode !== code)) {
+  const twoFactorResult = await fetch2FACode('email', email.toLowerCase());
+  if (!twoFactorResult || (twoFactorResult.code !== code)) {
     // eslint-disable-next-line no-console
-    console.error('Invalid email login request:', email, storedCode, code);
+    console.error('Invalid email login request:', email, code, twoFactorResult);
     // Add an error log entry
-    await addUserLogEntry(null, 'log-in-error', 'Invalid login request');
+    await addUserLogEntry(null, 'log-in-error', 'Invalid email login request');
     return {
       message: 'Invalid login request',
       status: 'error',
@@ -137,7 +132,7 @@ export async function loginEmailValidationAction(
   }
 
   // Delete Login Request
-  delete LOGIN_EMAIL_REQUESTS[email];
+  await delete2FACode('email', email.toLowerCase());
 
   const sql = getPGSQLClient();
   // Fetch user from the database
@@ -172,7 +167,7 @@ export async function loginEmailValidationAction(
   await startSession(userID);
 
   // eslint-disable-next-line no-console
-  console.error('User logged in by email: ', email);
+  console.info('User logged in by email: ', email);
   return {
     status: 'success',
     message: 'Login successful. Redirecting...',

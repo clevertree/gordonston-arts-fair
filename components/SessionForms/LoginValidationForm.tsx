@@ -5,7 +5,8 @@ import {
   Alert, Box, Button, TextField, Typography
 } from '@mui/material';
 import type { AlertColor } from '@mui/material/Alert';
-import { ActionResponse } from '@util/sessionActions';
+
+import { ActionResponse } from '../../types';
 
 interface LoginValidationFormProps {
   loginValidationAction(code: number): Promise<ActionResponse>,
@@ -47,7 +48,7 @@ function LoginValidationForm({
   const handleSubmit = (event: any) => {
     event.preventDefault();
     setStatus('submitting');
-    setMessage(['info', 'Submitting log in form...']);
+    setMessage(['info', 'Submitting log-in form...']);
 
     tryValidateCode().then();
   };

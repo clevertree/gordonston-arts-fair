@@ -1,3 +1,5 @@
+import { getPGSQLClient } from '@util/pgsql';
+
 export type UserStatus =
     'unregistered'
     | 'registered'
@@ -56,3 +58,40 @@ export type UserTableRow = {
 
 export type NewUserTableRow = Omit<UserTableRow, 'id' | 'created_at' | 'updated_at'>;
 export type UpdatedUserTableRow = Partial<NewUserTableRow>;
+
+interface TwoFactorTableRow {
+  type: 'email' | 'phone';
+  receiver: string;
+  code: number;
+  expiration: Date;
+}
+
+export async function fetch2FACode(type: 'email' | 'phone', receiver: string) {
+  const sql = getPGSQLClient();
+  const rows = (await sql`SELECT *
+                          FROM gaf_2fa_codes
+                          WHERE type = ${type}
+                            AND receiver = ${receiver}
+                            AND expiration > NOW()
+  `) as TwoFactorTableRow[];
+  return rows.length > 0 ? rows[0] : null;
+}
+
+export async function add2FACode(type: 'email' | 'phone', receiver: string, code: number) {
+  const timeout = Number.parseInt(process.env.TIMEOUT_2FACTOR_MINUTES || '15', 10);
+  const sql = getPGSQLClient();
+  await sql`INSERT INTO gaf_2fa_codes (type, receiver, code, expiration)
+            VALUES (${type}, ${receiver}, ${code}, (NOW() + INTERVAL '1 minute' * ${timeout}))
+            ON CONFLICT (type, receiver, code)
+              DO UPDATE SET code       = ${code},
+                            expiration = (NOW() + INTERVAL '1 minute' * ${timeout})`;
+}
+
+// Deletes all requests of type and receiver
+export async function delete2FACode(type: 'email' | 'phone', receiver: string) {
+  const sql = getPGSQLClient();
+  await sql`DELETE
+            FROM gaf_2fa_codes
+            WHERE type = ${type}
+              AND receiver = ${receiver}`;
+}

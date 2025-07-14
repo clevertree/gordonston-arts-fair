@@ -5,8 +5,9 @@ import {
   Alert, Box, Button, TextField, Typography
 } from '@mui/material';
 import type { AlertColor } from '@mui/material/Alert';
-import { ActionResponse } from '@util/sessionActions';
 import { validatePhone } from '@components/FormFields/validation';
+import { formatPhone } from '@components/FormFields/formatting';
+import { ActionResponse } from '../../types';
 
 interface LoginPhoneFormProps {
   loginPhoneAction(phone: string): Promise<ActionResponse>
@@ -21,15 +22,19 @@ function LoginPhoneForm({
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
-
-    const validation = validatePhone(phone);
+    const formattedPhone = formatPhone(phone);
+    if (!formattedPhone) {
+      setMessage(['error', 'Please enter a phone number']);
+      return;
+    }
+    const validation = validatePhone(formattedPhone);
     if (validation) {
       setMessage(['error', validation]);
       return;
     }
 
     setStatus('submitting');
-    setMessage(['info', 'Submitting log in form...']);
+    setMessage(['info', 'Submitting log-in form...']);
 
     try {
       const response = await loginPhoneAction(phone);
