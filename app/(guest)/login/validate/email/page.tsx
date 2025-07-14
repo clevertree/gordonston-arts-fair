@@ -1,7 +1,8 @@
 import { Stack } from '@mui/material';
 import Link from 'next/link';
 import LoginValidationForm from '@components/SessionForms/LoginValidationForm';
-import { loginEmailValidationAction } from '@util/sessionActions';
+
+import { loginEmailValidationAction } from '@util/emailActions';
 
 export const metadata = {
   title: 'Artist Email Login Validation',

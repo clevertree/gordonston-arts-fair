@@ -1,7 +1,8 @@
 import { Stack } from '@mui/material';
 import Link from 'next/link';
 import LoginValidationForm from '@components/SessionForms/LoginValidationForm';
-import { loginPhoneValidationAction } from '@util/sessionActions';
+
+import { loginPhoneValidationAction } from '@util/phoneActions';
 
 export const metadata = {
   title: 'Artist Phone Login Validation',

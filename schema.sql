@@ -70,6 +70,7 @@
         CONSTRAINT fk_user
             FOREIGN KEY (user_id)
                 REFERENCES gaf_user (id)
+                ON DELETE CASCADE
     );
 
 

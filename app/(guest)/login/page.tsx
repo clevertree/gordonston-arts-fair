@@ -2,7 +2,8 @@ import LoginEmailForm from '@components/SessionForms/LoginEmailForm';
 import LoginPhoneForm from '@components/SessionForms/LoginPhoneForm';
 import { Stack } from '@mui/material';
 import Link from 'next/link';
-import { loginEmailAction, loginPhoneAction } from '@util/sessionActions';
+import { loginPhoneAction } from '@util/phoneActions';
+import { loginEmailAction } from '@util/emailActions';
 
 export const metadata = {
   title: 'Artist Login',
