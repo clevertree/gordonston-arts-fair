@@ -26,6 +26,7 @@ import { UserFileUploadDescription, UserTableRow } from '@util/schema';
 
 interface ProfileEditorProps {
   userProfile: UserTableRow,
+  isProfileComplete: [boolean, string],
 
   updateProfile(newUserProfile: UserTableRow): Promise<UserTableRow>
 
@@ -36,15 +37,16 @@ interface ProfileEditorProps {
 
 function ProfileEditor({
   userProfile: userProfileServer,
+  isProfileComplete,
   updateProfile,
   uploadFile,
   deleteFile
 }: ProfileEditorProps) {
   const [status, setStatus] = useState<'ready' | 'unsaved' | 'updating' | 'error'>('ready');
   const [message, setMessage] = useState<[AlertColor, string]>(
-    userProfileServer.isProfileComplete === true
+    isProfileComplete[0]
       ? ['success', 'Artist profile is complete']
-      : ['info', `Please complete your artist profile. ${userProfileServer.isProfileComplete || ''}`]
+      : ['info', `Please complete your artist profile. ${isProfileComplete[1] || ''}`]
   );
   const [userProfileClient, setUserProfileClient] = useState<UserTableRow>(userProfileServer);
   // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)

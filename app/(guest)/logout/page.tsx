@@ -11,7 +11,7 @@ export default async function ArtistLogout() {
   // const session = await validateSession()
 
   return (
-    <>
+    <Stack spacing={2}>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">Artist Logout</h1>
 
       <LogoutForm logoutAction={logoutAction} />
@@ -19,6 +19,6 @@ export default async function ArtistLogout() {
       <Stack sx={{ margin: 'auto' }} direction="column">
         <Link href="/login">Click here to log in as an Artist</Link>
       </Stack>
-    </>
+    </Stack>
   );
 }

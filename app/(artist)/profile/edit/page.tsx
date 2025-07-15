@@ -7,7 +7,9 @@ import { redirect } from 'next/navigation';
 import { UserTableRow } from '@util/schema';
 import Link from 'next/link';
 import { ArtistStepper } from '@components/Profile/ArtistStepper';
+import { Stack } from '@mui/material';
 import React from 'react';
+import { isProfileComplete } from '@util/profile';
 import { SessionPayload } from '../../../../types';
 
 export const metadata = {
@@ -24,12 +26,13 @@ export default async function ProfilePage() {
   const profileData = await fetchProfileByID(session.userID);
 
   return (
-    <>
+    <Stack spacing={2}>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">Edit Artist Profile</h1>
 
       <ArtistStepper profileData={profileData} />
 
       <ProfileEditor
+        isProfileComplete={isProfileComplete(profileData)}
         userProfile={profileData}
         uploadFile={async (file: File) => {
           'use server';
@@ -49,6 +52,6 @@ export default async function ProfilePage() {
         }}
       />
       <Link href="/dashboard">Click here to return to your dashboard</Link>
-    </>
+    </Stack>
   );
 }

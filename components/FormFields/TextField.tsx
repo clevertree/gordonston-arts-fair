@@ -1,5 +1,5 @@
 import { TextField as MUITextField, TextFieldProps as MUITextFieldProps } from '@mui/material';
-import React, { useCallback } from 'react';
+import React from 'react';
 
 type TextFieldProps = MUITextFieldProps & {
   helperTextError?: boolean,
@@ -11,17 +11,6 @@ export default function TextField({
   helperTextError,
   ...props
 }: TextFieldProps) {
-  const onUserNameAnimationStart = useCallback(
-    (event: any): void => {
-      console.log(event);
-      if (event.animationName === 'mui-auto-fill') {
-        // Handle autofill event here
-        console.log('Username field autofilled!');
-      }
-    },
-    []
-  );
-
   return (
     <MUITextField
       inputRef={(inputRef) => {
@@ -42,10 +31,9 @@ export default function TextField({
         }
       }}
       slotProps={{
-        input: {
+        select: {
           onAnimationStart: (e: any): void => {
             if (e.animationName === 'mui-auto-fill') {
-              console.log(e, props.onChange);
               if (props.onChange) props.onChange(e as any);
             }
           },

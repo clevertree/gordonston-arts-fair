@@ -13,7 +13,7 @@ describe('template spec', () => {
         cy.get('h1').should('contain', 'Gordonston');
         cy.checkA11y();
 
-        cy.get('a[href="/profile"]').last().click();
+        cy.get('a[href="/dashboard"]').last().click();
         cy.get('h1').should('contain', 'Artist Login');
         cy.checkA11y();
 

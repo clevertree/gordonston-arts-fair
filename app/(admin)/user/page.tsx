@@ -1,4 +1,5 @@
 import AdminUserList from '@components/Admin/UserListAdmin';
+import { Stack } from '@mui/material';
 
 import { validateAdminSession } from '@util/sessionActions';
 import { listUsersAsAdmin, UserSearchParams } from '@util/userActions';
@@ -25,12 +26,12 @@ export default async function AdminUserListPage({ searchParams }:AdminUserListPa
   };
   const userResult = await listUsersAsAdmin(userSearchParams);
   return (
-    <>
+    <Stack spacing={2}>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">
         {`Manage ${USER_LABEL}s`}
       </h1>
 
       <AdminUserList {...userResult} searchParams={userSearchParams} />
-    </>
+    </Stack>
   );
 }

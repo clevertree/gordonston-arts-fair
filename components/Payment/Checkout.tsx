@@ -1,7 +1,9 @@
 'use client';
 
 import { loadStripe } from '@stripe/stripe-js';
-import { Alert, Button } from '@mui/material';
+import {
+  Alert, Button, Paper, Stack
+} from '@mui/material';
 import React, { useState } from 'react';
 import type { AlertColor } from '@mui/material/Alert';
 
@@ -36,19 +38,21 @@ export default function Checkout({ stripePublishableKey, feeType }: CheckoutProp
   };
 
   return (
-    <div>
-      <h1>Checkout</h1>
-      {message && message[1] && (
-        <Alert severity={message[0]}>
-          {message[1]}
-        </Alert>
-      )}
-      <Button
-        variant="outlined"
-        onClick={handleCheckout}
-      >
-        Proceed to Checkout
-      </Button>
-    </div>
+    <Paper elevation={3}>
+      <Stack spacing={2} padding={2}>
+        <h1>Checkout</h1>
+        {message && message[1] && (
+          <Alert severity={message[0]}>
+            {message[1]}
+          </Alert>
+        )}
+        <Button
+          variant="outlined"
+          onClick={handleCheckout}
+        >
+          Proceed to Checkout
+        </Button>
+      </Stack>
+    </Paper>
   );
 }

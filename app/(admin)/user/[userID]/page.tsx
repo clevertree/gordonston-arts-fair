@@ -26,7 +26,7 @@ export default async function AdminUserManagementPage({
   const userLogs = await fetchUserLogs(profile.id);
 
   return (
-    <>
+    <Stack spacing={2}>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">Manage an Artist</h1>
 
       <Stack spacing={2} padding={2}>
@@ -57,6 +57,6 @@ export default async function AdminUserManagementPage({
         <UserLogAdmin logs={userLogs} email={profile.email} />
 
       </Stack>
-    </>
+    </Stack>
   );
 }

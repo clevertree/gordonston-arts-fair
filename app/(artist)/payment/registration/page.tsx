@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Checkout from '@components/Payment/Checkout';
 import { ArtistStepper } from '@components/Profile/ArtistStepper';
 import React from 'react';
+import { Stack } from '@mui/material';
 import { SessionPayload } from '../../../../types';
 
 export const metadata = {
@@ -25,14 +26,14 @@ export default async function CheckoutPage() {
   }
   const profileData = await fetchProfileByID(session.userID);
   return (
-    <>
-      <h1 className="m-auto text-[color:var(--gold-color)] italic">Pay Artist Registration Fee</h1>
+    <Stack spacing={2}>
+      <h1 className="items-center text-[color:var(--gold-color)] italic">Pay Artist Registration Fee</h1>
 
       <ArtistStepper profileData={profileData} />
 
       <Checkout feeType="registration" stripePublishableKey={stripePublishableKey} />
 
       <Link href="/dashboard">Click here to return to your dashboard</Link>
-    </>
+    </Stack>
   );
 }

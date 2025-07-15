@@ -14,6 +14,7 @@ export default function ArtistLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const testMode = process.env.TEST_MODE !== 'false';
   return (
     <>
       <header>
@@ -23,6 +24,7 @@ export default function ArtistLayout({
         </FloatingDiv>
       </header>
       <article role="main" className="max-w-screen-lg flex flex-col z-[2] m-auto p-4">
+        {testMode && <div className="bg-red-500 text-white text-center p-2">TEST MODE</div>}
         <Suspense fallback={<SuspenseContent />}>
           {children}
         </Suspense>

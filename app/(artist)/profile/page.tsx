@@ -5,6 +5,7 @@ import ProfileView from '@components/Profile/ProfileView';
 import Link from 'next/link';
 import { ArtistStepper } from '@components/Profile/ArtistStepper';
 import React from 'react';
+import { Stack } from '@mui/material';
 import { SessionPayload } from '../../../types';
 
 export const metadata = {
@@ -21,7 +22,7 @@ export default async function ProfilePage() {
   const profileData = await fetchProfileByID(session.userID);
 
   return (
-    <>
+    <Stack spacing={2}>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">Artist Profile</h1>
 
       <ArtistStepper profileData={profileData} />
@@ -30,6 +31,6 @@ export default async function ProfilePage() {
         userProfile={profileData}
       />
       <Link href="/profile/edit">Click here to edit your profile</Link>
-    </>
+    </Stack>
   );
 }
