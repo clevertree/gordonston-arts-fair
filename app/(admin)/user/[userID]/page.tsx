@@ -2,9 +2,9 @@ import { validateAdminSession } from '@util/sessionActions';
 import { fetchProfileByID, updateUserStatus } from '@util/profileActions';
 import Link from 'next/link';
 import UserStatusEditorAdmin from '@components/Admin/UserStatusEditorAdmin';
-import ProfileView from '@components/Profile/ProfileView';
+import ProfileView from '@components/User/ProfileView';
 import { Stack } from '@mui/material';
-import UserLogAdmin from '@components/Admin/UserLogAdmin';
+import UserLogView from '@components/User/UserLogView';
 import React from 'react';
 import { fetchUserLogs } from '@util/logActions';
 
@@ -54,7 +54,7 @@ export default async function AdminUserManagementPage({
         {/*  sendMail={sendMail} */}
         {/* /> */}
 
-        <UserLogAdmin logs={userLogs} email={profile.email} />
+        <UserLogView logs={userLogs} title={`${USER_LABEL} Logs`} />
 
       </Stack>
     </Stack>

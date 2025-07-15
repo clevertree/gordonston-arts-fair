@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS gaf_transactions
 (
     id         SERIAL PRIMARY KEY,
     user_id    INT            NULL,
+    full_name  VARCHAR(256)   NULL,
     email      VARCHAR(256)   NULL,
     phone      VARCHAR(256)   NULL,
     type       VARCHAR(16)    NOT NULL CHECK (type IN ('charge.succeeded', 'charge.refunded')), -- Restricts the type to either 'email' or 'phone'

@@ -11,6 +11,7 @@ export type LogType = 'log-in' |
 'message-error' |
 'status-change';
 export type LogEntry = {
+  id: number,
   type: LogType,
   message: string,
   created_at: Date,

@@ -62,6 +62,7 @@ export async function POST(request: Request) {
         amount,
         metadata,
         billing_details: {
+          name,
           email,
           phone
         }
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
         feeType
       } = metadata as unknown as FeeMetaData;
       console.log('STRIPE', amount / 100, event.type);
-      await addTransaction(userID, event.type, amount / 100, event.data.object);
+      await addTransaction(userID, event.type, amount / 100, name, email, phone, event.data.object);
       const profileInfo = await fetchProfileByID(userID);
 
       switch (feeType) {

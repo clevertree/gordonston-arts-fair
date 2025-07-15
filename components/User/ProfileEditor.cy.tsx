@@ -1,5 +1,5 @@
 import React from 'react';
-import ProfileEditor from '@components/Profile/ProfileEditor';
+import ProfileEditor from '@components/User/ProfileEditor';
 import { UserTableRow } from '@util/schema';
 
 describe('<ProfileEditor />', () => {

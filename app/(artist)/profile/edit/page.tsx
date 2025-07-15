@@ -1,4 +1,4 @@
-import ProfileEditor from '@components/Profile/ProfileEditor';
+import ProfileEditor from '@components/User/ProfileEditor';
 import { validateSession } from '@util/session';
 import {
   deleteFile, fetchProfileByID, updateProfile, uploadFile
@@ -6,7 +6,7 @@ import {
 import { redirect } from 'next/navigation';
 import { UserTableRow } from '@util/schema';
 import Link from 'next/link';
-import { ArtistStepper } from '@components/Profile/ArtistStepper';
+import { ArtistStepper } from '@components/User/ArtistStepper';
 import { Stack } from '@mui/material';
 import React from 'react';
 import { isProfileComplete } from '@util/profile';

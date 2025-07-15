@@ -37,7 +37,7 @@ export default async function UserListAdmin({
 }: AdminUserListProps) {
   const statusOptions: Array<UserStatus | 'all'> = ['all', ...profileStatuses];
   return (
-    <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
+    <Box className="flex flex-col min-w-full m-auto p-6 rounded-2xl border-2 border-[#ccca]">
       <Typography variant="h4" gutterBottom>
         {`${USER_LABEL} Management`}
       </Typography>

@@ -2,20 +2,18 @@ import {
   Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography
 } from '@mui/material';
 
-import { LogEntry } from '@util/logActions';
+import { TransactionEntry } from '@util/transActions';
 
 interface AdminUserLogProps {
-  logs: LogEntry[],
-  email: string
+  transactions: TransactionEntry[],
+  title: string
 }
 
-const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
-
-export default async function UserLogAdmin({ logs, email }: AdminUserLogProps) {
+export default async function UserTransactionView({ transactions, title }: AdminUserLogProps) {
   return (
-    <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
-      <Typography component="h2" gutterBottom>
-        {`${USER_LABEL} Logs: ${email}`}
+    <Box className="flex flex-col min-w-full m-auto p-6 rounded-2xl border-2 border-[#ccca]">
+      <Typography component="h2" sx={{ pb: 0 }} gutterBottom>
+        {title}
       </Typography>
 
       <TableContainer component={Paper}>
@@ -24,12 +22,15 @@ export default async function UserLogAdmin({ logs, email }: AdminUserLogProps) {
             <TableRow className="bg-blue-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
               <TableCell align="center">Date</TableCell>
               <TableCell align="center">Type</TableCell>
-              <TableCell align="center">Message</TableCell>
+              <TableCell align="center">Full Name</TableCell>
+              <TableCell align="center">Email</TableCell>
+              <TableCell align="center">Phone</TableCell>
+              <TableCell align="center">Amount</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {logs.map(({
-              type, message, created_at
+            {transactions.map(({
+              created_at, type, full_name, email, phone, amount
             }) => (
               <TableRow
                 key={email}
@@ -42,7 +43,16 @@ export default async function UserLogAdmin({ logs, email }: AdminUserLogProps) {
                   {type}
                 </TableCell>
                 <TableCell align="center">
-                  {message}
+                  {full_name}
+                </TableCell>
+                <TableCell align="center">
+                  {email}
+                </TableCell>
+                <TableCell align="center">
+                  {phone}
+                </TableCell>
+                <TableCell align="center">
+                  {amount}
                 </TableCell>
               </TableRow>
             ))}

@@ -15,6 +15,7 @@ import { getStatusName } from '@util/profile';
 import ReloadingImage from '@components/Image/ReloadingImage';
 import Link from 'next/link';
 import { UserTableRow } from '@util/schema';
+import { formatPhone } from '@components/FormFields/formatting';
 
 interface ProfileViewProps {
   userProfile: UserTableRow
@@ -28,6 +29,7 @@ function ProfileView({ userProfile }: ProfileViewProps) {
   } = {
     first_name: 'First Name',
     last_name: 'Last Name',
+    email: 'Email',
     phone: 'Primary Phone',
     phone2: 'Contact Phone',
     address: 'Address',
@@ -39,8 +41,21 @@ function ProfileView({ userProfile }: ProfileViewProps) {
   const profileInfoFields = Object.keys(profileInfoLabels) as (keyof UserTableRow)[];
   const uploadList = Object.values(profileUploads);
 
+  function val(profileInfoField: keyof UserTableRow) {
+    const value = userProfile[profileInfoField] as string;
+    switch (profileInfoField) {
+      case 'phone':
+      case 'phone2':
+        return value ? <Link href={`tel:${value}`}>{formatPhone(`${value}`)}</Link> : 'N/A';
+      case 'email':
+        return value ? <Link href={`mailto:${value}`}>{`${value}`}</Link> : 'N/A';
+      default:
+        return value;
+    }
+  }
+
   return (
-    <Box className="flex flex-col min-w-full gap-4 m-auto p-6 rounded-2xl border-2 border-[#ccca]">
+    <Box className="flex flex-col min-w-full m-auto p-6 gap-2 rounded-2xl border-2 border-[#ccca]">
       <TableContainer>
         <Table>
           <TableHead>
@@ -67,7 +82,7 @@ function ProfileView({ userProfile }: ProfileViewProps) {
                   {profileInfoLabels[profileInfoField]}
                 </TableCell>
                 <TableCell>
-                  {`${userProfile[profileInfoField] || 'N/A'}`}
+                  {val(profileInfoField)}
                 </TableCell>
               </TableRow>
             ))}

@@ -1,9 +1,9 @@
 import { validateSession } from '@util/session';
 import { fetchProfileByID } from '@util/profileActions';
 import { redirect } from 'next/navigation';
-import ProfileView from '@components/Profile/ProfileView';
+import ProfileView from '@components/User/ProfileView';
 import Link from 'next/link';
-import { ArtistStepper } from '@components/Profile/ArtistStepper';
+import { ArtistStepper } from '@components/User/ArtistStepper';
 import React from 'react';
 import { Stack } from '@mui/material';
 import { SessionPayload } from '../../../types';
@@ -30,6 +30,7 @@ export default async function ProfilePage() {
       <ProfileView
         userProfile={profileData}
       />
+
       <Link href="/profile/edit">Click here to edit your profile</Link>
     </Stack>
   );

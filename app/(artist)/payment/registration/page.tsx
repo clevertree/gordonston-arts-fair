@@ -3,7 +3,7 @@ import { fetchProfileByID } from '@util/profileActions';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Checkout from '@components/Payment/Checkout';
-import { ArtistStepper } from '@components/Profile/ArtistStepper';
+import { ArtistStepper } from '@components/User/ArtistStepper';
 import React from 'react';
 import { Stack } from '@mui/material';
 import process from 'node:process';
