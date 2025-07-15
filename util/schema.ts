@@ -52,8 +52,6 @@ export type UserTableRow = {
   uploads: {
     [filename: string]: UserFileUploadDescription
   },
-  // Non DB fields
-  isProfileComplete: true | string
 };
 
 export type NewUserTableRow = Omit<UserTableRow, 'id' | 'created_at' | 'updated_at'>;

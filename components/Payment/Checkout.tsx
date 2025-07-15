@@ -5,9 +5,12 @@ import { Alert, Button } from '@mui/material';
 import React, { useState } from 'react';
 import type { AlertColor } from '@mui/material/Alert';
 
-// TODO: setup userID in checkout session
+interface CheckoutProps {
+  stripePublishableKey: string,
+  feeType: 'registration' | 'booth'
+}
 
-export default function Checkout({ stripePublishableKey }: { stripePublishableKey: string }) {
+export default function Checkout({ stripePublishableKey, feeType }: CheckoutProps) {
   const [message, setMessage] = useState<[AlertColor, string]>(['info', 'Please proceed to checkout to register an artist account.']);
 
   const handleCheckout = async () => {
@@ -15,7 +18,7 @@ export default function Checkout({ stripePublishableKey }: { stripePublishableKe
     setMessage(['info', "Redirecting to Stripe's checkout page..."]);
     const stripe = await stripePromise;
     if (!stripe) throw new Error('Invalid stripe instance');
-    const response = await fetch('/api/checkout-sessions/registration', {
+    const response = await fetch(`/api/checkout-sessions/${feeType}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

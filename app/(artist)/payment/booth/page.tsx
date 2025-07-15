@@ -3,6 +3,8 @@ import { fetchProfileByID } from '@util/profileActions';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Checkout from '@components/Payment/Checkout';
+import { ArtistStepper } from '@components/Profile/ArtistStepper';
+import React from 'react';
 import { SessionPayload } from '../../../../types';
 
 export const metadata = {
@@ -24,12 +26,13 @@ export default async function CheckoutPage() {
   const profileData = await fetchProfileByID(session.userID);
   return (
     <>
-      <h1 className="m-auto text-[color:var(--gold-color)] italic">Artist Checkout</h1>
+      <h1 className="m-auto text-[color:var(--gold-color)] italic">Pay Artist Registration Fee</h1>
 
-      <Checkout stripePublishableKey={stripePublishableKey} />
+      <ArtistStepper profileData={profileData} />
 
-      <Link href="/profile/edit">Click here to edit your profile</Link>
-      {JSON.stringify(profileData)}
+      <Checkout feeType="booth" stripePublishableKey={stripePublishableKey} />
+
+      <Link href="/dashboard">Click here to return to your dashboard</Link>
     </>
   );
 }

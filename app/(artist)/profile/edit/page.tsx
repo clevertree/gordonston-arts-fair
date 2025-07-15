@@ -6,6 +6,8 @@ import {
 import { redirect } from 'next/navigation';
 import { UserTableRow } from '@util/schema';
 import Link from 'next/link';
+import { ArtistStepper } from '@components/Profile/ArtistStepper';
+import React from 'react';
 import { SessionPayload } from '../../../../types';
 
 export const metadata = {
@@ -24,6 +26,8 @@ export default async function ProfilePage() {
   return (
     <>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">Edit Artist Profile</h1>
+
+      <ArtistStepper profileData={profileData} />
 
       <ProfileEditor
         userProfile={profileData}
@@ -44,7 +48,7 @@ export default async function ProfilePage() {
           return updateProfile(session.userID, newUserProfile);
         }}
       />
-      <Link href="/profile">Click here to return to your dashboard</Link>
+      <Link href="/dashboard">Click here to return to your dashboard</Link>
     </>
   );
 }

@@ -10,11 +10,14 @@ import { ActionResponse } from '../../types';
 
 interface LoginEmailFormProps {
   loginEmailAction(email: string): Promise<ActionResponse>
+  autoFocus?: boolean
 }
 
 function LoginEmailForm({
-  loginEmailAction
+  loginEmailAction,
+  autoFocus
 }: LoginEmailFormProps) {
+  // eslint-disable-next-line no-console
   const [status, setStatus] = useState<'ready' | 'submitting'>('ready');
   const [message, setMessage] = useState<[AlertColor, string]>(['info', 'A code will be sent to your email']);
   const [email, setEmail] = useState('');
@@ -71,14 +74,15 @@ function LoginEmailForm({
           name="email"
           type="email"
           required
-          label="Email Number"
+          label="Email Address"
           variant="outlined"
           value={email}
+          autoFocus={autoFocus}
           onChange={(e) => setEmail(e.target.value)}
           fullWidth
           slotProps={{
             inputLabel: {
-              shrink: true
+              shrink: true,
             }
           }}
         />

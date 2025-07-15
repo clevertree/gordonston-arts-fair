@@ -1,7 +1,5 @@
 import LoginEmailForm from '@components/SessionForms/LoginEmailForm';
 import LoginPhoneForm from '@components/SessionForms/LoginPhoneForm';
-import { Stack } from '@mui/material';
-import Link from 'next/link';
 import { loginPhoneAction } from '@util/phoneActions';
 import { loginEmailAction } from '@util/emailActions';
 
@@ -15,13 +13,10 @@ export default async function ArtistLogin() {
   return (
     <>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">Artist Login</h1>
-
-      <LoginEmailForm loginEmailAction={loginEmailAction} />
-      <LoginPhoneForm loginPhoneAction={loginPhoneAction} />
-
-      <Stack sx={{ margin: 'auto' }} direction="column">
-        <Link href="/login">Click here to log in as an Artist</Link>
-      </Stack>
+      <div className="grid md:grid-cols-2 gap-4 p-3">
+        <LoginEmailForm loginEmailAction={loginEmailAction} autoFocus />
+        <LoginPhoneForm loginPhoneAction={loginPhoneAction} />
+      </div>
     </>
   );
 }

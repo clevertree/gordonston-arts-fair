@@ -76,7 +76,7 @@ export default function FloatingDiv({
       </div>
       <div
         role="button"
-        tabIndex={0}
+        tabIndex={isFloating ? 0 : undefined}
         className={clsx(
           styles.bottomText,
           !isFloating && styles.bottomTextHidden

@@ -1,6 +1,4 @@
 import {formatDate, getTimeSpan} from "../../../util/date";
-import {Stack} from "@mui/material";
-import Link from "next/link";
 import LoginEmailForm from "../../../components/SessionForms/LoginEmailForm";
 import LoginPhoneForm from "../../../components/SessionForms/LoginPhoneForm";
 import {loginPhoneAction} from "../../../util/phoneActions";
@@ -106,12 +104,10 @@ I accept and agree to the terms and conditions above.
 
 ## Log in to Register as an Artist
 
-<LoginEmailForm loginEmailAction={loginEmailAction} />
-<LoginPhoneForm loginPhoneAction={loginPhoneAction} />
-
-<Stack sx={{margin: 'auto'}} direction='column'>
-    <Link href='/login'>Click here to log in as an Artist</Link>
-</Stack>
+<div className="grid md:grid-cols-2 gap-4 p-3">
+    <LoginEmailForm loginEmailAction={loginEmailAction} />
+    <LoginPhoneForm loginPhoneAction={loginPhoneAction} />
+</div>
 
 If you have problems with this registration system and need assistance
 or have any questions related to the actual show or its jurying process,

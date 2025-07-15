@@ -7,21 +7,6 @@ import { getPGSQLClient } from '@util/pgsql';
 import { UpdatedUserTableRow, UserStatus, UserTableRow } from '@util/schema';
 import { addUserLogEntry } from '@util/logActions';
 import { imageDimensionsFromStream } from 'image-dimensions';
-import { isProfileComplete } from '@util/profile';
-
-/** @deprecated  */
-export async function fetchProfileByEmail(email: string) {
-  // Get db client
-  const sql = getPGSQLClient();
-
-  const [userRow] = (await sql`SELECT u.*
-                               FROM gaf_user as u
-                               WHERE email = ${email.toLowerCase()} LIMIT 1`) as UserTableRow[];
-  if (!userRow) throw new Error(`User not found: ${email}`);
-  if (!userRow.uploads) userRow.uploads = {};
-  userRow.isProfileComplete = isProfileComplete(userRow);
-  return userRow;
-}
 
 export async function fetchProfileByID(userID: number) {
   // Get db client
@@ -32,7 +17,6 @@ export async function fetchProfileByID(userID: number) {
                           WHERE id = ${userID} LIMIT 1`) as UserTableRow[];
   if (!userRow) throw new Error(`User ID not found: ${userID}`);
   if (!userRow.uploads) userRow.uploads = {};
-  userRow.isProfileComplete = isProfileComplete(userRow);
   return userRow;
 }
 

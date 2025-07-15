@@ -171,6 +171,6 @@ export async function loginEmailValidationAction(
   return {
     status: 'success',
     message: 'Login successful. Redirecting...',
-    redirectURL: (await isAdmin(userID)) ? '/user' : '/profile'
+    redirectURL: (await isAdmin(userID)) ? '/user' : '/dashboard'
   };
 }

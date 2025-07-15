@@ -36,34 +36,35 @@
 
 import { UserStatus, UserTableRow } from '@util/schema';
 
-export function isProfileComplete(userRow: UserTableRow) {
+export function isProfileComplete(userRow: UserTableRow):[ boolean, string] {
   const {
-    first_name,
-    last_name,
-    phone,
-    address,
-    city,
-    state,
-    zipcode,
-    category,
-    description,
     uploads
   } = userRow;
 
-  if (!uploads) return 'No profile uploads found';
-  if (!first_name) return 'First Name is required';
-  if (!last_name) return 'Last name is required';
-  if (!phone) return 'Phone number is required';
-  if (!address) return 'Address is required';
-  if (!city) return 'City is required';
-  if (!state) return 'State is required';
-  if (!zipcode) return 'ZIP code is required';
-  if (!category) return 'Category is required';
-  if (!description) return 'Description is required';
+  const variables : { [key in keyof UserTableRow]?: string } = {
+    first_name: 'First Name',
+    last_name: 'Last Name',
+    phone: 'Phone Number',
+    address: 'Address',
+    city: 'City',
+    state: 'State',
+    zipcode: 'ZIP Code',
+    category: 'Category',
+    description: 'Description',
+    uploads: 'Uploads'
+  };
 
-  if (!uploads || Object.keys(uploads).length === 0) return 'At least one upload is required';
+  const fields = Object.keys(variables) as Array<keyof UserTableRow>;
+  const missingFields = fields.filter((field) => !userRow[field]).length;
+  if (missingFields > 0) return [false, 'Please complete your Artist Profile'];
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i];
+    if (!userRow[field]) return [false, `${variables[field]} is required`];
+  }
 
-  return true;
+  if (!uploads || Object.keys(uploads).length === 0) return [false, 'At least one upload is required'];
+
+  return [true, 'Profile is complete'];
 }
 
 export function getFullName(first_name?: string, last_name?: string) {
