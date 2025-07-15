@@ -54,20 +54,24 @@ export async function POST(request: Request) {
       // case 'charge.dispute.funds_reinstated':
       // case 'charge.dispute.funds_withdrawn':
       // case 'charge.refund.updated':
-    case 'charge.expired':
-    case 'charge.pending':
+    // case 'charge.expired':
+    // case 'charge.pending':
     case 'charge.refunded':
     case 'charge.succeeded': {
       const {
         amount,
-        metadata
+        metadata,
+        billing_details: {
+          email,
+          phone
+        }
       } = event.data.object;
       const {
         userID,
         feeType
       } = metadata as unknown as FeeMetaData;
-      await addTransaction(userID, event.type, amount / 100, event.type, event.data.object);
       console.log('STRIPE', amount / 100, event.type);
+      await addTransaction(userID, event.type, amount / 100, event.data.object);
       const profileInfo = await fetchProfileByID(userID);
 
       switch (feeType) {

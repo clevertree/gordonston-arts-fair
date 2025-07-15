@@ -3,8 +3,7 @@
 'use server';
 
 import { getPGSQLClient } from '@util/pgsql';
-import { UserTableRow } from '@util/schema';
-import { LogEntry, LogType } from '@util/logActions';
+import { LogEntry } from '@util/logActions';
 
 export async function fetchTransactions(userID: number) {
   const sql = getPGSQLClient();
@@ -18,10 +17,9 @@ export async function addTransaction(
   userID: number | null,
   type: string,
   amount: number,
-  status: string,
   content: any
 ) {
   const sql = getPGSQLClient();
-  await sql`INSERT INTO gaf_transactions (user_id, type, amount, status, created_at, content)
-              VALUES (${userID}, ${type}, ${amount}, ${status}, NOW(), ${content})`;
+  await sql`INSERT INTO gaf_transactions (user_id, type, amount, created_at, content)
+              VALUES (${userID}, ${type}, ${amount}, NOW(), ${content})`;
 }

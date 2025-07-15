@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="verceldb@ep-red-feather-a4wgc9jm-pooler.us-east-1.aws.neon.tech" uuid="0df96b45-3996-40a8-be7b-d76f1f2cf83f">
+    <data-source source="LOCAL" name="verceldb@ep-red-feather-a4wgc9jm-pooler.us-east-1.aws.neon.tech" uuid="edb2f35e-72dd-4e75-a1e4-89878f1e605c">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>

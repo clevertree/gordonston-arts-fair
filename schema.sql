@@ -74,14 +74,15 @@ CREATE TABLE IF NOT EXISTS gaf_user_log
 );
 
 
+DROP TABLE IF EXISTS gaf_transactions;
 CREATE TABLE IF NOT EXISTS gaf_transactions
 (
     id         SERIAL PRIMARY KEY,
     user_id    INT            NULL,
-    email      VARCHAR(256)   NOT NULL,
-    type       VARCHAR(256)   NOT NULL,
+    email      VARCHAR(256)   NULL,
+    phone      VARCHAR(256)   NULL,
+    type       VARCHAR(16)    NOT NULL CHECK (type IN ('charge.succeeded', 'charge.refunded')), -- Restricts the type to either 'email' or 'phone'
     amount     DECIMAL(10, 2) NULL,
-    status     VARCHAR(256)   NOT NULL,
     created_at TIMESTAMP      NOT NULL,
     content    JSON           NOT NULL,
     CONSTRAINT fk_user
