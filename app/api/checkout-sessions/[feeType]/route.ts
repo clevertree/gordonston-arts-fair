@@ -78,9 +78,9 @@ export async function POST(
     metadata,
     mode: 'payment',
     success_url: `${BASE_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${BASE_URL}/payment/cancel`,
+    cancel_url: `${BASE_URL}/payment/failure`,
   };
-  const stripeSession = await stripe.checkout.sessions.create(sessionParams, {});
+  const stripeSession = await stripe.checkout.sessions.create(sessionParams);
 
   return NextResponse.json({ sessionId: stripeSession.id });
 }

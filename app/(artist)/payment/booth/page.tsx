@@ -6,6 +6,7 @@ import Checkout from '@components/Payment/Checkout';
 import { ArtistStepper } from '@components/Profile/ArtistStepper';
 import React from 'react';
 import { Stack } from '@mui/material';
+import process from 'node:process';
 import { SessionPayload } from '../../../../types';
 
 export const metadata = {
@@ -24,14 +25,20 @@ export default async function CheckoutPage() {
   } catch (e: any) {
     return redirect(`/login?message=${e.message}`);
   }
+  const feeAmount = parseInt(`${process.env.NEXT_PUBLIC_BOOTH_FEE}`, 10);
   const profileData = await fetchProfileByID(session.userID);
   return (
     <Stack spacing={2}>
-      <h1 className="m-auto text-[color:var(--gold-color)] italic">Pay Artist Registration Fee</h1>
+      <h1 className="m-auto text-[color:var(--gold-color)] italic">Pay Artist Booth Fee</h1>
 
       <ArtistStepper profileData={profileData} />
 
-      <Checkout feeType="booth" stripePublishableKey={stripePublishableKey} />
+      <Checkout
+        feeType="booth"
+        feeText={`Please click below to pay the $${feeAmount} booth fee.`}
+        buttonText="Pay Booth Fee"
+        stripePublishableKey={stripePublishableKey}
+      />
 
       <Link href="/dashboard">Click here to return to your dashboard</Link>
     </Stack>

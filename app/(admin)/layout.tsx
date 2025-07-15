@@ -26,7 +26,7 @@ export default function AdminLayout({
         </FloatingDiv>
       </header>
       <article role="main" className="max-w-screen-lg flex flex-col z-[2] m-auto p-4">
-        {testMode && <div className="bg-red-500 text-white text-center p-2">TEST MODE</div>}
+        {testMode && <div className="bg-red-800 text-white font-bold text-center p-2">TEST MODE</div>}
         <Suspense fallback={<SuspenseContent />}>
           {children}
         </Suspense>

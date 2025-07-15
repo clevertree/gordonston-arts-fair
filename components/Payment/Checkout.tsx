@@ -9,11 +9,17 @@ import type { AlertColor } from '@mui/material/Alert';
 
 interface CheckoutProps {
   stripePublishableKey: string,
-  feeType: 'registration' | 'booth'
+  feeType: 'registration' | 'booth',
+  feeText: string,
+  buttonText: string
 }
 
-export default function Checkout({ stripePublishableKey, feeType }: CheckoutProps) {
-  const [message, setMessage] = useState<[AlertColor, string]>(['info', 'Please proceed to checkout to register an artist account.']);
+export default function Checkout({
+  stripePublishableKey, feeType,
+  buttonText,
+  feeText
+}: CheckoutProps) {
+  const [message, setMessage] = useState<[AlertColor, string]>(['info', feeText]);
 
   const handleCheckout = async () => {
     const stripePromise = loadStripe(stripePublishableKey);
@@ -50,7 +56,7 @@ export default function Checkout({ stripePublishableKey, feeType }: CheckoutProp
           variant="outlined"
           onClick={handleCheckout}
         >
-          Proceed to Checkout
+          {buttonText}
         </Button>
       </Stack>
     </Paper>

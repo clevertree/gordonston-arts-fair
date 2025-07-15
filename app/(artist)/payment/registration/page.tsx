@@ -6,6 +6,7 @@ import Checkout from '@components/Payment/Checkout';
 import { ArtistStepper } from '@components/Profile/ArtistStepper';
 import React from 'react';
 import { Stack } from '@mui/material';
+import process from 'node:process';
 import { SessionPayload } from '../../../../types';
 
 export const metadata = {
@@ -24,6 +25,7 @@ export default async function CheckoutPage() {
   } catch (e: any) {
     return redirect(`/login?message=${e.message}`);
   }
+  const feeAmount = parseInt(`${process.env.NEXT_PUBLIC_REGISTRATION_FEE}`, 10);
   const profileData = await fetchProfileByID(session.userID);
   return (
     <Stack spacing={2}>
@@ -31,8 +33,12 @@ export default async function CheckoutPage() {
 
       <ArtistStepper profileData={profileData} />
 
-      <Checkout feeType="registration" stripePublishableKey={stripePublishableKey} />
-
+      <Checkout
+        feeType="registration"
+        feeText={`Please click below to pay the $${feeAmount} registration fee.`}
+        buttonText="Pay Registration Fee"
+        stripePublishableKey={stripePublishableKey}
+      />
       <Link href="/dashboard">Click here to return to your dashboard</Link>
     </Stack>
   );
