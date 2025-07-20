@@ -46,7 +46,7 @@ function ProfileEditor({
   const [message, setMessage] = useState<[AlertColor, string]>(
     isProfileComplete[0]
       ? ['success', 'Artist profile is complete']
-      : ['info', isProfileComplete[1] || 'Please complete your artist profile']
+      : ['info', isProfileComplete[1] || 'Please complete your artist profile.']
   );
   const [userProfileClient, setUserProfileClient] = useState<UserTableRow>(userProfileServer);
   // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)

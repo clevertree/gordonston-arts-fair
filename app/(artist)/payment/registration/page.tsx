@@ -9,6 +9,7 @@ import { Stack } from '@mui/material';
 import process from 'node:process';
 import { fetchTransactions } from '@util/transActions';
 import UserTransactionView from '@components/User/UserTransactionView';
+import { isProfileComplete } from '@util/profile';
 import { SessionPayload } from '../../../../types';
 
 export const metadata = {
@@ -31,9 +32,13 @@ export default async function CheckoutPage() {
   const profileData = await fetchProfileByID(session.userID);
   const transactions = await fetchTransactions(session.userID);
   const alreadyPaid = transactions.find((t) => parseInt(`${t.amount}`, 10) === feeAmount) !== undefined;
-  const feeText = alreadyPaid
+  const [eligibleToRegister, eligibleToRegisterString] = isProfileComplete(profileData);
+  let feeText = alreadyPaid
     ? 'You have already paid this fee.'
     : `Please click below to pay the $${feeAmount} registration fee.`;
+  if (!eligibleToRegister) {
+    feeText = `You have not yet completed your profile. ${eligibleToRegisterString}`;
+  }
   const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
   return (
@@ -47,7 +52,7 @@ export default async function CheckoutPage() {
         feeText={feeText}
         buttonText="Pay Registration Fee"
         stripePublishableKey={stripePublishableKey}
-        disabled={alreadyPaid}
+        disabled={alreadyPaid || !eligibleToRegister}
       />
       <UserTransactionView transactions={transactions} title={`${USER_LABEL} Transactions`} />
       <Link href="/dashboard">Click here to return to your dashboard</Link>

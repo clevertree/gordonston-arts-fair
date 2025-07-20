@@ -56,15 +56,15 @@ export function isProfileComplete(userRow: UserTableRow):[ boolean, string] {
 
   const fields = Object.keys(variables) as Array<keyof UserTableRow>;
   const missingFields = fields.filter((field) => !userRow[field]).length;
-  if (missingFields > 0) return [false, 'Please complete your Artist Profile'];
+  if (missingFields > 0) return [false, 'Please complete your Artist Profile.'];
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i];
     if (!userRow[field]) return [false, `${variables[field]} is required`];
   }
 
-  if (!uploads || Object.keys(uploads).length === 0) return [false, 'At least one upload is required'];
+  if (!uploads || Object.keys(uploads).length === 0) return [false, 'At least one upload is required.'];
 
-  return [true, 'Profile is complete'];
+  return [true, 'Profile is complete.'];
 }
 
 export function getFullName(first_name?: string, last_name?: string) {

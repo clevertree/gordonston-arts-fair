@@ -35,9 +35,7 @@ export default async function CheckoutPage() {
     ? 'You have already paid this fee.'
     : `Please click below to pay the $${feeAmount} registration fee.`;
   const eligibleToRegister = profileData.status === 'approved';
-  if (!eligibleToRegister) {
-    feeText = 'You are not eligible to pay the booth fee. Please contact the admin for booth approval';
-  }
+  if (!eligibleToRegister) feeText = 'You are not eligible to pay the booth fee. Please contact the admin for booth approval';
   const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
   return (
@@ -51,7 +49,7 @@ export default async function CheckoutPage() {
         feeText={feeText}
         buttonText="Pay Booth Fee"
         stripePublishableKey={stripePublishableKey}
-        disabled={alreadyPaid}
+        disabled={alreadyPaid || !eligibleToRegister}
       />
       <UserTransactionView transactions={transactions} title={`${USER_LABEL} Transactions`} />
 
