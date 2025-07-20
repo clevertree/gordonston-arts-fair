@@ -18,12 +18,21 @@ export interface TransactionEntry {
   content: any
 }
 
-export async function fetchTransactions(userID: number) {
+export interface TransactionSearchParams {
+  type?: TransactionType,
+  amount ?: number,
+  page?: number,
+  pageCount?: number
+}
+export async function fetchTransactions(userID: number, options: TransactionSearchParams = {}) {
   const sql = getPGSQLClient();
+  const { type = null, amount = null } = options;
   return (await sql`SELECT *
-                      FROM gaf_transactions
-                      WHERE user_id = ${userID}
-                      ORDER BY created_at DESC`) as TransactionEntry[];
+                    FROM gaf_transactions
+                    WHERE user_id = ${userID}
+                    AND (${type}::text IS NULL OR type = ${type})
+                    AND (${amount}::int IS NULL OR amount = ${amount})
+                    ORDER BY created_at DESC`) as TransactionEntry[];
 }
 
 export async function addTransaction(

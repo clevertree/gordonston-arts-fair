@@ -11,19 +11,21 @@ interface CheckoutProps {
   stripePublishableKey: string,
   feeType: 'registration' | 'booth',
   feeText: string,
-  buttonText: string
+  buttonText: string,
+  disabled?: boolean
 }
 
 export default function Checkout({
   stripePublishableKey, feeType,
   buttonText,
-  feeText
+  feeText,
+  disabled
 }: CheckoutProps) {
   const [message, setMessage] = useState<[AlertColor, string]>(['info', feeText]);
 
   const handleCheckout = async () => {
-    const stripePromise = loadStripe(stripePublishableKey);
     setMessage(['info', "Redirecting to Stripe's checkout page..."]);
+    const stripePromise = loadStripe(stripePublishableKey);
     const stripe = await stripePromise;
     if (!stripe) throw new Error('Invalid stripe instance');
     const response = await fetch(`/api/checkout-sessions/${feeType}`, {
@@ -53,8 +55,9 @@ export default function Checkout({
           </Alert>
         )}
         <Button
+          disabled={disabled}
           variant="outlined"
-          onClick={handleCheckout}
+          onClick={!disabled ? handleCheckout : undefined}
         >
           {buttonText}
         </Button>

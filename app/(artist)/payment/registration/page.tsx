@@ -7,6 +7,8 @@ import { ArtistStepper } from '@components/User/ArtistStepper';
 import React from 'react';
 import { Stack } from '@mui/material';
 import process from 'node:process';
+import { fetchTransactions } from '@util/transActions';
+import UserTransactionView from '@components/User/UserTransactionView';
 import { SessionPayload } from '../../../../types';
 
 export const metadata = {
@@ -27,6 +29,13 @@ export default async function CheckoutPage() {
   }
   const feeAmount = parseInt(`${process.env.NEXT_PUBLIC_REGISTRATION_FEE}`, 10);
   const profileData = await fetchProfileByID(session.userID);
+  const transactions = await fetchTransactions(session.userID);
+  const alreadyPaid = transactions.find((t) => parseInt(`${t.amount}`, 10) === feeAmount) !== undefined;
+  const feeText = alreadyPaid
+    ? 'You have already paid this fee.'
+    : `Please click below to pay the $${feeAmount} registration fee.`;
+  const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
+
   return (
     <Stack spacing={2}>
       <h1 className="items-center text-[color:var(--gold-color)] italic">Pay Artist Registration Fee</h1>
@@ -35,10 +44,12 @@ export default async function CheckoutPage() {
 
       <Checkout
         feeType="registration"
-        feeText={`Please click below to pay the $${feeAmount} registration fee.`}
+        feeText={feeText}
         buttonText="Pay Registration Fee"
         stripePublishableKey={stripePublishableKey}
+        disabled={alreadyPaid}
       />
+      <UserTransactionView transactions={transactions} title={`${USER_LABEL} Transactions`} />
       <Link href="/dashboard">Click here to return to your dashboard</Link>
     </Stack>
   );
