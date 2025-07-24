@@ -25,7 +25,6 @@ describe('<ProfileEditor />', () => {
     // see: https://on.cypress.io/mounting-react
     cy.mount((
       <ProfileEditor
-        isProfileComplete={[false, '[Validation Message]']}
         userProfile={userProfile}
         updateProfile={cy.stub()}
         uploadFile={cy.stub()}

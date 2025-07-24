@@ -5,9 +5,11 @@ import {
   Alert,
   Box,
   Button,
+  Dialog,
   MenuItem,
   Paper,
   Stack,
+  SvgIcon,
   Table,
   TableBody,
   TableCell,
@@ -16,6 +18,7 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
+
 import {
   FormHookObject, SelectField, TextField, useFormHook
 } from '@components/FormFields';
@@ -23,10 +26,12 @@ import type { AlertColor } from '@mui/material/Alert';
 import Link from 'next/link';
 import ReloadingImage from '@components/Image/ReloadingImage';
 import { UserFileUploadDescription, UserTableRow } from '@util/schema';
+import { getProfileCompletion } from '@util/profile';
+import { useRouter } from 'next/navigation';
 
 interface ProfileEditorProps {
   userProfile: UserTableRow,
-  isProfileComplete: [boolean, string],
+  // isProfileComplete: [boolean, string],
 
   updateProfile(newUserProfile: UserTableRow): Promise<UserTableRow>
 
@@ -37,18 +42,20 @@ interface ProfileEditorProps {
 
 function ProfileEditor({
   userProfile: userProfileServer,
-  isProfileComplete,
   updateProfile,
   uploadFile,
   deleteFile
 }: ProfileEditorProps) {
+  const router = useRouter();
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [userProfileClient, setUserProfileClient] = useState<UserTableRow>(userProfileServer);
+  const [isProfileComplete, profileCompletionMessage] = getProfileCompletion(userProfileClient);
   const [status, setStatus] = useState<'ready' | 'unsaved' | 'updating' | 'error'>('ready');
   const [message, setMessage] = useState<[AlertColor, string]>(
-    isProfileComplete[0]
+    isProfileComplete
       ? ['success', 'Artist profile is complete']
-      : ['info', isProfileComplete[1] || 'Please complete your artist profile.']
+      : ['info', profileCompletionMessage || 'Please complete your artist profile.']
   );
-  const [userProfileClient, setUserProfileClient] = useState<UserTableRow>(userProfileServer);
   // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
   // const formRef = useRef<HTMLFormElement>();
   const { uploads: profileUploads = {} } = userProfileClient;
@@ -90,9 +97,13 @@ function ProfileEditor({
     try {
       userProfileClient.uploads = profileUploads;
       const updatedUserProfile = await updateProfile(userProfileClient);
+      const [isUpdatedProfileComplete] = getProfileCompletion(updatedUserProfile);
       setStatus('ready');
       setMessage(['success', 'User profile updated successfully']);
       setUserProfileClient((oldProfile) => ({ ...oldProfile, ...updatedUserProfile }));
+      if (isUpdatedProfileComplete) {
+        setShowPaymentModal(true);
+      }
     } catch (e: any) {
       setStatus('ready');
       setMessage(['error', e.message]);
@@ -117,129 +128,130 @@ function ProfileEditor({
   const fileUploadCount = Object.keys(profileUploads).length;
 
   return (
-    <form
-      method="post"
-      ref={formRef}
+    <>
+      <form
+        method="post"
+        ref={formRef}
         // onChange={handleFormChange}
-      onSubmit={async (e: any) => {
-        e.preventDefault();
-        await handleSubmit();
-      }}
-      className="scroll-mt-8"
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          minWidth: '100%',
-          gap: 2,
-          margin: 'auto',
-          padding: 3,
-          border: '1px solid #ccc',
-          borderRadius: 4,
+        onSubmit={async (e: any) => {
+          e.preventDefault();
+          await handleSubmit();
         }}
+        className="scroll-mt-8"
       >
-        {message && message[1] && (
-        <Alert severity={message[0]}>
-          {message[1]}
-        </Alert>
-        )}
-        <Typography component="h2" id="step1">
-          Contact Information
-        </Typography>
-        <fieldset disabled={status === 'updating'} className="grid md:grid-cols-4 gap-4">
-          <TextField
-            autoFocus
-            helperText="Please enter your first name"
-            {...formInfo.setupInput('first_name', 'First Name', 'required')}
-            required
-          />
-          <TextField
-            helperText="Please enter your first name"
-            {...formInfo.setupInput('last_name', 'Last Name', 'required')}
-            required
-          />
-          <TextField
-            helperText="Optional company name"
-            {...formInfo.setupInput('company_name', 'Company Name')}
-          />
-          <TextField
-            helperText="Artist Website"
-            {...formInfo.setupInput('website', 'Website')}
-          />
-        </fieldset>
-        <fieldset disabled={status === 'updating'} className="grid md:grid-cols-3 gap-4">
-          <TextField
-            helperText="Primary Email"
-            {...formInfo.setupInput('email', 'Primary Email', ['required', 'email'])}
-            required
-          />
-          <TextField
-            helperText="Primary Phone (i.e. home)"
-            {...formInfo.setupInput('phone', 'Primary Phone', ['required', 'phone'], 'phone')}
-            required
-          />
-          <TextField
-            helperText="Contact Phone (i.e. cell)"
-            {...formInfo.setupInput('phone2', 'Contact Phone', 'phone', 'phone')}
-          />
-        </fieldset>
-        <fieldset disabled={status === 'updating'} className="grid md:grid-cols-4 gap-4">
-          <TextField
-            helperText="Enter your Address"
-            placeholder="123 Art st."
-            {...formInfo.setupInput('address', 'Address', 'required')}
-            required
-          />
-          <TextField
-            helperText="Enter your city name"
-            placeholder="Savannah"
-            {...formInfo.setupInput('city', 'City', 'required')}
-            required
-          />
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: '100%',
+            gap: 2,
+            margin: 'auto',
+            padding: 3,
+            border: '1px solid #ccc',
+            borderRadius: 4,
+          }}
+        >
+          {message && message[1] && (
+          <Alert severity={message[0]}>
+            {message[1]}
+          </Alert>
+          )}
+          <Typography component="h2" id="step1">
+            Contact Information
+          </Typography>
+          <fieldset disabled={status === 'updating'} className="grid md:grid-cols-4 gap-4">
+            <TextField
+              autoFocus
+              helperText="Please enter your first name"
+              {...formInfo.setupInput('first_name', 'First Name', 'required')}
+              required
+            />
+            <TextField
+              helperText="Please enter your first name"
+              {...formInfo.setupInput('last_name', 'Last Name', 'required')}
+              required
+            />
+            <TextField
+              helperText="Optional company name"
+              {...formInfo.setupInput('company_name', 'Company Name')}
+            />
+            <TextField
+              helperText="Artist Website"
+              {...formInfo.setupInput('website', 'Website')}
+            />
+          </fieldset>
+          <fieldset disabled={status === 'updating'} className="grid md:grid-cols-3 gap-4">
+            <TextField
+              helperText="Primary Email"
+              {...formInfo.setupInput('email', 'Primary Email', ['required', 'email'])}
+              required
+            />
+            <TextField
+              helperText="Primary Phone (i.e. home)"
+              {...formInfo.setupInput('phone', 'Primary Phone', ['required', 'phone'], 'phone')}
+              required
+            />
+            <TextField
+              helperText="Contact Phone (i.e. cell)"
+              {...formInfo.setupInput('phone2', 'Contact Phone', 'phone', 'phone')}
+            />
+          </fieldset>
+          <fieldset disabled={status === 'updating'} className="grid md:grid-cols-4 gap-4">
+            <TextField
+              helperText="Enter your Address"
+              placeholder="123 Art st."
+              {...formInfo.setupInput('address', 'Address', 'required')}
+              required
+            />
+            <TextField
+              helperText="Enter your city name"
+              placeholder="Savannah"
+              {...formInfo.setupInput('city', 'City', 'required')}
+              required
+            />
 
-          <SelectField
-            required
-            helperText="Enter your state"
-            {...formInfo.setupInput('state', 'State', 'required')}
-          >
-            <MenuItem disabled value="">Select a state</MenuItem>
-            {Object.entries(LIST_STATES).map(([state, name]) => (
-              <MenuItem
-                key={state}
-                value={state}
-                selected={state === userProfileClient.state}
-              >
-                {name}
-              </MenuItem>
-            ))}
-          </SelectField>
-          <TextField
-            helperText="Enter your zipcode"
-            placeholder="31404"
-            {...formInfo.setupInput('zipcode', 'Zipcode', ['required', 'zipcode'])}
-            required
-          />
-        </fieldset>
-        <Typography component="h2">
-          Exhibit Information
-        </Typography>
-        <fieldset disabled={status === 'updating'} className="grid md:grid-cols-2 gap-4">
-          <SelectField
-            fullWidth
-            helperText="Select an exhibit category"
-            {...formInfo.setupInput('category', 'Category', 'required')}
-          >
-            <MenuItem disabled value="">Select a category</MenuItem>
-            {LIST_CATEGORIES.map((category) => (
-              <MenuItem
-                key={category}
-                value={category}
-              >
-                {category}
-              </MenuItem>
-            ))}
-            {categoryInput
+            <SelectField
+              required
+              helperText="Enter your state"
+              {...formInfo.setupInput('state', 'State', 'required')}
+            >
+              <MenuItem disabled value="">Select a state</MenuItem>
+              {Object.entries(LIST_STATES).map(([state, name]) => (
+                <MenuItem
+                  key={state}
+                  value={state}
+                  selected={state === userProfileClient.state}
+                >
+                  {name}
+                </MenuItem>
+              ))}
+            </SelectField>
+            <TextField
+              helperText="Enter your zipcode"
+              placeholder="31404"
+              {...formInfo.setupInput('zipcode', 'Zipcode', ['required', 'zipcode'])}
+              required
+            />
+          </fieldset>
+          <Typography component="h2">
+            Exhibit Information
+          </Typography>
+          <fieldset disabled={status === 'updating'} className="grid md:grid-cols-2 gap-4">
+            <SelectField
+              fullWidth
+              helperText="Select an exhibit category"
+              {...formInfo.setupInput('category', 'Category', 'required')}
+            >
+              <MenuItem disabled value="">Select a category</MenuItem>
+              {LIST_CATEGORIES.map((category) => (
+                <MenuItem
+                  key={category}
+                  value={category}
+                >
+                  {category}
+                </MenuItem>
+              ))}
+              {categoryInput
                 && !LIST_CATEGORIES.includes(categoryInput) && (
                 <MenuItem
                   key={categoryInput}
@@ -247,151 +259,174 @@ function ProfileEditor({
                 >
                   {categoryInput}
                 </MenuItem>
-            )}
-          </SelectField>
+              )}
+            </SelectField>
+            <Button
+              variant="text"
+              onClick={() => {
+                // eslint-disable-next-line no-alert
+                const category = window.prompt('Please enter a custom art category') || '';
+                if (category) {
+                  formInfo.setFieldValue('category', category);
+                  setStatus('unsaved');
+                }
+              }}
+            >
+              Add a custom category
+            </Button>
+          </fieldset>
+          <fieldset disabled={status === 'updating'}>
+            <TextField
+              multiline
+              minRows={4}
+              helperText="Describe your exhibit"
+              placeholder="Information about my exhibit..."
+              {...formInfo.setupInput('description', 'Description', 'required')}
+              required
+              slotProps={{
+                htmlInput: {
+                  maxLength: 600,
+                },
+                inputLabel: {
+                  shrink: true
+                }
+              }}
+            />
+          </fieldset>
+
+          <Typography component="h2">
+            Upload images
+          </Typography>
+
+          <fieldset disabled={status === 'updating'}>
+            <Stack spacing={2}>
+              <label htmlFor="file-upload-multiple">
+                <Button
+                  variant="outlined"
+                  component="span"
+                  color="secondary"
+                >
+                  Click here to Upload multiple images
+                </Button>
+                <input
+                  style={{ display: 'none' }}
+                  id="file-upload-multiple"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={async (e) => {
+                    e.stopPropagation();
+                    const input = e.target;
+                    if (input && input.files) {
+                      let count = 0;
+                      let updatedUserProfile: UserTableRow | null = null;
+                      setStatus('updating');
+                      setMessage(['info', `Uploading ${input.files.length} files...`]);
+                      await Promise.all(Array.from(input.files).map(async (file) => {
+                        updatedUserProfile = await uploadFile(file);
+                        count += 1;
+                      }));
+                      setStatus('ready');
+                      setMessage(['success', `${count} file${count === 1 ? '' : 's'} have been uploaded`]);
+                      e.target.value = '';
+                      if (updatedUserProfile) {
+                        setUserProfileClient((oldProfile) => ({
+                          ...oldProfile,
+                          ...updatedUserProfile
+                        }));
+                      }
+                    }
+                  }}
+                />
+              </label>
+            </Stack>
+          </fieldset>
+
+          <Typography component="h2">
+            Manage uploaded images
+          </Typography>
+
+          <fieldset disabled={status === 'updating'}>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow
+                    className={`${fileUploadCount > 0 ? 'bg-green-700' : 'bg-amber-700'} [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2`}
+                  >
+                    <TableCell colSpan={2}>
+                      File uploads:
+                      {' '}
+                      {fileUploadCount}
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {Object.keys(profileUploads).map((filename: string) => (
+                    <ProfileUploadForm
+                      key={filename}
+                      filename={filename}
+                      userProfile={userProfileClient}
+                      uploadHooks={formUploadList}
+                      deleteFile={deleteFile}
+                      status={status}
+                      onUpdate={(updatedUserProfile, isFormUnsaved) => {
+                        setUserProfileClient((oldProfile) => ({
+                          ...oldProfile,
+                          ...updatedUserProfile
+                        }));
+                        if (isFormUnsaved) handleFormChange();
+                      }}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </fieldset>
           <Button
-            variant="text"
-            onClick={() => {
-              // eslint-disable-next-line no-alert
-              const category = window.prompt('Please enter a custom art category') || '';
-              if (category) {
-                formInfo.setFieldValue('category', category);
-                setStatus('unsaved');
-              }
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={!['unsaved', 'error'].includes(status)}
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit().then();
             }}
           >
-            Add a custom category
+            Update Profile
           </Button>
-        </fieldset>
-        <fieldset disabled={status === 'updating'}>
-          <TextField
-            multiline
-            minRows={4}
-            helperText="Describe your exhibit"
-            placeholder="Information about my exhibit..."
-            {...formInfo.setupInput('description', 'Description', 'required')}
-            required
-            slotProps={{
-              htmlInput: {
-                maxLength: 600,
-              },
-              inputLabel: {
-                shrink: true
-              }
-            }}
-          />
-        </fieldset>
-
-        <Typography component="h2">
-          Upload images
-        </Typography>
-
-        <fieldset disabled={status === 'updating'}>
-          <Stack spacing={2}>
-            <label htmlFor="file-upload-multiple">
-              <Button
-                variant="outlined"
-                component="span"
-                color="secondary"
-              >
-                Click here to Upload multiple images
-              </Button>
-              <input
-                style={{ display: 'none' }}
-                id="file-upload-multiple"
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={async (e) => {
-                  e.stopPropagation();
-                  const input = e.target;
-                  if (input && input.files) {
-                    let count = 0;
-                    let updatedUserProfile: UserTableRow | null = null;
-                    setStatus('updating');
-                    setMessage(['info', `Uploading ${input.files.length} files...`]);
-                    await Promise.all(Array.from(input.files).map(async (file) => {
-                      updatedUserProfile = await uploadFile(file);
-                      count += 1;
-                    }));
-                    setStatus('ready');
-                    setMessage(['success', `${count} file${count === 1 ? '' : 's'} have been uploaded`]);
-                    e.target.value = '';
-                    if (updatedUserProfile) {
-                      setUserProfileClient((oldProfile) => ({
-                        ...oldProfile,
-                        ...updatedUserProfile
-                      }));
-                    }
-                  }
-                }}
-              />
-            </label>
+        </Box>
+      </form>
+      <Dialog open={showPaymentModal} onClose={() => setShowPaymentModal(false)}>
+        <Box className="m-auto flex flex-col gap-4 p-4">
+          <Stack direction="row" spacing={2} alignItems="center">
+            <SvgIcon
+              color="success"
+              sx={{ fontSize: 48, mb: 1 }}
+              className="float-left"
+            >
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+            </SvgIcon>
+            <Typography component="h2" align="center">
+              Your Profile is complete.
+            </Typography>
           </Stack>
-        </fieldset>
-
-        <Typography component="h2">
-          Manage uploaded images
-        </Typography>
-
-        <fieldset disabled={status === 'updating'}>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow
-                  className={`${fileUploadCount > 0 ? 'bg-green-700' : 'bg-amber-700'} [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2`}
-                >
-                  <TableCell colSpan={2}>
-                    File uploads:
-                    {' '}
-                    {fileUploadCount}
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {Object.keys(profileUploads).map((filename: string) => (
-                  <ProfileUploadForm
-                    key={filename}
-                    filename={filename}
-                    userProfile={userProfileClient}
-                    uploadHooks={formUploadList}
-                    deleteFile={deleteFile}
-                    status={status}
-                    onUpdate={(updatedUserProfile, isFormUnsaved) => {
-                      setUserProfileClient((oldProfile) => ({
-                        ...oldProfile,
-                        ...updatedUserProfile
-                      }));
-                      if (isFormUnsaved) handleFormChange();
-                    }}
-                      // onFileDeleted={() => {
-                      //   setUserProfileClient((oldData) => {
-                      //     const uploads = { ...oldData.uploads };
-                      //     delete uploads[filename];
-                      //     setMessage(['success', `File deleted successfully: ${filename}`]);
-                      //     return { ...oldData, uploads };
-                      //   });
-                      // }}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </fieldset>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          disabled={!['unsaved', 'error'].includes(status)}
-          onClick={(e) => {
-            e.preventDefault();
-            handleSubmit().then();
-          }}
-        >
-          Update Profile
-        </Button>
-      </Box>
-    </form>
+          <Typography variant="body2" align="center">
+            Please pay the registration fee to submit your registration for review.
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ float: 'right' }}
+            onClick={() => {
+              setShowPaymentModal(false);
+              router.push('/payment/registration');
+            }}
+          >
+            Pay Registration Fee
+          </Button>
+        </Box>
+      </Dialog>
+    </>
   );
 }
 

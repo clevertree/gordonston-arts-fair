@@ -9,8 +9,7 @@ import Link from 'next/link';
 import { ArtistStepper } from '@components/User/ArtistStepper';
 import { Stack } from '@mui/material';
 import React from 'react';
-import { isProfileComplete } from '@util/profile';
-import { SessionPayload } from '../../../../types';
+import { SessionPayload } from '@types';
 
 export const metadata = {
   title: 'Edit Artist Profile',
@@ -32,7 +31,6 @@ export default async function ProfilePage() {
       <ArtistStepper profileData={profileData} />
 
       <ProfileEditor
-        isProfileComplete={isProfileComplete(profileData)}
         userProfile={profileData}
         uploadFile={async (file: File) => {
           'use server';

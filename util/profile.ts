@@ -36,7 +36,7 @@
 
 import { UserStatus, UserTableRow } from '@util/schema';
 
-export function isProfileComplete(userRow: UserTableRow):[ boolean, string] {
+export function getProfileCompletion(userRow: UserTableRow):[ boolean, string] {
   const {
     uploads
   } = userRow;

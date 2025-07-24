@@ -43,6 +43,9 @@
       ],
       "@email": [
         "./email"
+      ],
+      "@types": [
+        "./types.ts"
       ]
     },
     "target": "ES2017"

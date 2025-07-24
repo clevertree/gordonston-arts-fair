@@ -1,5 +1,5 @@
 import { UserTableRow } from '@util/schema';
-import { isProfileComplete } from '@util/profile';
+import { getProfileCompletion } from '@util/profile';
 import {
   Alert, Step, StepLabel, Stepper
 } from '@mui/material';
@@ -14,7 +14,7 @@ interface ArtistStepperProps {
 export function ArtistStepper({ profileData, showAlert }: ArtistStepperProps) {
   let activeStep = 0;
   let message: ['info' | 'success', string] = ['info', 'Please complete your Artist profile.'];
-  const profileStatus = isProfileComplete(profileData);
+  const profileStatus = getProfileCompletion(profileData);
   let redirectURL: React.JSX.Element;
   if (profileStatus[0]) {
     activeStep = 1;
