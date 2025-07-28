@@ -3,20 +3,6 @@ import ProfileEditor from '@components/User/ProfileEditor';
 import { UserTableRow } from '@util/schema';
 
 describe('<ProfileEditor />', () => {
-  const userProfile: UserTableRow = {
-    id: 0,
-    email: '',
-    first_name: '',
-    last_name: '',
-    address: '',
-    city: '',
-    state: '',
-    zipcode: '',
-    phone: '',
-    type: 'admin',
-    status: 'submitted',
-    uploads: {}
-  };
   beforeEach(() => {
     cy.viewport(600, 600);
     cy.injectAxe();
@@ -24,12 +10,7 @@ describe('<ProfileEditor />', () => {
   it('renders', () => {
     // see: https://on.cypress.io/mounting-react
     cy.mount((
-      <ProfileEditor
-        userProfile={userProfile}
-        updateProfile={cy.stub()}
-        uploadFile={cy.stub()}
-        deleteFile={cy.stub()}
-      />));
+      <ProfileEditorWrapper />));
     cy.checkA11y();
 
     // cy.get('div').should('contain', 'First Name is a required field');
@@ -59,8 +40,8 @@ describe('<ProfileEditor />', () => {
 
     cy.focused().should('have.attr', 'name', 'address');
     cy.get('div').should('contain', 'Address is a required field');
-    cy.get('input[name="address"]').type('Address');
-    cy.get('input[name="city"]').type('City');
+    cy.get('input[name="address"]').type('Address{enter}');
+    cy.get('input[name="city"]').type('City{enter}');
     cy.get('button[type="submit"]').click();
 
     cy.focused().next().should('have.attr', 'name', 'state'); // Hack for MUISelects
@@ -85,6 +66,34 @@ describe('<ProfileEditor />', () => {
     cy.get('textarea[name="description"]').type('Description');
     cy.get('button[type="submit"]').click();
 
-    cy.get('div').should('contain', 'User profile updated successfully');
+    cy.get('div').should('contain', 'Please upload at least one image of your artwork to complete your profile.');
   });
 });
+
+function ProfileEditorWrapper() {
+  const [userProfile, setUserProfile] = React.useState<UserTableRow>(() => ({
+    id: 0,
+    email: '',
+    first_name: '',
+    last_name: '',
+    address: '',
+    city: '',
+    state: '',
+    zipcode: '',
+    phone: '',
+    type: 'admin',
+    status: 'submitted',
+    uploads: {}
+  } as UserTableRow));
+  return (
+    <ProfileEditor
+      userProfile={userProfile}
+      updateProfile={async (p) => {
+        setUserProfile(p);
+        return p;
+      }}
+      uploadFile={cy.stub()}
+      deleteFile={cy.stub()}
+    />
+  );
+}

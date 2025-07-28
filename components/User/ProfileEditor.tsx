@@ -5,11 +5,9 @@ import {
   Alert,
   Box,
   Button,
-  Dialog,
   MenuItem,
   Paper,
   Stack,
-  SvgIcon,
   Table,
   TableBody,
   TableCell,
@@ -27,9 +25,10 @@ import Link from 'next/link';
 import ReloadingImage from '@components/Image/ReloadingImage';
 import { UserFileUploadDescription, UserTableRow } from '@util/schema';
 import { getProfileCompletion } from '@util/profile';
-import { useRouter } from 'next/navigation';
+import PaymentModal from '@components/Modal/PaymentModal';
+import UploadsModal from '@components/Modal/UploadsModal';
 
-interface ProfileEditorProps {
+export interface ProfileEditorProps {
   userProfile: UserTableRow,
   // isProfileComplete: [boolean, string],
 
@@ -46,8 +45,7 @@ function ProfileEditor({
   uploadFile,
   deleteFile
 }: ProfileEditorProps) {
-  const router = useRouter();
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showModal, setShowModal] = useState<'none' | 'payment' | 'uploads'>('none');
   const [userProfileClient, setUserProfileClient] = useState<UserTableRow>(userProfileServer);
   const [isProfileComplete, profileCompletionMessage] = getProfileCompletion(userProfileClient);
   const [status, setStatus] = useState<'ready' | 'unsaved' | 'updating' | 'error'>('ready');
@@ -61,6 +59,7 @@ function ProfileEditor({
   const { uploads: profileUploads = {} } = userProfileClient;
   const formUploadList: { [filename: string]: FormHookObject<UserFileUploadDescription> } = {};
   const formRef = useRef<HTMLFormElement>(null);
+  const uploadFilesRef = useRef<HTMLInputElement>(null);
 
   const formInfo = useFormHook(userProfileClient, (formData, isFormUnsaved) => {
     setUserProfileClient((oldUserProfile) => (
@@ -97,12 +96,14 @@ function ProfileEditor({
     try {
       userProfileClient.uploads = profileUploads;
       const updatedUserProfile = await updateProfile(userProfileClient);
-      const [isUpdatedProfileComplete] = getProfileCompletion(updatedUserProfile);
+      const [isUpdatedProfileComplete, isUpdatedProfileCompleteMessage] = getProfileCompletion(updatedUserProfile);
       setStatus('ready');
-      setMessage(['success', 'User profile updated successfully']);
+      setMessage([isUpdatedProfileComplete ? 'success' : 'info', isUpdatedProfileCompleteMessage]);
       setUserProfileClient((oldProfile) => ({ ...oldProfile, ...updatedUserProfile }));
       if (isUpdatedProfileComplete) {
-        setShowPaymentModal(true);
+        setShowModal('payment');
+      } else if (Object.values(profileUploads).length === 0) {
+        setShowModal('uploads');
       }
     } catch (e: any) {
       setStatus('ready');
@@ -132,7 +133,7 @@ function ProfileEditor({
       <form
         method="post"
         ref={formRef}
-        // onChange={handleFormChange}
+          // onChange={handleFormChange}
         onSubmit={async (e: any) => {
           e.preventDefault();
           await handleSubmit();
@@ -213,6 +214,7 @@ function ProfileEditor({
             <SelectField
               required
               helperText="Enter your state"
+              autoComplete="address-level1" // Crucial for browser autofill
               {...formInfo.setupInput('state', 'State', 'required')}
             >
               <MenuItem disabled value="">Select a state</MenuItem>
@@ -252,13 +254,13 @@ function ProfileEditor({
                 </MenuItem>
               ))}
               {categoryInput
-                && !LIST_CATEGORIES.includes(categoryInput) && (
-                <MenuItem
-                  key={categoryInput}
-                  value={categoryInput}
-                >
-                  {categoryInput}
-                </MenuItem>
+                  && !LIST_CATEGORIES.includes(categoryInput) && (
+                  <MenuItem
+                    key={categoryInput}
+                    value={categoryInput}
+                  >
+                    {categoryInput}
+                  </MenuItem>
               )}
             </SelectField>
             <Button
@@ -309,6 +311,7 @@ function ProfileEditor({
                   Click here to Upload multiple images
                 </Button>
                 <input
+                  ref={uploadFilesRef}
                   style={{ display: 'none' }}
                   id="file-upload-multiple"
                   type="file"
@@ -327,14 +330,30 @@ function ProfileEditor({
                         count += 1;
                       }));
                       setStatus('ready');
-                      setMessage(['success', `${count} file${count === 1 ? '' : 's'} have been uploaded`]);
                       e.target.value = '';
-                      if (updatedUserProfile) {
-                        setUserProfileClient((oldProfile) => ({
-                          ...oldProfile,
-                          ...updatedUserProfile
-                        }));
+                      if (!updatedUserProfile || count === 0) {
+                        setMessage(['error', 'There was an error uploading your files.']);
+                        return;
                       }
+
+                      const [isUpdatedProfileComplete,
+                        isUpdatedProfileCompleteMessage
+                      ] = getProfileCompletion(updatedUserProfile);
+                      setMessage([isUpdatedProfileComplete ? 'success' : 'info', isUpdatedProfileCompleteMessage]);
+                      setUserProfileClient((oldProfile) => (
+                        { ...oldProfile, ...updatedUserProfile }
+                      ));
+                      if (isUpdatedProfileComplete) {
+                        setShowModal('payment');
+                      }
+
+                      // setMessage(['success', `${count} file${count === 1 ? '' : 's'} have been uploaded`]);
+                      // if (updatedUserProfile) {
+                      //   setUserProfileClient((oldProfile) => ({
+                      //     ...oldProfile,
+                      //     ...updatedUserProfile
+                      //   }));
+                      // }
                     }
                   }}
                 />
@@ -396,36 +415,22 @@ function ProfileEditor({
           </Button>
         </Box>
       </form>
-      <Dialog open={showPaymentModal} onClose={() => setShowPaymentModal(false)}>
-        <Box className="m-auto flex flex-col gap-4 p-4">
-          <Stack direction="row" spacing={2} alignItems="center">
-            <SvgIcon
-              color="success"
-              sx={{ fontSize: 48, mb: 1 }}
-              className="float-left"
-            >
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-            </SvgIcon>
-            <Typography component="h2" align="center">
-              Your Profile is complete.
-            </Typography>
-          </Stack>
-          <Typography variant="body2" align="center">
-            Please pay the registration fee to submit your registration for review.
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ float: 'right' }}
-            onClick={() => {
-              setShowPaymentModal(false);
-              router.push('/payment/registration');
-            }}
-          >
-            Pay Registration Fee
-          </Button>
-        </Box>
-      </Dialog>
+      <PaymentModal
+        open={showModal === 'payment'}
+        onClose={() => setShowModal('none')}
+        onClick={() => {
+          setShowModal('none');
+          document.location.href = '/payment/registration';
+        }}
+      />
+      <UploadsModal
+        open={showModal === 'uploads'}
+        onClose={() => setShowModal('none')}
+        onClick={() => {
+          setShowModal('none');
+          uploadFilesRef.current?.click();
+        }}
+      />
     </>
   );
 }
