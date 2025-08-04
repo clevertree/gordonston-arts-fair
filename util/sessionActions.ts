@@ -9,12 +9,15 @@ import { addUserLogEntry } from '@util/logActions';
 import { ActionResponse } from '../types';
 
 export async function logoutAction(): Promise<ActionResponse> {
-  const oldSession = await endSession();
-  const { userID } = oldSession;
+  try {
+    const oldSession = await endSession();
+    const { userID } = oldSession;
 
-  // Add a log entry
-  await addUserLogEntry(userID, 'log-out');
-
+    // Add a log entry
+    await addUserLogEntry(userID, 'log-out');
+  } catch (e:any) {
+    console.error('Error logging out: ', e);
+  }
   return {
     status: 'success',
     message: 'Log out successful. Redirecting...',

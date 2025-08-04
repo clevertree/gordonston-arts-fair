@@ -9,7 +9,7 @@ import { Stack } from '@mui/material';
 import process from 'node:process';
 import { fetchTransactions } from '@util/transActions';
 import UserTransactionView from '@components/User/UserTransactionView';
-import { getProfileCompletion } from '@util/profile';
+import { getProfileStatus } from '@util/profile';
 import { SessionPayload } from '../../../../types';
 
 export const metadata = {
@@ -32,7 +32,7 @@ export default async function CheckoutPage() {
   const profileData = await fetchProfileByID(session.userID);
   const transactions = await fetchTransactions(session.userID);
   const alreadyPaid = transactions.find((t) => parseInt(`${t.amount}`, 10) === feeAmount) !== undefined;
-  const [eligibleToRegister, eligibleToRegisterString] = getProfileCompletion(profileData);
+  const [eligibleToRegister, eligibleToRegisterString] = getProfileStatus(profileData);
   let feeText = alreadyPaid
     ? 'You have already paid this fee.'
     : `Please click below to pay the $${feeAmount} registration fee.`;

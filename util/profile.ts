@@ -36,8 +36,9 @@
 
 import { UserStatus, UserTableRow } from '@util/schema';
 
-export function getProfileCompletion(userRow: UserTableRow):[ boolean, string] {
+export function getProfileStatus(userRow: UserTableRow):[ boolean, string] {
   const {
+    status,
     uploads
   } = userRow;
 
@@ -64,7 +65,16 @@ export function getProfileCompletion(userRow: UserTableRow):[ boolean, string] {
 
   if (!uploads || Object.keys(uploads).length === 0) return [false, 'At least one upload is required.'];
 
-  return [true, 'Profile is complete.'];
+  switch (status) {
+    case 'registered': return [true, 'Please pay your registration fee to submit your profile for approval.'];
+    case 'submitted': return [true, 'Your artist profile is pending approval.'];
+    case 'approved': return [true, 'Your artist profile is approved. Please pay your booth fee to complete registration'];
+    case 'standby': return [true, 'Your artist profile is on standby.'];
+    case 'declined': return [true, 'Your artist profile has been declined.'];
+    case 'paid': return [true, 'Your artist profile is paid and registered.'];
+    default:
+      return [true, `Your profile status is ${status}`];
+  }
 }
 
 export function getFullName(first_name?: string, last_name?: string) {

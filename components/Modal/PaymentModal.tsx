@@ -4,12 +4,16 @@ import {
 import React from 'react';
 
 interface PaymentModalProps {
+  text: string,
+  title: string,
   open: boolean,
   onClose: () => void,
   onClick: () => void
 }
 
-export default function PaymentModal({ onClick, onClose, open }: PaymentModalProps) {
+export default function PaymentModal({
+  onClick, onClose, open, text, title
+}: PaymentModalProps) {
   return (
     <Dialog open={open} onClose={onClose}>
       <Box className="m-auto flex flex-col gap-4 p-4">
@@ -24,11 +28,11 @@ export default function PaymentModal({ onClick, onClose, open }: PaymentModalPro
             />
           </SvgIcon>
           <Typography component="h2" align="center">
-            Your Profile is complete.
+            {title}
           </Typography>
         </Stack>
         <Typography variant="body2" align="center">
-          Please pay the registration fee to submit your registration for review.
+          {text}
         </Typography>
         <Button
           variant="contained"

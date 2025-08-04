@@ -33,7 +33,7 @@ export default async function CheckoutPage() {
   const alreadyPaid = transactions.find((t) => parseInt(`${t.amount}`, 10) === feeAmount) !== undefined;
   let feeText = alreadyPaid
     ? 'You have already paid this fee.'
-    : `Please click below to pay the $${feeAmount} registration fee.`;
+    : `Please click below to pay the $${feeAmount} booth fee.`;
   const eligibleToRegister = profileData.status === 'approved';
   if (!eligibleToRegister) feeText = 'You are not eligible to pay the booth fee. Please contact the admin for booth approval';
   const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';

@@ -24,7 +24,7 @@ import type { AlertColor } from '@mui/material/Alert';
 import Link from 'next/link';
 import ReloadingImage from '@components/Image/ReloadingImage';
 import { UserFileUploadDescription, UserTableRow } from '@util/schema';
-import { getProfileCompletion } from '@util/profile';
+import { getProfileStatus } from '@util/profile';
 import PaymentModal from '@components/Modal/PaymentModal';
 import UploadsModal from '@components/Modal/UploadsModal';
 
@@ -45,13 +45,13 @@ function ProfileEditor({
   uploadFile,
   deleteFile
 }: ProfileEditorProps) {
-  const [showModal, setShowModal] = useState<'none' | 'payment' | 'uploads'>('none');
+  const [showModal, setShowModal] = useState<'none' | 'payment-registration' | 'payment-booth' | 'uploads'>('none');
   const [userProfileClient, setUserProfileClient] = useState<UserTableRow>(userProfileServer);
-  const [isProfileComplete, profileCompletionMessage] = getProfileCompletion(userProfileClient);
+  const [isProfileComplete, profileCompletionMessage] = getProfileStatus(userProfileClient);
   const [status, setStatus] = useState<'ready' | 'unsaved' | 'updating' | 'error'>('ready');
   const [message, setMessage] = useState<[AlertColor, string]>(
     isProfileComplete
-      ? ['success', 'Artist profile is complete']
+      ? ['success', profileCompletionMessage]
       : ['info', profileCompletionMessage || 'Please complete your artist profile.']
   );
   // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
@@ -75,6 +75,30 @@ function ProfileEditor({
     }
   } = formInfo;
 
+  function handleUserProfileUpdate(updatedUserProfile: UserTableRow) {
+    const [
+      isUpdatedProfileComplete,
+      isUpdatedProfileCompleteMessage
+    ] = getProfileStatus(updatedUserProfile);
+    setStatus('ready');
+    setMessage([isUpdatedProfileComplete ? 'success' : 'info', isUpdatedProfileCompleteMessage]);
+    setUserProfileClient((oldProfile) => ({ ...oldProfile, ...updatedUserProfile }));
+    if (Object.values(profileUploads).length === 0) {
+      setShowModal('uploads');
+    } else if (isUpdatedProfileComplete) {
+      switch (updatedUserProfile.status) {
+        case 'registered':
+          setShowModal('payment-registration');
+          break;
+        case 'approved':
+          setShowModal('payment-booth');
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
   const handleSubmit = async () => {
     // Validation
     const allForms = [formInfo, ...Object.values(formUploadList)];
@@ -96,15 +120,7 @@ function ProfileEditor({
     try {
       userProfileClient.uploads = profileUploads;
       const updatedUserProfile = await updateProfile(userProfileClient);
-      const [isUpdatedProfileComplete, isUpdatedProfileCompleteMessage] = getProfileCompletion(updatedUserProfile);
-      setStatus('ready');
-      setMessage([isUpdatedProfileComplete ? 'success' : 'info', isUpdatedProfileCompleteMessage]);
-      setUserProfileClient((oldProfile) => ({ ...oldProfile, ...updatedUserProfile }));
-      if (isUpdatedProfileComplete) {
-        setShowModal('payment');
-      } else if (Object.values(profileUploads).length === 0) {
-        setShowModal('uploads');
-      }
+      handleUserProfileUpdate(updatedUserProfile);
     } catch (e: any) {
       setStatus('ready');
       setMessage(['error', e.message]);
@@ -336,16 +352,7 @@ function ProfileEditor({
                         return;
                       }
 
-                      const [isUpdatedProfileComplete,
-                        isUpdatedProfileCompleteMessage
-                      ] = getProfileCompletion(updatedUserProfile);
-                      setMessage([isUpdatedProfileComplete ? 'success' : 'info', isUpdatedProfileCompleteMessage]);
-                      setUserProfileClient((oldProfile) => (
-                        { ...oldProfile, ...updatedUserProfile }
-                      ));
-                      if (isUpdatedProfileComplete) {
-                        setShowModal('payment');
-                      }
+                      handleUserProfileUpdate(updatedUserProfile);
 
                       // setMessage(['success', `${count} file${count === 1 ? '' : 's'} have been uploaded`]);
                       // if (updatedUserProfile) {
@@ -416,11 +423,23 @@ function ProfileEditor({
         </Box>
       </form>
       <PaymentModal
-        open={showModal === 'payment'}
+        text="Please pay the registration fee to submit your registration for review."
+        title="Your Profile is complete."
+        open={showModal === 'payment-registration'}
         onClose={() => setShowModal('none')}
         onClick={() => {
           setShowModal('none');
           document.location.href = '/payment/registration';
+        }}
+      />
+      <PaymentModal
+        text="Please pay the booth fee to complete your registration."
+        title="Your Artist Profile has been Approved."
+        open={showModal === 'payment-booth'}
+        onClose={() => setShowModal('none')}
+        onClick={() => {
+          setShowModal('none');
+          document.location.href = '/payment/booth';
         }}
       />
       <UploadsModal
