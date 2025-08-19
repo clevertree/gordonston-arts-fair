@@ -31,14 +31,19 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendMail(options: Mail.Options) {
+export interface MailResult {
+  status: 'success' | 'error';
+  message: string;
+}
+
+export async function sendMail(options: Mail.Options): Promise<MailResult> {
   const email = `${options.to}`;
   const subject = `${options.subject}`;
   if (!email) {
-    return { success: false, message: `Invalid recipient email: ${JSON.stringify(options)}` };
+    return { status: 'error', message: `Invalid recipient email: ${JSON.stringify(options)}` };
   }
   if (!subject) {
-    return { success: false, message: `Invalid subject: ${JSON.stringify(options)}` };
+    return { status: 'error', message: `Invalid subject: ${JSON.stringify(options)}` };
   }
 
   const isVerified = await transporter.verify();
@@ -56,10 +61,10 @@ export async function sendMail(options: Mail.Options) {
   }
 
   return {
-    success: true,
+    status: 'success',
     message: testMode
-      ? `Email sent: ${subject}`
-      : `TEST MODE: ${subject}`,
+      ? `TEST MODE: ${subject}`
+      : `Email sent: ${subject}`,
   };
 }
 
@@ -89,7 +94,7 @@ export async function loginEmailAction(email: string): Promise<ActionResponse> {
   try {
     const emailTemplate = User2FactorEmailTemplate(email, loginCode, validationURL);
     const emailResult = await sendMail(emailTemplate);
-    if (!emailResult.success) {
+    if (emailResult.status !== 'success') {
       return {
         status: 'error',
         message: 'Unable to send email. Please try again later',
@@ -161,7 +166,7 @@ export async function loginEmailValidationAction(
     const loginURL = `${process.env.NEXT_PUBLIC_BASE_URL}/login`;
     const emailTemplate = UserRegistrationEmailTemplate(email, loginURL);
     const mailResult = await sendMail(emailTemplate);
-    await addUserLogEntry(userID, mailResult.success ? 'message' : 'message-error', mailResult.message);
+    await addUserLogEntry(userID, mailResult.status === 'success' ? 'message' : 'message-error', mailResult.message);
   }
 
   await startSession(userID);
