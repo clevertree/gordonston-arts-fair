@@ -6,7 +6,7 @@ import { del, put } from '@vercel/blob';
 import { ensureDatabase } from '@util/database';
 import { addUserLogEntry } from '@util/logActions';
 import { imageDimensionsFromStream } from 'image-dimensions';
-import { UserModel, UserUpdateModel } from '@util/models';
+import { UserFileUploadModel, UserModel, UserUpdateModel } from '@util/models';
 import { UserStatus } from '@types';
 
 export async function fetchProfileByID(userID: number): Promise<UserModel> {
@@ -34,10 +34,7 @@ export async function updateProfile(userID: number, updatedUserRow: UserUpdateMo
 export async function uploadFile(userID: number, file: File) {
   await ensureDatabase();
 
-  const userRow = await fetchProfileByID(userID);
-  const {
-    uploads = {}
-  } = userRow;
+  // const userRow = await fetchProfileByID(userID);
 
   const imagePath = `uploads/${userID}`;
   const imageDimensions = await imageDimensionsFromStream(file.stream());
@@ -53,44 +50,38 @@ export async function uploadFile(userID: number, file: File) {
     allowOverwrite: true
   });
 
-  uploads[fileName] = {
+  return UserFileUploadModel.create({
     title: file.name,
     width,
     height,
     url: putResult.url
-  };
-
-  await userRow.update({
-    uploads,
-    updated_at: new Date()
   });
-
-  return userRow;
 }
 
-export async function deleteFile(userID: number, filename: string) {
+export async function deleteFile(userID: number, fileID: number) {
   await ensureDatabase();
 
-  const userRow = await fetchProfileByID(userID);
-  const {
-    uploads = {}
-  } = userRow;
-  delete uploads[filename];
-
-  await userRow.update({
-    uploads,
-    updated_at: new Date()
+  const fileUpload = await UserFileUploadModel.findOne({
+    where: {
+      id: fileID,
+      userID,
+    }
   });
+  if (!fileUpload) throw new Error(`File ID not found: ${fileID}`);
 
   try {
-    const imagePath = `profile/${userID}/uploads`;
-    // eslint-disable-next-line no-console
-    await del(`${imagePath}/${filename}`);
-    console.log('Deleted file: ', `${imagePath}/${filename}`);
+    await del(fileUpload.url);
+    console.log('Deleted file: ', fileUpload.url);
   } catch (error: any) {
     console.error('Error deleting file: ', error);
   }
-  return userRow;
+
+  return UserFileUploadModel.destroy({
+    where: {
+      id: fileID,
+      userID,
+    }
+  });
 }
 
 export async function updateUserStatus(userID: number, newStatus: UserStatus, message: string) {

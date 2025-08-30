@@ -38,10 +38,10 @@ export default async function ProfilePage() {
           await uploadFile(session.userID, file);
           return fetchProfileByID(session.userID);
         }}
-        deleteFile={async (filename: string) => {
+        deleteFile={async (fileID: number) => {
           'use server';
 
-          return deleteFile(session.userID, filename);
+          return deleteFile(session.userID, fileID);
         }}
         updateProfile={async (newUserProfile: UserModel) => {
           'use server';

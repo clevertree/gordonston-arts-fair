@@ -36,7 +36,7 @@ export interface ProfileEditorProps {
 
   uploadFile(file: File): Promise<UserModel>
 
-  deleteFile(filename: string): Promise<UserModel>
+  deleteFile(fileID: number): Promise<UserModel>
 }
 
 function ProfileEditor({
@@ -390,7 +390,7 @@ function ProfileEditor({
                   {Object.keys(profileUploads).map((filename: string) => (
                     <ProfileUploadForm
                       key={filename}
-                      filename={filename}
+                      fileID={filename}
                       userProfile={userProfileClient}
                       uploadHooks={formUploadList}
                       deleteFile={deleteFile}
@@ -457,7 +457,7 @@ function ProfileEditor({
 export default ProfileEditor;
 
 interface ProfileUploadFormProps {
-  filename: string,
+  fileID: number,
   userProfile: UserModel,
   uploadHooks: { [filename: string]: FormHookObject<UserFileUploadDescription> },
 
@@ -465,13 +465,13 @@ interface ProfileUploadFormProps {
 
   // onFileDeleted(): void,
 
-  deleteFile(filename: string): Promise<UserModel>,
+  deleteFile(fileID: number): Promise<UserModel>,
 
   status: 'ready' | 'unsaved' | 'updating' | 'error'
 }
 
 function ProfileUploadForm({
-  filename,
+  fileID,
   userProfile,
   uploadHooks,
   onUpdate,
@@ -479,12 +479,12 @@ function ProfileUploadForm({
   deleteFile,
   status
 }: ProfileUploadFormProps) {
-  const uploadInfo = userProfile.uploads[filename];
+  const uploadInfo = userProfile.uploads[fileID];
   const formUpload = useFormHook(
     uploadInfo,
     (updatedUploadInfo) => {
       const uploads = { ...userProfile.uploads };
-      uploads[filename] = updatedUploadInfo;
+      uploads[fileID] = updatedUploadInfo;
       onUpdate({
         ...userProfile,
         uploads
@@ -493,10 +493,10 @@ function ProfileUploadForm({
     status === 'error'
   );
   // eslint-disable-next-line no-param-reassign
-  uploadHooks[filename] = formUpload;
+  uploadHooks[fileID] = formUpload;
   return (
     <TableRow
-      key={filename}
+      key={fileID}
     >
       <TableCell component="th" scope="row" sx={{ verticalAlign: 'top' }}>
         <Stack spacing={2}>
@@ -529,9 +529,9 @@ function ProfileUploadForm({
               onClick={async () => {
                 // eslint-disable-next-line no-alert
                 if (!window.confirm(
-                  `Are you sure you want to permanently delete this file: ${filename}`
+                  `Are you sure you want to permanently delete this file: ${fileID}`
                 )) return;
-                const userRow = await deleteFile(filename);
+                const userRow = await deleteFile(fileID);
                 onUpdate(userRow, false);
               }}
             >
@@ -546,7 +546,7 @@ function ProfileUploadForm({
           <ReloadingImage
             loading="lazy"
             src={uploadInfo.url}
-            alt={filename}
+            alt={fileID}
             width={uploadInfo.width}
             height={uploadInfo.height}
             style={{

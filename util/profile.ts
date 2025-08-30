@@ -34,10 +34,10 @@
 //   // path: string
 // }
 
-import { UserModel } from '@util/models';
+import { UserModel, UserUpdateModel } from '@util/models';
 import { UserStatus } from '@types';
 
-export function getProfileStatus(userRow: UserModel):[ boolean, string] {
+export function getProfileStatus(userRow: UserUpdateModel):[ boolean, string] {
   const {
     status,
     uploads
@@ -56,7 +56,7 @@ export function getProfileStatus(userRow: UserModel):[ boolean, string] {
     uploads: 'Uploads'
   };
 
-  const fields = Object.keys(variables) as Array<keyof UserModel>;
+  const fields = Object.keys(variables) as Array<keyof UserUpdateModel>;
   const missingFields = fields.filter((field) => !userRow[field]).length;
   if (missingFields >= Object.values(variables).length - 1) return [false, 'Please complete your Artist Profile'];
   for (let i = 0; i < fields.length; i++) {
