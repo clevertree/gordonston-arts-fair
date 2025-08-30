@@ -7,7 +7,7 @@ export default function UserRegistrationEmailTemplate(
   const subject = 'Registration Confirmation';
   const html = `<p>Dear Artist,</p>
 
-<p>Thank you for registering an artist account. Please use your email and password to log in and manage your profile.</p>
+<p>Thank you for registering an artist account. Please use your email or phone number to log in and manage your profile.</p>
 
 <a href="${loginURL}">${loginURL}</a>
 

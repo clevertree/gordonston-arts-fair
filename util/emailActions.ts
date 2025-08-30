@@ -15,11 +15,13 @@ import { randomInt } from 'node:crypto';
 import { User2FactorEmailTemplate, UserRegistrationEmailTemplate } from '../template/email';
 import { ActionResponse } from '../types';
 
-const { SMTP_SERVER_HOST } = process.env;
-const { SMTP_SERVER_USERNAME } = process.env;
-const { SMTP_SERVER_PASSWORD } = process.env;
-const EMAIL_ADMIN = process.env.NEXT_PUBLIC_EMAIL_ADMIN;
-const EMAIL_BCC = process.env.NEXT_PUBLIC_EMAIL_BCC;
+const {
+  SMTP_SERVER_HOST,
+  SMTP_SERVER_USERNAME,
+  SMTP_SERVER_PASSWORD,
+  EMAIL_ADMIN,
+  EMAIL_BCC
+} = process.env;
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   host: SMTP_SERVER_HOST,

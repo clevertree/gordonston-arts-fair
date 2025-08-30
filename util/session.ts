@@ -23,6 +23,9 @@ export async function decrypt(session: string | undefined = '') {
     });
     return payload;
   } catch (error) {
+    if (error instanceof Error) {
+      throw HttpError.Unauthorized(`Failed to verify session - Please login. Error: ${error.message}`);
+    }
     throw HttpError.Unauthorized('Failed to verify session - Please login');
   }
 }
