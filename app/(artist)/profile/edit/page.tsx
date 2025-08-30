@@ -22,21 +22,21 @@ export default async function ProfilePage() {
   } catch (e: any) {
     return redirect(`/login?message=${e.message}`);
   }
-  const profileData = await fetchProfileByID(session.userID);
+  const userProfile = await fetchProfileByID(session.userID);
 
   return (
     <Stack spacing={2}>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">Edit Artist Profile</h1>
 
-      <ArtistStepper profileData={profileData} />
+      <ArtistStepper profileData={userProfile} />
 
       <ProfileEditor
-        userProfile={profileData}
+        userProfile={userProfile}
         uploadFile={async (file: File) => {
           'use server';
 
-          await uploadFile(session.userID, file);
-          return fetchProfileByID(session.userID);
+          return uploadFile(session.userID, file);
+          // return fetchProfileByID(session.userID);
         }}
         deleteFile={async (fileID: number) => {
           'use server';

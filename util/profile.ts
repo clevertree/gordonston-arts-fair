@@ -34,16 +34,23 @@
 //   // path: string
 // }
 
-import { UserModel, UserUpdateModel } from '@util/models';
+import { UserModel } from '@util/models';
 import { UserStatus } from '@types';
+import { InferAttributes } from 'sequelize';
 
-export function getProfileStatus(userRow: UserUpdateModel):[ boolean, string] {
+export interface IProfileStatus {
+  status: boolean,
+  message: string,
+  action?: 'pay-fee-registration' | 'pay-fee-booth'
+}
+
+export function getProfileStatus(userRow: UserModel):IProfileStatus {
   const {
     status,
     uploads
   } = userRow;
 
-  const variables : { [key in keyof UserModel]?: string } = {
+  const variables : { [key in keyof InferAttributes<UserModel>]?: string } = {
     first_name: 'First Name',
     last_name: 'Last Name',
     phone: 'Phone Number',
@@ -56,25 +63,63 @@ export function getProfileStatus(userRow: UserUpdateModel):[ boolean, string] {
     uploads: 'Uploads'
   };
 
-  const fields = Object.keys(variables) as Array<keyof UserUpdateModel>;
+  const fields = Object.keys(variables) as Array<keyof InferAttributes<UserModel>>;
   const missingFields = fields.filter((field) => !userRow[field]).length;
-  if (missingFields >= Object.values(variables).length - 1) return [false, 'Please complete your Artist Profile'];
+  if (missingFields >= Object.values(variables).length - 1) {
+    return {
+      status: false,
+      message: 'Please complete your Artist Profile',
+    };
+  }
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i];
-    if (!userRow[field]) return [false, `${variables[field]} is required`];
+    if (!userRow[field]) {
+      return {
+        status: false,
+        message: `Please complete your ${variables[field]}`,
+      };
+    }
   }
 
-  if (!uploads || Object.keys(uploads).length === 0) return [false, 'At least one upload is required.'];
+  if (!uploads || Object.keys(uploads).length === 0) {
+    return {
+      status: false,
+      message: 'Please upload at least one file',
+    };
+  }
 
   switch (status) {
-    case 'registered': return [true, 'Please pay your registration fee to submit your profile for approval.'];
-    case 'submitted': return [true, 'Your artist profile is pending approval.'];
-    case 'approved': return [true, 'Your artist profile is approved. Please pay your booth fee to complete registration'];
-    case 'standby': return [true, 'Your artist profile is on standby.'];
-    case 'declined': return [true, 'Your artist profile has been declined.'];
-    case 'paid': return [true, 'Your artist profile is paid and registered.'];
+    case 'registered': return {
+      status: false,
+      message: 'Please pay your registration fee to submit your profile for approval.',
+      action: 'pay-fee-registration'
+    };
+    case 'submitted': return {
+      status: false,
+      message: 'Your profile is pending approval. Please wait for approval.',
+    };
+    case 'approved': return {
+      status: false,
+      message: 'Your artist profile is approved. Please pay your booth fee to complete registration.',
+      action: 'pay-fee-booth'
+    };
+    case 'standby': return {
+      status: false,
+      message: 'Your artist profile is on standby. Please wait for approval.',
+    };
+    case 'declined': return {
+      status: false,
+      message: 'Your artist profile has been declined. Please contact us for more information.',
+    };
+    case 'paid': return {
+      status: true,
+      message: 'Your artist profile is paid and registered.',
+    };
     default:
-      return [true, `Your profile status is ${status}`];
+      return {
+        status: false,
+        message: 'Your profile status is unknown. Please contact us for more information.',
+      };
   }
 }
 

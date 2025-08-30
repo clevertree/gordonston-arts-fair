@@ -6,8 +6,10 @@ import { del, put } from '@vercel/blob';
 import { ensureDatabase } from '@util/database';
 import { addUserLogEntry } from '@util/logActions';
 import { imageDimensionsFromStream } from 'image-dimensions';
-import { UserFileUploadModel, UserModel, UserUpdateModel } from '@util/models';
+import { UserFileUploadModel, UserModel } from '@util/models';
 import { UserStatus } from '@types';
+import { getProfileStatus } from '@util/profile';
+import { InferAttributes } from 'sequelize';
 
 export async function fetchProfileByID(userID: number): Promise<UserModel> {
   await ensureDatabase();
@@ -17,7 +19,7 @@ export async function fetchProfileByID(userID: number): Promise<UserModel> {
   return userRow;
 }
 
-export async function updateProfile(userID: number, updatedUserRow: UserUpdateModel) {
+export async function updateProfile(userID: number, updatedUserRow: InferAttributes<UserModel>) {
   await ensureDatabase();
 
   const userRow = await UserModel.findByPk(userID);
@@ -26,15 +28,19 @@ export async function updateProfile(userID: number, updatedUserRow: UserUpdateMo
   userRow.phone = `${userRow.phone || ''}`.replace(/\D/g, '');
   userRow.phone2 = `${userRow.phone2 || ''}`.replace(/\D/g, '');
 
-  await userRow.update(userRow);
-
-  return userRow;
+  const updatedUserRowDB = await userRow.update(userRow);
+  const profileStatus = getProfileStatus(updatedUserRowDB);
+  return {
+    status: profileStatus,
+    updatedUserRow: updatedUserRowDB,
+  };
 }
 
 export async function uploadFile(userID: number, file: File) {
   await ensureDatabase();
 
-  // const userRow = await fetchProfileByID(userID);
+  const userRow = await UserModel.findByPk(userID);
+  if (!userRow) throw new Error(`User ID not found: ${userID}`);
 
   const imagePath = `uploads/${userID}`;
   const imageDimensions = await imageDimensionsFromStream(file.stream());
@@ -50,12 +56,18 @@ export async function uploadFile(userID: number, file: File) {
     allowOverwrite: true
   });
 
-  return UserFileUploadModel.create({
+  const createAction = UserFileUploadModel.create({
     title: file.name,
     width,
     height,
     url: putResult.url
   });
+  const profileStatus = getProfileStatus(userRow);
+
+  return {
+    status: profileStatus,
+    createAction,
+  };
 }
 
 export async function deleteFile(userID: number, fileID: number) {
@@ -76,12 +88,18 @@ export async function deleteFile(userID: number, fileID: number) {
     console.error('Error deleting file: ', error);
   }
 
-  return UserFileUploadModel.destroy({
-    where: {
-      id: fileID,
-      userID,
-    }
-  });
+  const userRow = await fetchProfileByID(userID);
+  const profileStatus = getProfileStatus(userRow);
+
+  return {
+    status: profileStatus,
+    deleteAction: UserFileUploadModel.destroy({
+      where: {
+        id: fileID,
+        userID,
+      }
+    })
+  };
 }
 
 export async function updateUserStatus(userID: number, newStatus: UserStatus, message: string) {

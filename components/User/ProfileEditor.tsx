@@ -23,20 +23,21 @@ import {
 import type { AlertColor } from '@mui/material/Alert';
 import Link from 'next/link';
 import ReloadingImage from '@components/Image/ReloadingImage';
-import { getProfileStatus } from '@util/profile';
+import { getProfileStatus, IProfileStatus } from '@util/profile';
 import PaymentModal from '@components/Modal/PaymentModal';
 import UploadsModal from '@components/Modal/UploadsModal';
-import { UserFileUploadModel, UserModel, UserUpdateModel } from '@util/models';
+import { UserFileUploadModel, UserModel } from '@util/models';
+import { InferAttributes } from 'sequelize';
 
 export interface ProfileEditorProps {
   userProfile: UserModel,
   // isProfileComplete: [boolean, string],
 
-  updateProfile(newUserProfile: UserModel): Promise<UserModel>
+  updateProfile(newUserProfile: InferAttributes<UserModel>): Promise<{ status: IProfileStatus }>
 
-  uploadFile(file: File): Promise<UserModel>
+  uploadFile(file: File): Promise<{ status: IProfileStatus }>
 
-  deleteFile(fileID: number): Promise<UserModel>
+  deleteFile(fileID: number): Promise<{ status: IProfileStatus }>
 }
 
 function ProfileEditor({
@@ -46,8 +47,11 @@ function ProfileEditor({
   deleteFile
 }: ProfileEditorProps) {
   const [showModal, setShowModal] = useState<'none' | 'payment-registration' | 'payment-booth' | 'uploads'>('none');
-  const [userProfileClient, setUserProfileClient] = useState<UserUpdateModel>(userProfileServer);
-  const [isProfileComplete, profileCompletionMessage] = getProfileStatus(userProfileClient);
+  const [userProfileClient, setUserProfileClient] = useState<UserModel>(userProfileServer);
+  const {
+    status: isProfileComplete,
+    message: profileCompletionMessage,
+  } = getProfileStatus(userProfileClient);
   const [status, setStatus] = useState<'ready' | 'unsaved' | 'updating' | 'error'>('ready');
   const [message, setMessage] = useState<[AlertColor, string]>(
     isProfileComplete
@@ -56,14 +60,14 @@ function ProfileEditor({
   );
   // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
   // const formRef = useRef<HTMLFormElement>();
-  const { uploads: profileUploads = {} } = userProfileClient;
-  const formUploadList: { [filename: string]: FormHookObject<UserFileUploadModel> } = {};
+  const { uploads: profileUploads } = userProfileClient;
+  const formUploadList: { [fileID: number]: FormHookObject<UserFileUploadModel> } = {};
   const formRef = useRef<HTMLFormElement>(null);
   const uploadFilesRef = useRef<HTMLInputElement>(null);
 
   const formInfo = useFormHook(userProfileClient, (formData, isFormUnsaved) => {
     setUserProfileClient((oldUserProfile) => (
-      { ...oldUserProfile, ...formData }));
+      { ...oldUserProfile, ...formData } as UserModel));
     if (isFormUnsaved) {
       handleFormChange();
     }
@@ -75,22 +79,25 @@ function ProfileEditor({
     }
   } = formInfo;
 
-  function handleUserProfileUpdate(updatedUserProfile: UserModel) {
-    const [
-      isUpdatedProfileComplete,
-      isUpdatedProfileCompleteMessage
-    ] = getProfileStatus(updatedUserProfile);
+  function handleUserProfileUpdate(newStatus: IProfileStatus) {
+    const {
+      status: isUpdatedProfileComplete,
+      message: isUpdatedProfileCompleteMessage
+    } = getProfileStatus(userProfileClient);
     setStatus('ready');
     setMessage([isUpdatedProfileComplete ? 'success' : 'info', isUpdatedProfileCompleteMessage]);
-    setUserProfileClient((oldProfile) => ({ ...oldProfile, ...updatedUserProfile }));
-    if (Object.values(profileUploads).length === 0) {
+    // setUserProfileClient((oldProfile) => ({
+    //   ...oldProfile,
+    //   ...updatedUserProfile
+    // }));
+    if (profileUploads.length === 0) {
       setShowModal('uploads');
     } else if (isUpdatedProfileComplete) {
-      switch (updatedUserProfile.status) {
-        case 'registered':
+      switch (newStatus.action) {
+        case 'pay-fee-registration':
           setShowModal('payment-registration');
           break;
-        case 'approved':
+        case 'pay-fee-booth':
           setShowModal('payment-booth');
           break;
         default:
@@ -118,9 +125,9 @@ function ProfileEditor({
     setStatus('updating');
     setMessage(['info', 'Submitting form...']);
     try {
-      userProfileClient.uploads = profileUploads;
+      // userProfileClient.uploads = profileUploads;
       const updatedUserProfile = await updateProfile(userProfileClient);
-      handleUserProfileUpdate(updatedUserProfile);
+      handleUserProfileUpdate(userProfileClient);
     } catch (e: any) {
       setStatus('ready');
       setMessage(['error', e.message]);
@@ -338,21 +345,21 @@ function ProfileEditor({
                     const input = e.target;
                     if (input && input.files) {
                       let count = 0;
-                      let updatedUserProfile: UserModel | null = null;
                       setStatus('updating');
                       setMessage(['info', `Uploading ${input.files.length} files...`]);
                       await Promise.all(Array.from(input.files).map(async (file) => {
-                        updatedUserProfile = await uploadFile(file);
+                        await uploadFile(file);
                         count += 1;
                       }));
                       setStatus('ready');
                       e.target.value = '';
-                      if (!updatedUserProfile || count === 0) {
+                      if (count === 0) {
                         setMessage(['error', 'There was an error uploading your files.']);
                         return;
                       }
 
-                      handleUserProfileUpdate(updatedUserProfile);
+                      setPending;
+                      handleUserProfileUpdate();
 
                       // setMessage(['success', `${count} file${count === 1 ? '' : 's'} have been uploaded`]);
                       // if (updatedUserProfile) {
@@ -387,11 +394,9 @@ function ProfileEditor({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {Object.keys(profileUploads).map((filename: string) => (
+                  {profileUploads.map((fileUpload) => (
                     <ProfileUploadForm
-                      key={filename}
-                      fileID={filename}
-                      userProfile={userProfileClient}
+                      fileUpload={fileUpload}
                       uploadHooks={formUploadList}
                       deleteFile={deleteFile}
                       status={status}
@@ -457,46 +462,36 @@ function ProfileEditor({
 export default ProfileEditor;
 
 interface ProfileUploadFormProps {
-  fileID: number,
-  userProfile: UserModel,
-  uploadHooks: { [filename: string]: FormHookObject<UserFileUploadDescription> },
+  fileUpload: UserFileUploadModel
+  uploadHooks: { [fileID: number]: FormHookObject<UserFileUploadModel> },
 
-  onUpdate(updatedUserRow: UserModel, isFormUnsaved: boolean): void,
+  onUpdate(updatedFile: InferAttributes<UserFileUploadModel>): void,
 
   // onFileDeleted(): void,
 
-  deleteFile(fileID: number): Promise<UserModel>,
+  deleteFile(fileID: number): Promise<void>,
 
   status: 'ready' | 'unsaved' | 'updating' | 'error'
 }
 
 function ProfileUploadForm({
-  fileID,
-  userProfile,
+  fileUpload,
   uploadHooks,
   onUpdate,
   // onFileDeleted,
   deleteFile,
   status
 }: ProfileUploadFormProps) {
-  const uploadInfo = userProfile.uploads[fileID];
   const formUpload = useFormHook(
-    uploadInfo,
-    (updatedUploadInfo) => {
-      const uploads = { ...userProfile.uploads };
-      uploads[fileID] = updatedUploadInfo;
-      onUpdate({
-        ...userProfile,
-        uploads
-      }, true);
-    },
+    fileUpload,
+    onUpdate,
     status === 'error'
   );
   // eslint-disable-next-line no-param-reassign
-  uploadHooks[fileID] = formUpload;
+  uploadHooks[fileUpload.id] = formUpload;
   return (
     <TableRow
-      key={fileID}
+      key={fileUpload.id}
     >
       <TableCell component="th" scope="row" sx={{ verticalAlign: 'top' }}>
         <Stack spacing={2}>
@@ -529,10 +524,9 @@ function ProfileUploadForm({
               onClick={async () => {
                 // eslint-disable-next-line no-alert
                 if (!window.confirm(
-                  `Are you sure you want to permanently delete this file: ${fileID}`
+                  `Are you sure you want to permanently delete this file: ${fileUpload.id}`
                 )) return;
-                const userRow = await deleteFile(fileID);
-                onUpdate(userRow, false);
+                await deleteFile(fileUpload.id);
               }}
             >
               Delete Image
@@ -541,14 +535,14 @@ function ProfileUploadForm({
         </Stack>
       </TableCell>
       <TableCell sx={{ position: 'relative', width: '50%' }}>
-        {uploadInfo.url && (
-        <Link href={uploadInfo.url} target="_blank" rel="noreferrer">
+        {fileUpload.url && (
+        <Link href={fileUpload.url} target="_blank" rel="noreferrer">
           <ReloadingImage
             loading="lazy"
-            src={uploadInfo.url}
-            alt={fileID}
-            width={uploadInfo.width}
-            height={uploadInfo.height}
+            src={fileUpload.url}
+            alt={fileUpload.title}
+            width={fileUpload.width}
+            height={fileUpload.height}
             style={{
               height: 'auto'
             }}

@@ -108,7 +108,7 @@ export class UserModel extends Model {
     transactions!: TransactionModel[];
 }
 
-export type UserUpdateModel = InferAttributes<UserModel>;
+// export type UserUpdateModel = InferAttributes<UserModel>;
 
 // UserLog model with decorators
 @Table({
