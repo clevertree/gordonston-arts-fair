@@ -4,12 +4,12 @@ import {
   deleteFile, fetchProfileByID, updateProfile, uploadFile
 } from '@util/profileActions';
 import { redirect } from 'next/navigation';
-import { UserTableRow } from '@util/schema';
 import Link from 'next/link';
 import { ArtistStepper } from '@components/User/ArtistStepper';
 import { Stack } from '@mui/material';
 import React from 'react';
 import { SessionPayload } from '@types';
+import { UserModel } from '@util/models';
 
 export const metadata = {
   title: 'Edit Artist Profile',
@@ -43,7 +43,7 @@ export default async function ProfilePage() {
 
           return deleteFile(session.userID, filename);
         }}
-        updateProfile={async (newUserProfile: UserTableRow) => {
+        updateProfile={async (newUserProfile: UserModel) => {
           'use server';
 
           return updateProfile(session.userID, newUserProfile);

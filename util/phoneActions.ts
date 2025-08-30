@@ -4,10 +4,9 @@
 // Initialize Stripe with type checking for the secret key
 import { randomInt } from 'node:crypto';
 import { addUserLogEntry } from '@util/logActions';
-import { getPGSQLClient } from '@util/pgsql';
-import {
-  add2FACode, delete2FACode, fetch2FACode, UserTableRow
-} from '@util/schema';
+import { ensureDatabase } from '@util/database';
+import { add2FACode, delete2FACode, fetch2FACode } from '@util/2faActions';
+import { UserModel } from '@util/models';
 import { startSession } from '@util/session';
 import { isAdmin } from '@util/userActions';
 import UserRegistrationSMSTemplate from '../template/sms/user-registration-sms';
@@ -143,24 +142,28 @@ export async function loginPhoneValidationAction(
   // Delete Login Request
   await delete2FACode('phone', phone);
 
-  const sql = getPGSQLClient();
+  await ensureDatabase();
   // Fetch user from the database
-  const rows = (await sql`SELECT id
-                          FROM gaf_user
-                          WHERE phone = ${phone}
-                          LIMIT 1`) as UserTableRow[];
+  const user = await UserModel.findOne({
+    where: { phone },
+    attributes: ['id']
+  });
+
   let userID: number = -1;
-  if (rows.length > 0) {
+  if (user) {
     // User already exists
-    userID = rows[0].id;
+    userID = user.id;
     // Add a log entry
     await addUserLogEntry(userID, 'log-in');
   } else {
     // Register a new user
-    const result = await sql`INSERT INTO gaf_user (phone, type, status, created_at)
-                             VALUES (${phone}, 'user', 'registered', now())
-                             RETURNING id`;
-    userID = result[0].id;
+    const newUser = await UserModel.create({
+      phone,
+      type: 'user',
+      status: 'registered',
+      created_at: new Date()
+    });
+    userID = newUser.id;
     console.log(`Registered a new user (${userID}): `, phone);
 
     // Add a log entry

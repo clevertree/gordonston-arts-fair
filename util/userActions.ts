@@ -2,8 +2,8 @@
 
 'use server';
 
-import { getPGSQLClient } from '@util/pgsql';
-import { UserTableRow } from '@util/schema';
+import { ensureDatabase } from '@util/database';
+import { UserModel } from '@util/models';
 
 export interface UserSearchParams {
   status?: string,
@@ -14,49 +14,52 @@ export interface UserSearchParams {
 }
 
 export async function listUsersAsAdmin(params: UserSearchParams) {
-  const sql = getPGSQLClient();
+  await ensureDatabase();
 
   const {
     status,
-    orderBy,
-    order,
+    orderBy = 'id',
+    order = 'desc',
     pageCount = 10,
     page = 1
   } = params;
 
-  // Default sort order
-  const orderByClause = `ORDER BY ${orderBy || 'id'} ${order || 'desc'}`;
-  let whereClause = '';
-  if (status && status !== 'all') whereClause = `WHERE status = '${status}'`;
-  const pageOffset = page ? page - 1 : 0;
-  const [{ count }] = (await sql.query(`SELECT COUNT(*)
-                                      FROM gaf_user ${whereClause}`));
-  const userList = (await sql.query(`SELECT *
-                                     FROM gaf_user ${whereClause} ${orderByClause}
-                                     LIMIT ${pageCount} OFFSET ${pageOffset * pageCount}`)) as UserTableRow[];
+  const whereCondition = status && status !== 'all' ? { status } : {};
+  const pageOffset = (page - 1) * pageCount;
+
+  const { count, rows: userList } = await UserModel.findAndCountAll({
+    where: whereCondition,
+    order: [[orderBy, order.toUpperCase()]],
+    limit: pageCount,
+    offset: pageOffset
+  });
+
   return {
-    userList,
+    userList: userList.map((user) => user.toJSON()) as UserModel[],
     totalCount: count,
     pageCount: Math.ceil(count / pageCount)
   };
 }
 
 export async function fetchUserID(email: string) {
-  const sql = getPGSQLClient();
-  const rows = (await sql`SELECT id
-                          FROM gaf_user
-                          WHERE email = ${email.toLowerCase()}
-                          LIMIT 1`) as UserTableRow[];
-  if (!rows[0]) throw new Error(`User ID not found: ${email}`);
-  return rows[0].id;
+  await ensureDatabase();
+
+  const user = await UserModel.findOne({
+    where: { email: email.toLowerCase() },
+    attributes: ['id']
+  });
+
+  if (!user) throw new Error(`User ID not found: ${email}`);
+  return user.id;
 }
 
 export async function isAdmin(userID: number) {
-  const sql = getPGSQLClient();
-  const rows = (await sql`SELECT type
-                          FROM gaf_user
-                          WHERE id = ${userID}
-                          LIMIT 1`) as UserTableRow[];
-  if (!rows[0]) throw new Error(`User ID not found: ${userID}`);
-  return rows[0].type === 'admin';
+  await ensureDatabase();
+
+  const user = await UserModel.findByPk(userID, {
+    attributes: ['type']
+  });
+
+  if (!user) throw new Error(`User ID not found: ${userID}`);
+  return user.type === 'admin';
 }

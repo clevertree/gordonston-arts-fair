@@ -1,11 +1,11 @@
-DROP TABLE IF EXISTS gaf_transactions;
-DROP TABLE IF EXISTS gaf_user;
-DROP TABLE IF EXISTS gaf_user_log;
-DROP TYPE IF EXISTS gaf_user_status;
-DROP TYPE IF EXISTS gaf_user_type;
-DROP TYPE IF EXISTS gaf_user_log_type;
+DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS user_log;
+DROP TYPE IF EXISTS user_status;
+DROP TYPE IF EXISTS user_type;
+DROP TYPE IF EXISTS user_log_type;
 
-CREATE TYPE gaf_user_status AS ENUM (
+CREATE TYPE user_status AS ENUM (
     'unregistered',
     'registered',
     'submitted',
@@ -17,16 +17,16 @@ CREATE TYPE gaf_user_status AS ENUM (
     'admin'
     );
 
-CREATE TYPE gaf_user_type AS ENUM (
+CREATE TYPE user_type AS ENUM (
     'user',
     'admin'
     );
 
 
-CREATE TABLE IF NOT EXISTS gaf_user
+CREATE TABLE IF NOT EXISTS user
 (
     id           SERIAL PRIMARY KEY,
-    type         gaf_user_type      NOT NULL,
+    type         user_type      NOT NULL,
     email        VARCHAR(64) UNIQUE NULL,
     phone        VARCHAR(64) UNIQUE NULL,
     first_name   VARCHAR(64)        NULL,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS gaf_user
     website      VARCHAR(256)       NULL,
     description  TEXT               NULL,
     category     VARCHAR(128)       NULL,
-    status       gaf_user_status    NOT NULL,
+    status       user_status    NOT NULL,
     created_at   TIMESTAMP          NOT NULL,
     updated_at   TIMESTAMP          NULL,
     uploads      JSON               NULL
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS gaf_user
 
 
 
-CREATE TYPE gaf_user_log_type AS ENUM (
+CREATE TYPE user_log_type AS ENUM (
     'log-in',
     'log-in-error',
     'log-out',
@@ -60,22 +60,22 @@ CREATE TYPE gaf_user_log_type AS ENUM (
     'message-error',
     'status-change'
     );
-CREATE TABLE IF NOT EXISTS gaf_user_log
+CREATE TABLE IF NOT EXISTS user_log
 (
     id         SERIAL PRIMARY KEY,
     user_id    INT               NULL,
-    type       gaf_user_log_type NOT NULL,
+    type       user_log_type NOT NULL,
     message    VARCHAR(256)      NOT NULL,
     created_at TIMESTAMP         NOT NULL,
     CONSTRAINT fk_user
         FOREIGN KEY (user_id)
-            REFERENCES gaf_user (id)
+            REFERENCES user (id)
             ON DELETE CASCADE
 );
 
 
-DROP TABLE IF EXISTS gaf_transactions;
-CREATE TABLE IF NOT EXISTS gaf_transactions
+DROP TABLE IF EXISTS transactions;
+CREATE TABLE IF NOT EXISTS transactions
 (
     id         SERIAL PRIMARY KEY,
     user_id    INT            NULL,
@@ -88,11 +88,11 @@ CREATE TABLE IF NOT EXISTS gaf_transactions
     content    JSON           NOT NULL,
     CONSTRAINT fk_user
         FOREIGN KEY (user_id)
-            REFERENCES gaf_user (id)
+            REFERENCES user (id)
 );
 
-DROP TABLE IF EXISTS gaf_2fa_codes;
-CREATE TABLE IF NOT EXISTS gaf_2fa_codes
+DROP TABLE IF EXISTS 2fa_codes;
+CREATE TABLE IF NOT EXISTS 2fa_codes
 (
     type       VARCHAR(16) NOT NULL CHECK (type IN ('email', 'phone')), -- Restricts the type to either 'email' or 'phone'
     receiver   VARCHAR(64) NOT NULL,

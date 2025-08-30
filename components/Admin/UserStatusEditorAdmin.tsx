@@ -18,7 +18,7 @@ import { getStatusName } from '@util/profile';
 import type { AlertColor } from '@mui/material/Alert';
 import { useRouter } from 'next/navigation';
 import { SelectField } from '@components/FormFields';
-import { profileStatuses, UserStatus } from '@util/schema';
+import { profileStatuses, UserStatus } from '@types';
 
 interface UserStatusEditorAdminProps {
   userStatus: UserStatus,

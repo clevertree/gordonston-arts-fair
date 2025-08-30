@@ -10,10 +10,10 @@ export default async function ResetTests() {
     //   const testProfile = await fetchProfileByEmail('test@test.com');
     //   const sql = getPGSQLClient();
     //   await sql`DELETE
-    //               FROM gaf_user_log
+    //               FROM user_log
     //               WHERE user_id = ${testProfile.id}`;
     //   await sql`DELETE
-    //               FROM gaf_user
+    //               FROM user
     //               WHERE email = 'test@test.com'`;
     //   // eslint-disable-next-line no-console
     //   console.info('Test have been reset');

@@ -1,5 +1,4 @@
 // @ts-ignore
-import {UserTableRow} from "@util/schema";
 
 describe('template spec', () => {
     beforeEach(() => {

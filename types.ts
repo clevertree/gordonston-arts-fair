@@ -15,3 +15,36 @@ export type ActionResponse = {
   message: string;
   redirectURL?: string;
 };
+// User model types
+export type UserStatus =
+    'unregistered'
+    | 'registered'
+    | 'submitted'
+    | 'approved'
+    | 'standby'
+    | 'declined'
+    | 'paid'
+    | 'imported';
+export type UserType = 'user' | 'admin';
+export type LogType =
+    'log-in'
+    | 'log-in-error'
+    | 'log-out'
+    | 'register'
+    | 'register-error'
+    | 'password-reset'
+    | 'password-reset-error'
+    | 'message'
+    | 'message-error'
+    | 'status-change';
+
+export const profileStatuses: UserStatus[] = [
+  'unregistered',
+  'registered',
+  'submitted',
+  'approved',
+  'standby',
+  'declined',
+  'paid',
+  'imported'
+];

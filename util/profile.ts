@@ -34,15 +34,16 @@
 //   // path: string
 // }
 
-import { UserStatus, UserTableRow } from '@util/schema';
+import { UserModel } from '@util/models';
+import { UserStatus } from '@types';
 
-export function getProfileStatus(userRow: UserTableRow):[ boolean, string] {
+export function getProfileStatus(userRow: UserModel):[ boolean, string] {
   const {
     status,
     uploads
   } = userRow;
 
-  const variables : { [key in keyof UserTableRow]?: string } = {
+  const variables : { [key in keyof UserModel]?: string } = {
     first_name: 'First Name',
     last_name: 'Last Name',
     phone: 'Phone Number',
@@ -55,7 +56,7 @@ export function getProfileStatus(userRow: UserTableRow):[ boolean, string] {
     uploads: 'Uploads'
   };
 
-  const fields = Object.keys(variables) as Array<keyof UserTableRow>;
+  const fields = Object.keys(variables) as Array<keyof UserModel>;
   const missingFields = fields.filter((field) => !userRow[field]).length;
   if (missingFields >= Object.values(variables).length - 1) return [false, 'Please complete your Artist Profile'];
   for (let i = 0; i < fields.length; i++) {

@@ -1,0 +1,275 @@
+import 'reflect-metadata';
+import {
+  AllowNull,
+  AutoIncrement,
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  HasMany,
+  Model,
+  PrimaryKey,
+  Sequelize,
+  Table,
+  Unique
+} from 'sequelize-typescript';
+import * as Types from '@types';
+import { InferAttributes } from 'sequelize';
+
+// User model with decorators
+@Table({
+  tableName: 'user',
+  timestamps: true, // Automatically add createdAt and updatedAt columns
+  paranoid: true // Add deletedAt column for soft deletes
+})
+export class UserModel extends Model {
+  @PrimaryKey
+  @AutoIncrement
+  @Column(DataType.INTEGER)
+    id!: number;
+
+  @Unique
+  @AllowNull(true)
+  @Column(DataType.STRING(64))
+    email!: string;
+
+  @AllowNull(false)
+  @Column(DataType.ENUM('user', 'admin'))
+    type!: Types.UserType;
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+    password?: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(64))
+    first_name?: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(64))
+    last_name?: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(64))
+    company_name?: string | null;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(128))
+    address?: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(32))
+    city?: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(10))
+    state?: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(10))
+    zipcode?: string;
+
+  @Unique
+  @AllowNull(true)
+  @Column(DataType.STRING(64))
+    phone?: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(64))
+    phone2?: string | null;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(256))
+    website?: string | null;
+
+  @AllowNull(true)
+  @Column(DataType.TEXT)
+    description?: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(128))
+    category?: string;
+
+  @AllowNull(false)
+  @Column(DataType.ENUM('unregistered', 'registered', 'submitted', 'approved', 'standby', 'declined', 'paid', 'imported'))
+    status!: Types.UserStatus;
+
+  @AllowNull(true)
+  @Column(DataType.DATE)
+    updated_at?: Date | null;
+
+  @HasMany(() => UserLogModel)
+    userLogs!: UserLogModel[];
+
+  @HasMany(() => UserFileUploadModel)
+    uploads!: UserFileUploadModel[];
+
+  @HasMany(() => TransactionModel)
+    transactions!: TransactionModel[];
+}
+
+export type UserUpdateModel = InferAttributes<UserModel>;
+
+// UserLog model with decorators
+@Table({
+  tableName: 'user_file_uploads',
+  timestamps: true, // Automatically add createdAt and updatedAt columns
+  paranoid: true // Add deletedAt column for soft deletes
+})
+export class UserFileUploadModel extends Model {
+  @PrimaryKey
+  @AutoIncrement
+  @Column(DataType.INTEGER)
+    id!: number;
+
+  @ForeignKey(() => UserModel)
+  @AllowNull(true)
+  @Column(DataType.INTEGER)
+    user_id!: number | null;
+
+  @AllowNull(false)
+  @Column(DataType.STRING(256))
+    title!: string;
+
+  @AllowNull(true)
+  @Column(DataType.TEXT)
+    description!: string;
+
+  @AllowNull(false)
+  @Column(DataType.STRING(256))
+    url!: string;
+
+  @AllowNull(false)
+  @Column(DataType.INTEGER)
+    width!: number;
+
+  @AllowNull(false)
+  @Column(DataType.INTEGER)
+    height!: number;
+
+  @BelongsTo(() => UserModel)
+    user!: UserModel;
+}
+
+export type UserFileUploadUpdateModel = InferAttributes<UserModel>;
+
+// UserLog model with decorators
+@Table({
+  tableName: 'user_log',
+  timestamps: true, // Automatically add createdAt and updatedAt columns
+  paranoid: true // Add deletedAt column for soft deletes
+})
+export class UserLogModel extends Model {
+  @PrimaryKey
+  @AutoIncrement
+  @Column(DataType.INTEGER)
+    id!: number;
+
+  @ForeignKey(() => UserModel)
+  @AllowNull(true)
+  @Column(DataType.INTEGER)
+    user_id!: number | null;
+
+  @AllowNull(false)
+  @Column(DataType.ENUM('log-in', 'log-in-error', 'log-out', 'register', 'register-error', 'password-reset', 'password-reset-error', 'message', 'message-error', 'status-change'))
+    type!: Types.LogType;
+
+  @AllowNull(false)
+  @Column(DataType.STRING(256))
+    message!: string;
+
+  @BelongsTo(() => UserModel)
+    user!: UserModel;
+}
+
+// Transaction model with decorators
+@Table({
+  tableName: 'transactions',
+  timestamps: false
+})
+export class TransactionModel extends Model {
+  @PrimaryKey
+  @AutoIncrement
+  @Column(DataType.INTEGER)
+    id!: number;
+
+  @ForeignKey(() => UserModel)
+  @AllowNull(true)
+  @Column(DataType.INTEGER)
+    user_id!: number | null;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(256))
+    full_name!: string | null;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(256))
+    email!: string | null;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(256))
+    phone!: string | null;
+
+  @AllowNull(false)
+  @Column(DataType.ENUM('charge.succeeded', 'charge.refunded'))
+    type!: 'charge.succeeded' | 'charge.refunded';
+
+  @AllowNull(true)
+  @Column(DataType.DECIMAL(10, 2))
+    amount!: number | null;
+
+  @AllowNull(false)
+  @Column(DataType.JSON)
+    content!: any;
+
+  @BelongsTo(() => UserModel)
+    user!: UserModel;
+}
+
+// TwoFactorCode model with decorators
+@Table({
+  tableName: '2fa_codes',
+  timestamps: true, // Automatically add createdAt and updatedAt columns
+  paranoid: true // Add deletedAt column for soft deletes
+})
+export class TwoFactorCodeModel extends Model {
+  @PrimaryKey
+  @AllowNull(false)
+  @Column(DataType.ENUM('email', 'phone'))
+    type!: 'email' | 'phone';
+
+  @PrimaryKey
+  @AllowNull(false)
+  @Column(DataType.STRING(64))
+    receiver!: string;
+
+  @PrimaryKey
+  @AllowNull(false)
+  @Column(DataType.INTEGER)
+    code!: number;
+
+  @AllowNull(false)
+  @Column(DataType.DATE)
+    expiration!: Date;
+}
+
+// Database connection with sequelize-typescript
+const sequelize = new Sequelize(process.env.DATABASE_URL!, {
+  dialect: 'postgres',
+  logging: false, // Set to console.log to see SQL queries
+  models: [UserModel, UserLogModel, TransactionModel, TwoFactorCodeModel]
+});
+
+// Initialize database connection
+export async function initDatabase() {
+  try {
+    await sequelize.authenticate();
+    console.log('Database connection established successfully.');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+    throw error;
+  }
+}
+
+export { sequelize };
+export default sequelize;

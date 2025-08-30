@@ -1,6 +1,6 @@
 import React from 'react';
 import ProfileEditor from '@components/User/ProfileEditor';
-import { UserTableRow } from '@util/schema';
+import { UserModel } from '@util/models';
 
 describe('<ProfileEditor />', () => {
   beforeEach(() => {
@@ -71,7 +71,7 @@ describe('<ProfileEditor />', () => {
 });
 
 function ProfileEditorWrapper() {
-  const [userProfile, setUserProfile] = React.useState<UserTableRow>(() => ({
+  const [userProfile, setUserProfile] = React.useState<UserModel>(() => ({
     id: 0,
     email: '',
     first_name: '',
@@ -84,7 +84,7 @@ function ProfileEditorWrapper() {
     type: 'admin',
     status: 'submitted',
     uploads: {}
-  } as UserTableRow));
+  } as UserModel));
   return (
     <ProfileEditor
       userProfile={userProfile}

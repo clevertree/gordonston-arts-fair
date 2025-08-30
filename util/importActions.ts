@@ -1,11 +1,11 @@
-/* eslint-disable no-await-in-loop,no-restricted-syntax,no-console */
+/* eslint-disable no-await-in-loop,no-restricted-syntax,no-console,no-continue */
+// noinspection SpellCheckingInspection
 
 'use server';
 
 import { validateEmail } from '@components/FormFields/validation';
 import * as fs from 'node:fs';
-import { getPGSQLClient } from '@util/pgsql';
-import { UserFileUploadDescription } from '@util/schema';
+import { UserFileUploadModel, UserModel } from '@util/models';
 
 interface RowData {
   id: string,
@@ -57,39 +57,64 @@ async function insertUser(email: string, row: RowData) {
     name4,
     description4
   } = row;
-  const uploads: { [key: string]: UserFileUploadDescription } = {};
+  const newUser = await UserModel.create({
+    email: email.toLowerCase(),
+    type: 'user',
+    status: 'imported',
+    first_name: fname,
+    last_name: lname,
+    company_name: company,
+    address,
+    city,
+    state,
+    zipcode: zip,
+    phone,
+  });
   if (name1 && description1) {
-    uploads[name1] = {
-      title: name1, description: description1, width: -1, height: -1, url: '#'
-    };
+    UserFileUploadModel.create({
+      user_id: newUser.id,
+      title: name1,
+      description: description1,
+      width: -1,
+      height: -1,
+      url: '#'
+    });
   }
 
   if (name2 && description2) {
-    uploads[name2] = {
-      title: name2, description: description2, width: -1, height: -1, url: '#'
-
-    };
+    UserFileUploadModel.create({
+      user_id: newUser.id,
+      title: name2,
+      description: description2,
+      width: -1,
+      height: -1,
+      url: '#'
+    });
   }
 
   if (name3 && description3) {
-    uploads[name3] = {
-      title: name3, description: description3, width: -1, height: -1, url: '#'
-    };
+    UserFileUploadModel.create({
+      user_id: newUser.id,
+      title: name3,
+      description: description3,
+      width: -1,
+      height: -1,
+      url: '#'
+    });
   }
 
   if (name4 && description4) {
-    uploads[name4] = {
-      title: name4, description: description4, width: -1, height: -1, url: '#'
-    };
+    UserFileUploadModel.create({
+      user_id: newUser.id,
+      title: name4,
+      description: description4,
+      width: -1,
+      height: -1,
+      url: '#'
+    });
   }
 
-  const sql = getPGSQLClient();
-  return sql`INSERT INTO gaf_user (email, type, status, first_name, last_name, company_name,
-                                   address, city, state, zipcode, phone, phone2, website,
-                                   description, category, uploads, created_at)
-             VALUES (${email.toLowerCase()}, 'user', 'imported', ${fname}, ${lname}, ${company},
-                     ${address}, ${city}, ${state}, ${zip}, ${phone}, ${phone2}, ${website},
-                     ${comment}, ${category}, ${uploads}, now()) ON CONFLICT (email) DO NOTHING;`;
+  return newUser;
 }
 
 export async function importDBFromCSV() {
@@ -112,7 +137,7 @@ export async function importDBFromCSV() {
     console.info('Importing profile: ', email);
     await insertUser(email, row as unknown as RowData);
     // const currentUserProfile = (await sql`SELECT *
-    //                                       FROM gaf_user
+    //                                       FROM user
     //                                       WHERE email = ${email}`) as unknown as UserProfile;
     // if (currentUserProfile) {
     //   const { info, uploads } = newProfile;

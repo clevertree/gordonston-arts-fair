@@ -14,12 +14,13 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { getFullName, getStatusName } from '@util/profile';
-import { profileStatuses, UserStatus, UserTableRow } from '@util/schema';
 import { UserSearchParams } from '@util/userActions';
+import { profileStatuses, UserStatus } from '@types';
+import { UserModel } from '@util/models';
 import styles from './UserListAdmin.module.css';
 
 interface AdminUserListProps {
-  userList: UserTableRow[],
+  userList: UserModel[],
   // totalCount: number,
   pageCount: number,
   searchParams: UserSearchParams

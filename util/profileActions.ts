@@ -3,59 +3,37 @@
 'use server';
 
 import { del, put } from '@vercel/blob';
-import { getPGSQLClient } from '@util/pgsql';
-import { UpdatedUserTableRow, UserStatus, UserTableRow } from '@util/schema';
+import { ensureDatabase } from '@util/database';
 import { addUserLogEntry } from '@util/logActions';
 import { imageDimensionsFromStream } from 'image-dimensions';
+import { UserModel, UserUpdateModel } from '@util/models';
+import { UserStatus } from '@types';
 
-export async function fetchProfileByID(userID: number) {
-  // Get db client
-  const sql = getPGSQLClient();
+export async function fetchProfileByID(userID: number): Promise<UserModel> {
+  await ensureDatabase();
 
-  const [userRow] = (await sql`SELECT u.*
-                               FROM gaf_user as u
-                          WHERE id = ${userID} LIMIT 1`) as UserTableRow[];
+  const userRow = await UserModel.findByPk(userID);
   if (!userRow) throw new Error(`User ID not found: ${userID}`);
-  if (!userRow.uploads) userRow.uploads = {};
   return userRow;
 }
 
-export async function updateProfile(userID: number, updatedUserRow: UpdatedUserTableRow) {
-  const sql = getPGSQLClient();
-  const userRow = await fetchProfileByID(userID);
-  Object.assign(userRow, updatedUserRow);
-  const {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    first_name, last_name, company_name,
-    address, city, state, zipcode,
-    phone: unformattedPhone = '',
-    phone2: unformattedPhone2 = '', website,
-    description, category, uploads
-  } = userRow;
-  const phone = `${unformattedPhone || ''}`.replace(/\D/g, '');
-  const phone2 = `${unformattedPhone2 || ''}`.replace(/\D/g, '');
+export async function updateProfile(userID: number, updatedUserRow: UserUpdateModel) {
+  await ensureDatabase();
 
-  await sql`UPDATE gaf_user
-            SET first_name   = ${first_name},
-                last_name    = ${last_name},
-                company_name = ${company_name},
-                address      = ${address},
-                city         = ${city},
-                state        = ${state},
-                zipcode      = ${zipcode},
-                phone        = ${phone},
-                phone2       = ${phone2},
-                website      = ${website},
-                description  = ${description},
-                category     = ${category},
-                uploads      = ${uploads},
-                updated_at   = NOW()
-                WHERE id = ${userRow.id}`;
+  const userRow = await UserModel.findByPk(userID);
+  if (!userRow) throw new Error(`User ID not found: ${userID}`);
+  Object.assign(userRow, updatedUserRow);
+  userRow.phone = `${userRow.phone || ''}`.replace(/\D/g, '');
+  userRow.phone2 = `${userRow.phone2 || ''}`.replace(/\D/g, '');
+
+  await userRow.update(userRow);
+
   return userRow;
 }
 
 export async function uploadFile(userID: number, file: File) {
-  const sql = getPGSQLClient();
+  await ensureDatabase();
+
   const userRow = await fetchProfileByID(userID);
   const {
     uploads = {}
@@ -81,24 +59,29 @@ export async function uploadFile(userID: number, file: File) {
     height,
     url: putResult.url
   };
-  await sql`UPDATE gaf_user
-            SET uploads      = ${uploads},
-                updated_at   = NOW()
-                WHERE id = ${userRow.id}`;
+
+  await userRow.update({
+    uploads,
+    updated_at: new Date()
+  });
+
   return userRow;
 }
 
 export async function deleteFile(userID: number, filename: string) {
-  const sql = getPGSQLClient();
+  await ensureDatabase();
+
   const userRow = await fetchProfileByID(userID);
   const {
     uploads = {}
   } = userRow;
   delete uploads[filename];
-  await sql`UPDATE gaf_user
-            SET uploads      = ${uploads},
-                updated_at   = NOW()
-                WHERE id = ${userRow.id}`;
+
+  await userRow.update({
+    uploads,
+    updated_at: new Date()
+  });
+
   try {
     const imagePath = `profile/${userID}/uploads`;
     // eslint-disable-next-line no-console
@@ -110,12 +93,18 @@ export async function deleteFile(userID: number, filename: string) {
   return userRow;
 }
 
-export async function updateUserStatus(userID: number, newStatus: UserStatus, message:string) {
-  const sql = getPGSQLClient();
-  await sql`UPDATE gaf_user
-            SET status     = ${newStatus},
-                updated_at = NOW()
-            WHERE id = ${userID}`;
+export async function updateUserStatus(userID: number, newStatus: UserStatus, message: string) {
+  await ensureDatabase();
+
+  await UserModel.update(
+    {
+      status: newStatus,
+      updated_at: new Date()
+    },
+    {
+      where: { id: userID }
+    }
+  );
 
   // Add a log entry
   await addUserLogEntry(userID, 'status-change', message);

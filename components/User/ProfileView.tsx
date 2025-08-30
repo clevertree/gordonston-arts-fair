@@ -14,18 +14,18 @@ import {
 import { getStatusName } from '@util/profile';
 import ReloadingImage from '@components/Image/ReloadingImage';
 import Link from 'next/link';
-import { UserTableRow } from '@util/schema';
 import { formatPhone } from '@components/FormFields/formatting';
+import { UserModel } from '@util/models';
 
 interface ProfileViewProps {
-  userProfile: UserTableRow
+  userProfile: UserModel
 }
 
 function ProfileView({ userProfile }: ProfileViewProps) {
   const { uploads: profileUploads = {}, status } = userProfile;
 
   const profileInfoLabels: {
-    [key in keyof UserTableRow]?: string
+    [key in keyof UserModel]?: string
   } = {
     first_name: 'First Name',
     last_name: 'Last Name',
@@ -38,10 +38,10 @@ function ProfileView({ userProfile }: ProfileViewProps) {
     zipcode: 'Zipcode',
     category: 'Category',
   };
-  const profileInfoFields = Object.keys(profileInfoLabels) as (keyof UserTableRow)[];
+  const profileInfoFields = Object.keys(profileInfoLabels) as (keyof UserModel)[];
   const uploadList = Object.values(profileUploads);
 
-  function val(profileInfoField: keyof UserTableRow) {
+  function val(profileInfoField: keyof UserModel) {
     const value = userProfile[profileInfoField] as string;
     switch (profileInfoField) {
       case 'phone':

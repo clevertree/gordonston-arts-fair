@@ -1,13 +1,13 @@
-import { UserTableRow } from '@util/schema';
 import { getProfileStatus } from '@util/profile';
 import {
   Alert, Step, StepLabel, Stepper
 } from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
+import { UserModel } from '@util/models';
 
 interface ArtistStepperProps {
-  profileData: UserTableRow,
+  profileData: UserModel,
   showAlert?: boolean
 }
 

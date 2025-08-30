@@ -5,10 +5,9 @@
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 import { addUserLogEntry } from '@util/logActions';
-import { getPGSQLClient } from '@util/pgsql';
-import {
-  add2FACode, delete2FACode, fetch2FACode, UserTableRow
-} from '@util/schema';
+import { ensureDatabase } from '@util/database';
+import { add2FACode, delete2FACode, fetch2FACode } from '@util/2faActions';
+import { UserModel } from '@util/models';
 import { startSession } from '@util/session';
 import { isAdmin } from '@util/userActions';
 import { randomInt } from 'node:crypto';
@@ -141,24 +140,28 @@ export async function loginEmailValidationAction(
   // Delete Login Request
   await delete2FACode('email', email.toLowerCase());
 
-  const sql = getPGSQLClient();
+  await ensureDatabase();
   // Fetch user from the database
-  const rows = (await sql`SELECT id
-                          FROM gaf_user
-                          WHERE email = ${email.toLowerCase()}
-                          LIMIT 1`) as UserTableRow[];
+  const user = await UserModel.findOne({
+    where: { email: email.toLowerCase() },
+    attributes: ['id']
+  });
+
   let userID: number = -1;
-  if (rows.length > 0) {
+  if (user) {
     // User already exists
-    userID = rows[0].id;
+    userID = user.id;
     // Add a log entry
     await addUserLogEntry(userID, 'log-in');
   } else {
     // Register a new user
-    const result = await sql`INSERT INTO gaf_user (email, type, status, created_at)
-                             VALUES (${email.toLowerCase()}, 'user', 'registered', now())
-                             RETURNING id`;
-    userID = result[0].id;
+    const newUser = await UserModel.create({
+      email: email.toLowerCase(),
+      type: 'user',
+      status: 'registered',
+      created_at: new Date()
+    });
+    userID = newUser.id;
     console.log(`Registered a new user (${userID}): `, email);
 
     // Add a log entry

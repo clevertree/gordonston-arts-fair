@@ -23,20 +23,20 @@ import {
 import type { AlertColor } from '@mui/material/Alert';
 import Link from 'next/link';
 import ReloadingImage from '@components/Image/ReloadingImage';
-import { UserFileUploadDescription, UserTableRow } from '@util/schema';
 import { getProfileStatus } from '@util/profile';
 import PaymentModal from '@components/Modal/PaymentModal';
 import UploadsModal from '@components/Modal/UploadsModal';
+import { UserFileUploadModel, UserModel, UserUpdateModel } from '@util/models';
 
 export interface ProfileEditorProps {
-  userProfile: UserTableRow,
+  userProfile: UserModel,
   // isProfileComplete: [boolean, string],
 
-  updateProfile(newUserProfile: UserTableRow): Promise<UserTableRow>
+  updateProfile(newUserProfile: UserModel): Promise<UserModel>
 
-  uploadFile(file: File): Promise<UserTableRow>
+  uploadFile(file: File): Promise<UserModel>
 
-  deleteFile(filename: string): Promise<UserTableRow>
+  deleteFile(filename: string): Promise<UserModel>
 }
 
 function ProfileEditor({
@@ -46,7 +46,7 @@ function ProfileEditor({
   deleteFile
 }: ProfileEditorProps) {
   const [showModal, setShowModal] = useState<'none' | 'payment-registration' | 'payment-booth' | 'uploads'>('none');
-  const [userProfileClient, setUserProfileClient] = useState<UserTableRow>(userProfileServer);
+  const [userProfileClient, setUserProfileClient] = useState<UserUpdateModel>(userProfileServer);
   const [isProfileComplete, profileCompletionMessage] = getProfileStatus(userProfileClient);
   const [status, setStatus] = useState<'ready' | 'unsaved' | 'updating' | 'error'>('ready');
   const [message, setMessage] = useState<[AlertColor, string]>(
@@ -57,7 +57,7 @@ function ProfileEditor({
   // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
   // const formRef = useRef<HTMLFormElement>();
   const { uploads: profileUploads = {} } = userProfileClient;
-  const formUploadList: { [filename: string]: FormHookObject<UserFileUploadDescription> } = {};
+  const formUploadList: { [filename: string]: FormHookObject<UserFileUploadModel> } = {};
   const formRef = useRef<HTMLFormElement>(null);
   const uploadFilesRef = useRef<HTMLInputElement>(null);
 
@@ -75,7 +75,7 @@ function ProfileEditor({
     }
   } = formInfo;
 
-  function handleUserProfileUpdate(updatedUserProfile: UserTableRow) {
+  function handleUserProfileUpdate(updatedUserProfile: UserModel) {
     const [
       isUpdatedProfileComplete,
       isUpdatedProfileCompleteMessage
@@ -338,7 +338,7 @@ function ProfileEditor({
                     const input = e.target;
                     if (input && input.files) {
                       let count = 0;
-                      let updatedUserProfile: UserTableRow | null = null;
+                      let updatedUserProfile: UserModel | null = null;
                       setStatus('updating');
                       setMessage(['info', `Uploading ${input.files.length} files...`]);
                       await Promise.all(Array.from(input.files).map(async (file) => {
@@ -458,14 +458,14 @@ export default ProfileEditor;
 
 interface ProfileUploadFormProps {
   filename: string,
-  userProfile: UserTableRow,
+  userProfile: UserModel,
   uploadHooks: { [filename: string]: FormHookObject<UserFileUploadDescription> },
 
-  onUpdate(updatedUserRow: UserTableRow, isFormUnsaved: boolean): void,
+  onUpdate(updatedUserRow: UserModel, isFormUnsaved: boolean): void,
 
   // onFileDeleted(): void,
 
-  deleteFile(filename: string): Promise<UserTableRow>,
+  deleteFile(filename: string): Promise<UserModel>,
 
   status: 'ready' | 'unsaved' | 'updating' | 'error'
 }
