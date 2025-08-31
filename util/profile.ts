@@ -41,7 +41,7 @@ import { InferAttributes } from 'sequelize';
 export interface IProfileStatus {
   status: boolean,
   message: string,
-  action?: 'pay-fee-registration' | 'pay-fee-booth'
+  action?: 'upload-files' | 'pay-fee-registration' | 'pay-fee-booth'
 }
 
 export function getProfileStatus(userRow: UserModel):IProfileStatus {
@@ -85,6 +85,7 @@ export function getProfileStatus(userRow: UserModel):IProfileStatus {
     return {
       status: false,
       message: 'Please upload at least one file',
+      action: 'upload-files'
     };
   }
 

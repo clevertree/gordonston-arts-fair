@@ -41,7 +41,7 @@ export interface FormHookObject<T extends object> {
   ): FormFieldProps,
 }
 
-export type FormDataUpdateCallback<T extends object> = (formData: T, isFormUnsaved: boolean) => any;
+export type FormDataUpdateCallback<T extends object> = (formData: T) => any;
 
 export interface FormValues {
   [fieldName: string]: any
@@ -66,7 +66,7 @@ export function useFormHook<T extends object>(
     setupInput,
     setFieldValue(fieldName: keyof T, value: string) {
       setFieldValue(fieldName, value);
-      updateFormData(formData, true);
+      updateFormData(formData);
     },
   };
 
@@ -109,7 +109,7 @@ export function useFormHook<T extends object>(
       onBlur: () => {
         // Update form data if the value changed
         if (JSON.stringify(defaultFormData[fieldName]) !== JSON.stringify(formData[fieldName])) {
-          updateFormData(formData, true);
+          updateFormData(formData);
         }
       }
     };

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   Alert,
   Box,
@@ -19,13 +19,12 @@ import {
 
 import { SelectField, TextField, useFormHook } from '@components/FormFields';
 import type { AlertColor } from '@mui/material/Alert';
-import Link from 'next/link';
-import ReloadingImage from '@components/Image/ReloadingImage';
 import { getProfileStatus, IProfileStatus } from '@util/profile';
 import PaymentModal from '@components/Modal/PaymentModal';
 import UploadsModal from '@components/Modal/UploadsModal';
 import { UserFileUploadModel, UserModel } from '@util/models';
 import { InferAttributes } from 'sequelize';
+import { ProfileUploadForm } from '@components/User/ProfileUploadForm';
 
 export interface ProfileEditorProps {
   userProfile: UserModel,
@@ -84,21 +83,19 @@ function ProfileEditor({
     }
   } = formInfo;
 
-  function handleUserProfileUpdate(newStatus: IProfileStatus) {
+  const handleUserProfileUpdate = useCallback((newStatus: IProfileStatus) => {
     const {
       status: isUpdatedProfileComplete,
-      message: isUpdatedProfileCompleteMessage
-    } = getProfileStatus(userProfileClient);
+      message: isUpdatedProfileCompleteMessage,
+      action
+    } = newStatus;
     setStatus('ready');
     setMessage([isUpdatedProfileComplete ? 'success' : 'info', isUpdatedProfileCompleteMessage]);
-    // setUserProfileClient((oldProfile) => ({
-    //   ...oldProfile,
-    //   ...updatedUserProfile
-    // }));
-    if (profileUploads.length === 0) {
-      setShowModal('uploads');
-    } else if (isUpdatedProfileComplete) {
-      switch (newStatus.action) {
+    if (isUpdatedProfileComplete) {
+      switch (action) {
+        case 'upload-files':
+          setShowModal('uploads');
+          break;
         case 'pay-fee-registration':
           setShowModal('payment-registration');
           break;
@@ -109,21 +106,20 @@ function ProfileEditor({
           break;
       }
     }
-  }
+  }, []);
 
   const handleSubmit = async () => {
     // Validation
     // const allForms = [formInfo, ...Object.values(formUploadList)];
     // for (let i = 0; i < allForms.length; i++) {
-    //   const form = allForms[i];
-    //   const { firstError } = form;
-    //   if (firstError) {
-    //     const { message: firstErrorMessage, scrollToField } = firstError;
-    //     setStatus('error');
-    //     setMessage(['error', firstErrorMessage]);
-    //     scrollToField();
-    //     return;
-    //   }
+    const { firstError } = formInfo;
+    if (firstError) {
+      const { message: firstErrorMessage, scrollToField } = firstError;
+      setStatus('error');
+      setMessage(['error', firstErrorMessage]);
+      scrollToField();
+      return;
+    }
     // }
 
     // Submit to server
@@ -159,6 +155,7 @@ function ProfileEditor({
   return (
     <>
       <form
+        id="profile-editor-form"
         method="post"
         ref={formRef}
           // onChange={handleFormChange}
@@ -433,7 +430,7 @@ function ProfileEditor({
                     // uploadHooks={formUploadList}
                     deleteFile={deleteFile}
                     updateFile={updateFile}
-                    status={status}
+                    onUpdate={handleUserProfileUpdate}
                   />
                 ))}
               </TableBody>
@@ -474,99 +471,6 @@ function ProfileEditor({
 }
 
 export default ProfileEditor;
-
-interface ProfileUploadFormProps {
-  fileUpload: UserFileUploadModel
-  // uploadHooks: { [fileID: number]: FormHookObject<UserFileUploadModel> },
-
-  updateFile(updatedFile: InferAttributes<UserFileUploadModel>): void,
-
-  // onFileDeleted(): void,
-
-  deleteFile(fileID: number): Promise<{ status: IProfileStatus }>,
-
-  status: 'ready' | 'unsaved' | 'updating' | 'error'
-}
-
-function ProfileUploadForm({
-  fileUpload,
-  // uploadHooks,
-  updateFile,
-  // onFileDeleted,
-  deleteFile,
-  status
-}: ProfileUploadFormProps) {
-  const formUpload = useFormHook(
-    fileUpload,
-    updateFile,
-    status === 'error'
-  );
-  // eslint-disable-next-line no-param-reassign
-  // uploadHooks[fileUpload.id] = formUpload;
-  return (
-    <TableRow
-      key={fileUpload.id}
-    >
-      <TableCell component="th" scope="row" sx={{ verticalAlign: 'top' }}>
-        <Stack spacing={2}>
-          <TextField
-            required
-            helperText="Title this image"
-            placeholder="Title this image..."
-            {...formUpload.setupInput('title', 'Title', 'required')}
-          />
-          <TextField
-            multiline
-            minRows={4}
-            helperText="Describe this image"
-            placeholder="Describe this image..."
-            {...formUpload.setupInput('description', 'Description')}
-            slotProps={{
-              htmlInput: {
-                maxLength: 600,
-              },
-              inputLabel: {
-                shrink: true
-              }
-            }}
-          />
-          <div>
-            <Button
-              variant="outlined"
-              color="secondary"
-              sx={{ float: 'right' }}
-              onClick={async () => {
-                // eslint-disable-next-line no-alert
-                if (!window.confirm(
-                  `Are you sure you want to permanently delete this file: ${fileUpload.id}`
-                )) return;
-                await deleteFile(fileUpload.id);
-              }}
-            >
-              Delete Image
-            </Button>
-          </div>
-        </Stack>
-      </TableCell>
-      <TableCell sx={{ position: 'relative', width: '50%' }}>
-        {fileUpload.url && (
-        <Link href={fileUpload.url} target="_blank" rel="noreferrer">
-          <ReloadingImage
-            loading="lazy"
-            src={fileUpload.url}
-            alt={fileUpload.title}
-            width={fileUpload.width}
-            height={fileUpload.height}
-            style={{
-              height: 'auto'
-            }}
-          />
-        </Link>
-        )}
-      </TableCell>
-    </TableRow>
-  );
-}
 
 const LIST_STATES = {
   // "": "",
