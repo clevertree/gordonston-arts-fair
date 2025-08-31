@@ -11,8 +11,8 @@ import { UserModel } from '@util/models';
 import { startSession } from '@util/session';
 import { isAdmin } from '@util/userActions';
 import { randomInt } from 'node:crypto';
-import { User2FactorEmailTemplate, UserRegistrationEmailTemplate } from '../template/email';
-import { ActionResponse } from '../types';
+import { ActionResponse } from '@types';
+import { User2FactorEmailTemplate, UserRegistrationEmailTemplate } from '@template/email';
 
 const {
   SMTP_SERVER_HOST,

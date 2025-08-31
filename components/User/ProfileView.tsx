@@ -22,7 +22,7 @@ interface ProfileViewProps {
 }
 
 function ProfileView({ userProfile }: ProfileViewProps) {
-  const { uploads: profileUploads = {}, status } = userProfile;
+  const { uploads: uploadList = [], status } = userProfile;
 
   const profileInfoLabels: {
     [key in keyof UserModel]?: string
@@ -39,7 +39,6 @@ function ProfileView({ userProfile }: ProfileViewProps) {
     category: 'Category',
   };
   const profileInfoFields = Object.keys(profileInfoLabels) as (keyof UserModel)[];
-  const uploadList = Object.values(profileUploads);
 
   function val(profileInfoField: keyof UserModel) {
     const value = userProfile[profileInfoField] as string;

@@ -16,12 +16,12 @@ export function ArtistStepper({ profileData, showAlert }: ArtistStepperProps) {
   let message: ['info' | 'success', string] = ['info', 'Please complete your Artist profile.'];
   const profileStatus = getProfileStatus(profileData);
   let redirectURL: React.JSX.Element;
-  if (profileStatus[0]) {
+  if (profileStatus.status) {
     activeStep = 1;
     message = ['info', 'Please pay the artist registration fee to submit your profile for approval.'];
     redirectURL = <Link href="/payment/registration">Click here to pay Registration Fee</Link>;
   } else {
-    message = ['info', profileStatus[1]];
+    message = ['info', profileStatus.message];
     redirectURL = <Link href="/profile/edit">Click here to return to profile editor</Link>;
   }
   if (profileData.status === 'submitted') {

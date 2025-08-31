@@ -106,7 +106,7 @@ export default async function UserListAdmin({
             {userList.map(({
               id,
               first_name, last_name, email,
-              type, created_at, status, uploads
+              type, createdAt, status, uploads
             }) => (
               <TableRow
                 key={email}
@@ -122,8 +122,8 @@ export default async function UserListAdmin({
                   {type === 'admin' ? '🔑 Admin' : '🎨 Artist'}
                 </TableCell>
                 <TableCell className={styles.hideOnMobile}>
-                  {created_at
-                    ? new Date(created_at).toLocaleDateString()
+                  {createdAt
+                    ? new Date(createdAt).toLocaleDateString()
                     : 'N/A'}
                 </TableCell>
                 <TableCell className={styles.hideOnMobile}>

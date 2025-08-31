@@ -1,6 +1,7 @@
 import React from 'react';
 import ProfileEditor from '@components/User/ProfileEditor';
 import { UserModel } from '@util/models';
+import { InferAttributes } from 'sequelize';
 
 describe('<ProfileEditor />', () => {
   beforeEach(() => {
@@ -71,7 +72,7 @@ describe('<ProfileEditor />', () => {
 });
 
 function ProfileEditorWrapper() {
-  const [userProfile, setUserProfile] = React.useState<UserModel>(() => ({
+  const [userProfile, setUserProfile] = React.useState<InferAttributes<UserModel>>(() => ({
     id: 0,
     email: '',
     first_name: '',
@@ -83,17 +84,34 @@ function ProfileEditorWrapper() {
     phone: '',
     type: 'admin',
     status: 'submitted',
-    uploads: {}
+    uploads: [
+      {
+        id: 0,
+        title: 'test',
+        width: 100,
+        height: 100,
+        url: 'https://ttfmqae8x58lkhvg.public.blob.vercel-storage.com/profile/ari%40asu.edu/uploads/morrowindinstallorder1.png',
+        user_id: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+    ]
   } as UserModel));
   return (
     <ProfileEditor
-      userProfile={userProfile}
+      userProfile={userProfile as UserModel}
       updateProfile={async (p) => {
         setUserProfile(p);
-        return p;
+        return {
+          status: {
+            status: true,
+            message: ''
+          },
+        };
       }}
       uploadFile={cy.stub()}
       deleteFile={cy.stub()}
+      updateFile={cy.stub()}
     />
   );
 }

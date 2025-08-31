@@ -17,9 +17,7 @@ import {
   Typography
 } from '@mui/material';
 
-import {
-  FormHookObject, SelectField, TextField, useFormHook
-} from '@components/FormFields';
+import { SelectField, TextField, useFormHook } from '@components/FormFields';
 import type { AlertColor } from '@mui/material/Alert';
 import Link from 'next/link';
 import ReloadingImage from '@components/Image/ReloadingImage';
@@ -37,6 +35,8 @@ export interface ProfileEditorProps {
 
   uploadFile(file: File): Promise<{ status: IProfileStatus }>
 
+  updateFile(file: InferAttributes<UserFileUploadModel>): Promise<{ status: IProfileStatus }>
+
   deleteFile(fileID: number): Promise<{ status: IProfileStatus }>
 }
 
@@ -44,6 +44,7 @@ function ProfileEditor({
   userProfile: userProfileServer,
   updateProfile,
   uploadFile,
+  updateFile,
   deleteFile
 }: ProfileEditorProps) {
   const [showModal, setShowModal] = useState<'none' | 'payment-registration' | 'payment-booth' | 'uploads'>('none');
@@ -60,19 +61,23 @@ function ProfileEditor({
   );
   // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
   // const formRef = useRef<HTMLFormElement>();
-  const { uploads: profileUploads } = userProfileClient;
-  const formUploadList: { [fileID: number]: FormHookObject<UserFileUploadModel> } = {};
+  const { uploads: profileUploads = [] } = userProfileClient;
+  // const formUploadList: { [fileID: number]: FormHookObject<UserFileUploadModel> } = {};
   const formRef = useRef<HTMLFormElement>(null);
   const uploadFilesRef = useRef<HTMLInputElement>(null);
 
-  const formInfo = useFormHook(userProfileClient, (formData, isFormUnsaved) => {
-    setUserProfileClient((oldUserProfile) => (
-      { ...oldUserProfile, ...formData } as UserModel));
-    if (isFormUnsaved) {
-      handleFormChange();
-    }
+  const formInfo = useFormHook(
+    userProfileClient,
+    (formData, isFormUnsaved) => {
+      setUserProfileClient((oldUserProfile) => (
+        { ...oldUserProfile, ...formData } as UserModel));
+      if (isFormUnsaved) {
+        handleFormChange();
+      }
     // setMessage('')
-  }, status === 'error');
+    },
+    status === 'error'
+  );
   const {
     formData: {
       category: categoryInput,
@@ -108,26 +113,26 @@ function ProfileEditor({
 
   const handleSubmit = async () => {
     // Validation
-    const allForms = [formInfo, ...Object.values(formUploadList)];
-    for (let i = 0; i < allForms.length; i++) {
-      const form = allForms[i];
-      const { firstError } = form;
-      if (firstError) {
-        const { message: firstErrorMessage, scrollToField } = firstError;
-        setStatus('error');
-        setMessage(['error', firstErrorMessage]);
-        scrollToField();
-        return;
-      }
-    }
+    // const allForms = [formInfo, ...Object.values(formUploadList)];
+    // for (let i = 0; i < allForms.length; i++) {
+    //   const form = allForms[i];
+    //   const { firstError } = form;
+    //   if (firstError) {
+    //     const { message: firstErrorMessage, scrollToField } = firstError;
+    //     setStatus('error');
+    //     setMessage(['error', firstErrorMessage]);
+    //     scrollToField();
+    //     return;
+    //   }
+    // }
 
     // Submit to server
     setStatus('updating');
     setMessage(['info', 'Submitting form...']);
     try {
       // userProfileClient.uploads = profileUploads;
-      const updatedUserProfile = await updateProfile(userProfileClient);
-      handleUserProfileUpdate(userProfileClient);
+      const { status: updatedStatus } = await updateProfile(userProfileClient);
+      handleUserProfileUpdate(updatedStatus);
     } catch (e: any) {
       setStatus('ready');
       setMessage(['error', e.message]);
@@ -149,7 +154,7 @@ function ProfileEditor({
     }
   }
 
-  const fileUploadCount = Object.keys(profileUploads).length;
+  const fileUploadCount = profileUploads.length;
 
   return (
     <>
@@ -289,7 +294,7 @@ function ProfileEditor({
             <Button
               variant="text"
               onClick={() => {
-                // eslint-disable-next-line no-alert
+              // eslint-disable-next-line no-alert
                 const category = window.prompt('Please enter a custom art category') || '';
                 if (category) {
                   formInfo.setFieldValue('category', category);
@@ -347,8 +352,9 @@ function ProfileEditor({
                       let count = 0;
                       setStatus('updating');
                       setMessage(['info', `Uploading ${input.files.length} files...`]);
+                      let lastStatus: IProfileStatus | undefined;
                       await Promise.all(Array.from(input.files).map(async (file) => {
-                        await uploadFile(file);
+                        lastStatus = (await uploadFile(file)).status;
                         count += 1;
                       }));
                       setStatus('ready');
@@ -358,16 +364,15 @@ function ProfileEditor({
                         return;
                       }
 
-                      setPending;
-                      handleUserProfileUpdate();
+                      if (lastStatus) handleUserProfileUpdate(lastStatus);
 
-                      // setMessage(['success', `${count} file${count === 1 ? '' : 's'} have been uploaded`]);
-                      // if (updatedUserProfile) {
-                      //   setUserProfileClient((oldProfile) => ({
-                      //     ...oldProfile,
-                      //     ...updatedUserProfile
-                      //   }));
-                      // }
+                      setMessage(['success', `${count} file${count === 1 ? '' : 's'} have been uploaded`]);
+                    // if (updatedUserProfile) {
+                    //   setUserProfileClient((oldProfile) => ({
+                    //     ...oldProfile,
+                    //     ...updatedUserProfile
+                    //   }));
+                    // }
                     }
                   }}
                 />
@@ -375,44 +380,6 @@ function ProfileEditor({
             </Stack>
           </fieldset>
 
-          <Typography component="h2">
-            Manage uploaded images
-          </Typography>
-
-          <fieldset disabled={status === 'updating'}>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow
-                    className={`${fileUploadCount > 0 ? 'bg-green-700' : 'bg-amber-700'} [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2`}
-                  >
-                    <TableCell colSpan={2}>
-                      File uploads:
-                      {' '}
-                      {fileUploadCount}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {profileUploads.map((fileUpload) => (
-                    <ProfileUploadForm
-                      fileUpload={fileUpload}
-                      uploadHooks={formUploadList}
-                      deleteFile={deleteFile}
-                      status={status}
-                      onUpdate={(updatedUserProfile, isFormUnsaved) => {
-                        setUserProfileClient((oldProfile) => ({
-                          ...oldProfile,
-                          ...updatedUserProfile
-                        }));
-                        if (isFormUnsaved) handleFormChange();
-                      }}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </fieldset>
           <Button
             type="submit"
             variant="contained"
@@ -427,6 +394,53 @@ function ProfileEditor({
           </Button>
         </Box>
       </form>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          minWidth: '100%',
+          gap: 2,
+          margin: 'auto',
+          padding: 3,
+          border: '1px solid #ccc',
+          borderRadius: 4,
+        }}
+      >
+
+        <Typography component="h2">
+          Manage uploaded images
+        </Typography>
+
+        <fieldset disabled={status === 'updating'}>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow
+                  className={`${fileUploadCount > 0 ? 'bg-green-700' : 'bg-amber-700'} [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2`}
+                >
+                  <TableCell colSpan={2}>
+                    File uploads:
+                    {' '}
+                    {fileUploadCount}
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {profileUploads.map((fileUpload) => (
+                  <ProfileUploadForm
+                    key={fileUpload.id}
+                    fileUpload={fileUpload}
+                    // uploadHooks={formUploadList}
+                    deleteFile={deleteFile}
+                    updateFile={updateFile}
+                    status={status}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </fieldset>
+      </Box>
       <PaymentModal
         text="Please pay the registration fee to submit your registration for review."
         title="Your Profile is complete."
@@ -463,32 +477,32 @@ export default ProfileEditor;
 
 interface ProfileUploadFormProps {
   fileUpload: UserFileUploadModel
-  uploadHooks: { [fileID: number]: FormHookObject<UserFileUploadModel> },
+  // uploadHooks: { [fileID: number]: FormHookObject<UserFileUploadModel> },
 
-  onUpdate(updatedFile: InferAttributes<UserFileUploadModel>): void,
+  updateFile(updatedFile: InferAttributes<UserFileUploadModel>): void,
 
   // onFileDeleted(): void,
 
-  deleteFile(fileID: number): Promise<void>,
+  deleteFile(fileID: number): Promise<{ status: IProfileStatus }>,
 
   status: 'ready' | 'unsaved' | 'updating' | 'error'
 }
 
 function ProfileUploadForm({
   fileUpload,
-  uploadHooks,
-  onUpdate,
+  // uploadHooks,
+  updateFile,
   // onFileDeleted,
   deleteFile,
   status
 }: ProfileUploadFormProps) {
   const formUpload = useFormHook(
     fileUpload,
-    onUpdate,
+    updateFile,
     status === 'error'
   );
   // eslint-disable-next-line no-param-reassign
-  uploadHooks[fileUpload.id] = formUpload;
+  // uploadHooks[fileUpload.id] = formUpload;
   return (
     <TableRow
       key={fileUpload.id}

@@ -12,13 +12,17 @@ const nextConfig = {
     pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
     
     // Optionally, add any other Next.js config below
+    serverExternalPackages: ['sequelize'],
+
     experimental: {
         serverActions: {
             bodySizeLimit: '10mb'
         }
     },
     images: {
-        remotePatterns: [new URL('https://*.public.blob.vercel-storage.com/**')]
+        remotePatterns: [
+            new URL('https://*.public.blob.vercel-storage.com/**')
+            ]
     }
 }
 

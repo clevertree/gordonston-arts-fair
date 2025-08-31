@@ -32,7 +32,10 @@ export default async function CheckoutPage() {
   const profileData = await fetchProfileByID(session.userID);
   const transactions = await fetchTransactions(session.userID);
   const alreadyPaid = transactions.find((t) => parseInt(`${t.amount}`, 10) === feeAmount) !== undefined;
-  const [eligibleToRegister, eligibleToRegisterString] = getProfileStatus(profileData);
+  const {
+    status: eligibleToRegister,
+    message: eligibleToRegisterString
+  } = getProfileStatus(profileData);
   let feeText = alreadyPaid
     ? 'You have already paid this fee.'
     : `Please click below to pay the $${feeAmount} registration fee.`;

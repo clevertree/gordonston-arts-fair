@@ -13,10 +13,11 @@ import {
   Table,
   Unique
 } from 'sequelize-typescript';
-import * as Types from '@types';
-import { InferAttributes } from 'sequelize';
+import type { LogType, UserStatus, UserType } from '@types';
 
 // User model with decorators
+import pg from 'pg';
+
 @Table({
   tableName: 'user',
   timestamps: true, // Automatically add createdAt and updatedAt columns
@@ -35,7 +36,7 @@ export class UserModel extends Model {
 
   @AllowNull(false)
   @Column(DataType.ENUM('user', 'admin'))
-    type!: Types.UserType;
+    type!: UserType;
 
   @AllowNull(true)
   @Column(DataType.STRING)
@@ -92,7 +93,7 @@ export class UserModel extends Model {
 
   @AllowNull(false)
   @Column(DataType.ENUM('unregistered', 'registered', 'submitted', 'approved', 'standby', 'declined', 'paid', 'imported'))
-    status!: Types.UserStatus;
+    status!: UserStatus;
 
   @AllowNull(true)
   @Column(DataType.DATE)
@@ -151,8 +152,6 @@ export class UserFileUploadModel extends Model {
     user!: UserModel;
 }
 
-export type UserFileUploadUpdateModel = InferAttributes<UserModel>;
-
 // UserLog model with decorators
 @Table({
   tableName: 'user_log',
@@ -172,7 +171,7 @@ export class UserLogModel extends Model {
 
   @AllowNull(false)
   @Column(DataType.ENUM('log-in', 'log-in-error', 'log-out', 'register', 'register-error', 'password-reset', 'password-reset-error', 'message', 'message-error', 'status-change'))
-    type!: Types.LogType;
+    type!: LogType;
 
   @AllowNull(false)
   @Column(DataType.STRING(256))
@@ -256,8 +255,9 @@ export class TwoFactorCodeModel extends Model {
 // Database connection with sequelize-typescript
 const sequelize = new Sequelize(process.env.DATABASE_URL!, {
   dialect: 'postgres',
+  dialectModule: pg,
   logging: false, // Set to console.log to see SQL queries
-  models: [UserModel, UserLogModel, TransactionModel, TwoFactorCodeModel]
+  models: [UserModel, UserLogModel, UserFileUploadModel, TransactionModel, TwoFactorCodeModel]
 });
 
 // Initialize database connection

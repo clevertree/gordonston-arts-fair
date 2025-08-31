@@ -1,7 +1,7 @@
 import ProfileEditor from '@components/User/ProfileEditor';
 import { validateSession } from '@util/session';
 import {
-  deleteFile, fetchProfileByID, updateProfile, uploadFile
+  deleteFile, fetchProfileByID, updateFile, updateProfile, uploadFile
 } from '@util/profileActions';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -9,7 +9,6 @@ import { ArtistStepper } from '@components/User/ArtistStepper';
 import { Stack } from '@mui/material';
 import React from 'react';
 import { SessionPayload } from '@types';
-import { UserModel } from '@util/models';
 
 export const metadata = {
   title: 'Edit Artist Profile',
@@ -32,22 +31,10 @@ export default async function ProfilePage() {
 
       <ProfileEditor
         userProfile={userProfile}
-        uploadFile={async (file: File) => {
-          'use server';
-
-          return uploadFile(session.userID, file);
-          // return fetchProfileByID(session.userID);
-        }}
-        deleteFile={async (fileID: number) => {
-          'use server';
-
-          return deleteFile(session.userID, fileID);
-        }}
-        updateProfile={async (newUserProfile: UserModel) => {
-          'use server';
-
-          return updateProfile(session.userID, newUserProfile);
-        }}
+        updateFile={updateFile}
+        uploadFile={uploadFile}
+        deleteFile={deleteFile}
+        updateProfile={updateProfile}
       />
       <Link href="/dashboard">Click here to return to your dashboard</Link>
     </Stack>
