@@ -64,7 +64,7 @@ function ProfileEditor({
 
   // Check for unsaved data
   useEffect(() => {
-    if (status === 'ready') {
+    if (status === 'ready' && formInfo.hasUnsavedData) {
       setStatus('unsaved');
     } else if (status === 'unsaved' && !formInfo.hasUnsavedData) {
       setStatus('ready');
