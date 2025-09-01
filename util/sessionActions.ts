@@ -5,16 +5,16 @@
 import { endSession, validateSession } from '@util/session';
 import { HttpError } from '@util/exception/httpError';
 import { isAdmin } from '@util/userActions';
-import { addUserLogEntry } from '@util/logActions';
-import { ActionResponse } from '../types';
+import { ActionResponse } from '@types';
 
 export async function logoutAction(): Promise<ActionResponse> {
   try {
-    const oldSession = await endSession();
-    const { userID } = oldSession;
+    // const oldSession =
+    await endSession();
+    // const { userID } = oldSession;
 
     // Add a log entry
-    await addUserLogEntry(userID, 'log-out');
+    // await addUserLogEntry(userID, 'log-out');
   } catch (e:any) {
     console.error('Error logging out: ', e);
   }

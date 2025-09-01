@@ -10,7 +10,7 @@ export interface UserSearchParams {
   order?: 'asc' | 'desc',
   orderBy?: string,
   page?: number,
-  pageCount?: number
+  limit?: number
 }
 
 export async function listUsersAsAdmin(params: UserSearchParams) {
@@ -20,24 +20,24 @@ export async function listUsersAsAdmin(params: UserSearchParams) {
     status,
     orderBy = 'id',
     order = 'desc',
-    pageCount = 10,
-    page = 1
+    limit = 10,
   } = params;
+  const page = params.page || 1;
 
   const whereCondition = status && status !== 'all' ? { status } : {};
-  const pageOffset = (page - 1) * pageCount;
+  const offset = (page - 1) * limit;
 
   const { count, rows: userList } = await UserModel.findAndCountAll({
     where: whereCondition,
-    order: [[orderBy, order.toUpperCase()]],
-    limit: pageCount,
-    offset: pageOffset
+    order: [[orderBy, order === 'desc' ? 'DESC' : 'ASC']],
+    limit,
+    offset
   });
 
   return {
     userList: userList.map((user) => user.toJSON()) as UserModel[],
     totalCount: count,
-    pageCount: Math.ceil(count / pageCount)
+    pageCount: Math.ceil(count / limit)
   };
 }
 

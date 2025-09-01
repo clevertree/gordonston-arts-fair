@@ -11,12 +11,30 @@ export type LogEntry = {
   created_at: Date,
 };
 
-export async function fetchUserLogs(userID: number) {
+export interface UserLogSearchParams {
+  type?: LogType,
+  order?: 'asc' | 'desc',
+  orderBy?: string,
+  page?: number,
+  limit?: number
+}
+export async function fetchUserLogs(userID: number, searchParams: UserLogSearchParams = {}) {
   await ensureDatabase();
 
+  const {
+    type,
+    order,
+    orderBy = 'id',
+    page = 1,
+    limit = 10,
+  } = searchParams;
+  const offset = (page - 1) * limit;
+
   const logs = await UserLogModel.findAll({
-    where: { user_id: userID },
-    order: [['createdAt', 'DESC']]
+    where: { user_id: userID, type },
+    order: [[orderBy, order === 'desc' ? 'DESC' : 'ASC']],
+    limit,
+    offset
   });
 
   return logs.map((log) => log.toJSON()) as LogEntry[];

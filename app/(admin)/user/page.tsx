@@ -19,7 +19,7 @@ export default async function AdminUserListPage({ searchParams }:AdminUserListPa
   const params = new URLSearchParams(await searchParams as Record<string, string>);
   const userSearchParams: UserSearchParams = {
     page: params.get('page') ? parseInt(`${params.get('page')}`, 10) : 0,
-    pageCount: params.get('page_count') ? parseInt(`${params.get('page_count')}`, 10) : 25,
+    limit: params.get('page_count') ? parseInt(`${params.get('page_count')}`, 10) : 25,
     status: params.get('status') || 'all',
     order: params.get('order') === 'asc' ? 'asc' : 'desc',
     orderBy: params.get('orderBy') || undefined

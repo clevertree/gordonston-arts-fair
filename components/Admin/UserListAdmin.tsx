@@ -253,14 +253,14 @@ function getSortURL(searchParams: UserSearchParams, variable: OrderFieldType) {
 function getParamsURL(searchParams: UserSearchParams) {
   const {
     page,
-    pageCount,
+    limit,
     status,
     order,
     orderBy
   } = searchParams;
   // eslint-disable-next-line prefer-template
   return `?page=${page}`
-      + (pageCount ? `&pageCount=${pageCount}` : '')
+      + (limit ? `&pageCount=${limit}` : '')
       + (status ? `&status=${status}` : '')
       + (order ? `&order=${order}` : '')
       + (orderBy ? `&orderBy=${orderBy}` : '');
