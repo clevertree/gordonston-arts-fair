@@ -6,7 +6,7 @@
 @tailwind utilities;
 
 :root {
-  --foreground-color: rgb(29, 29, 29);
+  --foreground-color: black; // rgb(29, 29, 29);
   --background-color: white;
   --link-color: #000042;
   --link-color-inverted: #e8e8e8;
@@ -86,7 +86,7 @@ a:active {
   /* unvisited link */
   a:link {
     color: var(--link-color-inverted);
-      text-decoration: none;
+    text-decoration: none;
 
   }
 
@@ -175,7 +175,6 @@ h2 {
 //h3 + p, h3 + div, {
 //  padding-top: 1rem
 //}
-
 
 
 /* Focus styles for keyboard navigation */

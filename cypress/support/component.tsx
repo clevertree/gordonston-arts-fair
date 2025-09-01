@@ -13,6 +13,7 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 import 'cypress-axe';
+import { AppRouterContext } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
 // Import commands.js using ES2015 syntax:
 import './commands';
@@ -26,14 +27,28 @@ import {StyledEngineProvider} from '@mui/material/styles';
 // import ThemeProvider from '@provider/themeProvider';
 import '../../app/globals.scss';
 
+
 // Augment the Cypress namespace to include type definitions for
 // your custom command.
 // Alternatively, can be defined in cypress/support/component.d.ts
 // with a <reference path="./component" /> at the top of your spec.
 
 Cypress.Commands.add('mount', (component) => {
+// Mock Next.js App Router for component testing
+    const mockRouter = {
+        push: cy.stub().as('routerPush'),
+        replace: cy.stub().as('routerReplace'),
+        prefetch: cy.stub().as('routerPrefetch'),
+        back: cy.stub().as('routerBack'),
+        forward: cy.stub().as('routerForward'),
+        refresh: cy.stub().as('routerRefresh'),
+        pathname: '/profile',
+        searchParams: new URLSearchParams(),
+        query: {},
+    };
     const wrappedContent = (
         <Box p={2}>
+            <AppRouterContext.Provider value={mockRouter}>
             <AppRouterCacheProvider options={{enableCssLayer: true}}>
                 <StyledEngineProvider injectFirst>
                     {/*<ThemeProvider>*/}
@@ -41,6 +56,7 @@ Cypress.Commands.add('mount', (component) => {
                     {/*</ThemeProvider>*/}
                 </StyledEngineProvider>
             </AppRouterCacheProvider>
+            </AppRouterContext.Provider>
         </Box>
     );
     return mount(wrappedContent);

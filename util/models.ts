@@ -124,7 +124,7 @@ export class UserFileUploadModel extends Model {
     id!: number;
 
   @ForeignKey(() => UserModel)
-  @AllowNull(true)
+  @AllowNull(false)
   @Column(DataType.INTEGER)
     user_id!: number | null;
 
@@ -165,7 +165,7 @@ export class UserLogModel extends Model {
     id!: number;
 
   @ForeignKey(() => UserModel)
-  @AllowNull(true)
+  @AllowNull(false)
   @Column(DataType.INTEGER)
     user_id!: number | null;
 
@@ -184,7 +184,7 @@ export class UserLogModel extends Model {
 // Transaction model with decorators
 @Table({
   tableName: 'transactions',
-  timestamps: false
+  timestamps: true
 })
 export class TransactionModel extends Model {
   @PrimaryKey
@@ -252,18 +252,28 @@ export class TwoFactorCodeModel extends Model {
     expiration!: Date;
 }
 
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL environment variable is required');
+}
+
 // Database connection with sequelize-typescript
-const sequelize = new Sequelize(process.env.DATABASE_URL!, {
+const sequelize = new Sequelize(databaseUrl, {
   dialect: 'postgres',
   dialectModule: pg,
   logging: false, // Set to console.log to see SQL queries
-  models: [UserModel, UserLogModel, UserFileUploadModel, TransactionModel, TwoFactorCodeModel]
+  models: [UserModel,
+    UserLogModel,
+    UserFileUploadModel,
+    TransactionModel,
+    TwoFactorCodeModel]
 });
 
 // Initialize database connection
 export async function initDatabase() {
   try {
-    await sequelize.authenticate();
+    // await sequelize.authenticate();
+    await sequelize.sync();
     console.log('Database connection established successfully.');
   } catch (error) {
     console.error('Unable to connect to the database:', error);

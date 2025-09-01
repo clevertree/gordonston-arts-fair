@@ -57,7 +57,7 @@ export default function UserStatusEditorAdmin({
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow className="bg-blue-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
+              <TableRow className="bg-blue-800 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
                 <TableCell colSpan={2}>
                   {`Manage ${USER_LABEL} Status`}
                 </TableCell>

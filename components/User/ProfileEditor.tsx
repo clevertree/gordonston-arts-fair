@@ -1,112 +1,75 @@
 'use client';
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  Alert,
-  Box,
-  Button,
-  MenuItem,
-  Paper,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography
+  Alert, Box, Button, MenuItem, Stack, Typography
 } from '@mui/material';
 
 import { SelectField, TextField, useFormHook } from '@components/FormFields';
 import type { AlertColor } from '@mui/material/Alert';
-import { getProfileStatus, IProfileStatus } from '@util/profile';
+import { IProfileStatus, IProfileStatusAction } from '@util/profile';
 import PaymentModal from '@components/Modal/PaymentModal';
 import UploadsModal from '@components/Modal/UploadsModal';
 import { UserFileUploadModel, UserModel } from '@util/models';
 import { InferAttributes } from 'sequelize';
-import { ProfileUploadForm } from '@components/User/ProfileUploadForm';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export interface ProfileEditorProps {
+  profileStatus: IProfileStatus,
   userProfile: UserModel,
-  // isProfileComplete: [boolean, string],
 
-  updateProfile(newUserProfile: InferAttributes<UserModel>): Promise<{ status: IProfileStatus }>
+  updateFile(file: InferAttributes<UserFileUploadModel>): Promise<{
+    result: IProfileStatus, message: string
+  }>
 
-  uploadFile(file: File): Promise<{ status: IProfileStatus }>
+  deleteFile(fileID: number): Promise<{ result: IProfileStatus, message: string }>
 
-  updateFile(file: InferAttributes<UserFileUploadModel>): Promise<{ status: IProfileStatus }>
-
-  deleteFile(fileID: number): Promise<{ status: IProfileStatus }>
+  updateProfile(newUserProfile: InferAttributes<UserModel>): Promise<{
+    result: IProfileStatus, message: string
+  }>
 }
 
 function ProfileEditor({
+  profileStatus,
   userProfile: userProfileServer,
   updateProfile,
-  uploadFile,
-  updateFile,
-  deleteFile
 }: ProfileEditorProps) {
-  const [showModal, setShowModal] = useState<'none' | 'payment-registration' | 'payment-booth' | 'uploads'>('none');
+  const [showModal, setShowModal] = useState<'none' | IProfileStatusAction>('none');
   const [userProfileClient, setUserProfileClient] = useState<UserModel>(userProfileServer);
-  const {
-    status: isProfileComplete,
-    message: profileCompletionMessage,
-  } = getProfileStatus(userProfileClient);
   const [status, setStatus] = useState<'ready' | 'unsaved' | 'updating' | 'error'>('ready');
   const [message, setMessage] = useState<[AlertColor, string]>(
-    isProfileComplete
-      ? ['success', profileCompletionMessage]
-      : ['info', profileCompletionMessage || 'Please complete your artist profile.']
+    profileStatus.complete
+      ? ['success', profileStatus.message]
+      : ['info', profileStatus.message || 'Please complete your artist profile.']
   );
-  // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
-  // const formRef = useRef<HTMLFormElement>();
-  const { uploads: profileUploads = [] } = userProfileClient;
-  // const formUploadList: { [fileID: number]: FormHookObject<UserFileUploadModel> } = {};
-  const formRef = useRef<HTMLFormElement>(null);
-  const uploadFilesRef = useRef<HTMLInputElement>(null);
-
-  const formInfo = useFormHook(
-    userProfileClient,
-    (formData, isFormUnsaved) => {
-      setUserProfileClient((oldUserProfile) => (
-        { ...oldUserProfile, ...formData } as UserModel));
-      if (isFormUnsaved) {
-        handleFormChange();
-      }
-    // setMessage('')
-    },
-    status === 'error'
-  );
+    // const [categoryList, setCategoryList] = useState(LIST_CATEGORIES)
+    // const formRef = useRef<HTMLFormElement>();
   const {
-    formData: {
-      category: categoryInput,
-    }
-  } = formInfo;
+    category: categoryInput,
+  } = userProfileClient;
 
-  const handleUserProfileUpdate = useCallback((newStatus: IProfileStatus) => {
-    const {
-      status: isUpdatedProfileComplete,
-      message: isUpdatedProfileCompleteMessage,
-      action
-    } = newStatus;
-    setStatus('ready');
-    setMessage([isUpdatedProfileComplete ? 'success' : 'info', isUpdatedProfileCompleteMessage]);
-    if (isUpdatedProfileComplete) {
-      switch (action) {
-        case 'upload-files':
-          setShowModal('uploads');
-          break;
-        case 'pay-fee-registration':
-          setShowModal('payment-registration');
-          break;
-        case 'pay-fee-booth':
-          setShowModal('payment-booth');
-          break;
-        default:
-          break;
-      }
+  const formRef = useRef<HTMLFormElement>(null);
+  const formInfo = useFormHook({
+    formData: userProfileClient,
+    defaultFormData: userProfileServer,
+    setFieldValue: (fieldName, value) => {
+      setUserProfileClient((oldUserProfile) => (
+        { ...oldUserProfile, [fieldName]: value } as UserModel));
+    },
+    showError: status === 'error'
+  });
+
+  const router = useRouter();
+
+  // Check for unsaved data
+  useEffect(() => {
+    if (status === 'ready') {
+      setStatus('unsaved');
+    } else if (status === 'unsaved' && !formInfo.hasUnsavedData) {
+      setStatus('ready');
     }
-  }, []);
+  }, [formInfo.hasUnsavedData, status]);
 
   const handleSubmit = async () => {
     // Validation
@@ -127,8 +90,18 @@ function ProfileEditor({
     setMessage(['info', 'Submitting form...']);
     try {
       // userProfileClient.uploads = profileUploads;
-      const { status: updatedStatus } = await updateProfile(userProfileClient);
-      handleUserProfileUpdate(updatedStatus);
+      const {
+        result: {
+          complete: isUpdatedProfileComplete,
+          message: isUpdatedProfileCompleteMessage,
+          action
+        }
+      } = await updateProfile(userProfileClient);
+      setStatus('ready');
+      setMessage([isUpdatedProfileComplete ? 'success' : 'info', isUpdatedProfileCompleteMessage]);
+      if (action) {
+        setShowModal(action);
+      }
     } catch (e: any) {
       setStatus('ready');
       setMessage(['error', e.message]);
@@ -139,26 +112,12 @@ function ProfileEditor({
     });
   };
 
-  function handleFormChange() {
-    switch (status) {
-      case 'ready':
-        setMessage(['warning', 'Click "Update Profile" to save changes']);
-        setStatus('unsaved');
-        break;
-      default:
-        break;
-    }
-  }
-
-  const fileUploadCount = profileUploads.length;
-
   return (
     <>
       <form
         id="profile-editor-form"
         method="post"
         ref={formRef}
-          // onChange={handleFormChange}
         onSubmit={async (e: any) => {
           e.preventDefault();
           await handleSubmit();
@@ -178,9 +137,9 @@ function ProfileEditor({
           }}
         >
           {message && message[1] && (
-          <Alert severity={message[0]}>
-            {message[1]}
-          </Alert>
+            <Alert severity={message[0]}>
+              {message[1]}
+            </Alert>
           )}
           <Typography component="h2" id="step1">
             Contact Information
@@ -279,19 +238,19 @@ function ProfileEditor({
                 </MenuItem>
               ))}
               {categoryInput
-                  && !LIST_CATEGORIES.includes(categoryInput) && (
-                  <MenuItem
-                    key={categoryInput}
-                    value={categoryInput}
-                  >
-                    {categoryInput}
-                  </MenuItem>
+                                && !LIST_CATEGORIES.includes(categoryInput) && (
+                                <MenuItem
+                                  key={categoryInput}
+                                  value={categoryInput}
+                                >
+                                  {categoryInput}
+                                </MenuItem>
               )}
             </SelectField>
             <Button
               variant="text"
               onClick={() => {
-              // eslint-disable-next-line no-alert
+                // eslint-disable-next-line no-alert
                 const category = window.prompt('Please enter a custom art category') || '';
                 if (category) {
                   formInfo.setFieldValue('category', category);
@@ -321,67 +280,11 @@ function ProfileEditor({
             />
           </fieldset>
 
-          <Typography component="h2">
-            Upload images
-          </Typography>
-
-          <fieldset disabled={status === 'updating'}>
-            <Stack spacing={2}>
-              <label htmlFor="file-upload-multiple">
-                <Button
-                  variant="outlined"
-                  component="span"
-                  color="secondary"
-                >
-                  Click here to Upload multiple images
-                </Button>
-                <input
-                  ref={uploadFilesRef}
-                  style={{ display: 'none' }}
-                  id="file-upload-multiple"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={async (e) => {
-                    e.stopPropagation();
-                    const input = e.target;
-                    if (input && input.files) {
-                      let count = 0;
-                      setStatus('updating');
-                      setMessage(['info', `Uploading ${input.files.length} files...`]);
-                      let lastStatus: IProfileStatus | undefined;
-                      await Promise.all(Array.from(input.files).map(async (file) => {
-                        lastStatus = (await uploadFile(file)).status;
-                        count += 1;
-                      }));
-                      setStatus('ready');
-                      e.target.value = '';
-                      if (count === 0) {
-                        setMessage(['error', 'There was an error uploading your files.']);
-                        return;
-                      }
-
-                      if (lastStatus) handleUserProfileUpdate(lastStatus);
-
-                      setMessage(['success', `${count} file${count === 1 ? '' : 's'} have been uploaded`]);
-                    // if (updatedUserProfile) {
-                    //   setUserProfileClient((oldProfile) => ({
-                    //     ...oldProfile,
-                    //     ...updatedUserProfile
-                    //   }));
-                    // }
-                    }
-                  }}
-                />
-              </label>
-            </Stack>
-          </fieldset>
-
           <Button
             type="submit"
             variant="contained"
             color="primary"
-            disabled={!['unsaved', 'error'].includes(status)}
+            disabled={!formInfo.hasUnsavedData}
             onClick={(e) => {
               e.preventDefault();
               handleSubmit().then();
@@ -391,6 +294,7 @@ function ProfileEditor({
           </Button>
         </Box>
       </form>
+
       <Box
         sx={{
           display: 'flex',
@@ -403,67 +307,43 @@ function ProfileEditor({
           borderRadius: 4,
         }}
       >
-
         <Typography component="h2">
-          Manage uploaded images
+          Upload images
         </Typography>
 
-        <fieldset disabled={status === 'updating'}>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow
-                  className={`${fileUploadCount > 0 ? 'bg-green-700' : 'bg-amber-700'} [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2`}
-                >
-                  <TableCell colSpan={2}>
-                    File uploads:
-                    {' '}
-                    {fileUploadCount}
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {profileUploads.map((fileUpload) => (
-                  <ProfileUploadForm
-                    key={fileUpload.id}
-                    fileUpload={fileUpload}
-                    // uploadHooks={formUploadList}
-                    deleteFile={deleteFile}
-                    updateFile={updateFile}
-                    onUpdate={handleUserProfileUpdate}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </fieldset>
+        <Stack spacing={2}>
+          <Link href="/profile/upload">
+            Click here to Upload images
+          </Link>
+        </Stack>
       </Box>
+
       <PaymentModal
         text="Please pay the registration fee to submit your registration for review."
         title="Your Profile is complete."
-        open={showModal === 'payment-registration'}
+        open={showModal === 'pay-fee-registration'}
         onClose={() => setShowModal('none')}
         onClick={() => {
           setShowModal('none');
-          document.location.href = '/payment/registration';
+          router.push('/payment/registration');
         }}
       />
       <PaymentModal
         text="Please pay the booth fee to complete your registration."
         title="Your Artist Profile has been Approved."
-        open={showModal === 'payment-booth'}
+        open={showModal === 'pay-fee-booth'}
         onClose={() => setShowModal('none')}
         onClick={() => {
           setShowModal('none');
-          document.location.href = '/payment/booth';
+          router.push('/payment/booth');
         }}
       />
       <UploadsModal
-        open={showModal === 'uploads'}
+        open={showModal === 'upload-files'}
         onClose={() => setShowModal('none')}
         onClick={() => {
           setShowModal('none');
-          uploadFilesRef.current?.click();
+          router.push('/profile/upload');
         }}
       />
     </>

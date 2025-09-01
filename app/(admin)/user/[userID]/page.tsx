@@ -1,5 +1,5 @@
 import { validateAdminSession } from '@util/sessionActions';
-import { fetchProfileByID, updateUserStatus } from '@util/profileActions';
+import { fetchProfileByID, fetchUserFiles, updateUserStatus } from '@util/profileActions';
 import Link from 'next/link';
 import UserStatusEditorAdmin from '@components/Admin/UserStatusEditorAdmin';
 import ProfileView from '@components/User/ProfileView';
@@ -22,8 +22,9 @@ export default async function AdminUserManagementPage({
   const adminSession = await validateAdminSession();
 
   const { userID } = await params;
-  const profile = await fetchProfileByID(userID);
-  const userLogs = await fetchUserLogs(profile.id);
+  const userProfile = await fetchProfileByID(userID);
+  const userUploads = await fetchUserFiles(userProfile.id);
+  const userLogs = await fetchUserLogs(userProfile.id);
 
   return (
     <Stack spacing={2}>
@@ -39,14 +40,17 @@ export default async function AdminUserManagementPage({
         </Link>
 
         <UserStatusEditorAdmin
-          userStatus={profile.status}
+          userStatus={userProfile.status}
           updateUserStatus={async (newStatus) => {
             'use server';
 
-            return updateUserStatus(profile.id, newStatus, `${newStatus} set by admin #${adminSession.userID}`);
+            return updateUserStatus(userProfile.id, newStatus, `${newStatus} set by admin #${adminSession.userID}`);
           }}
         />
-        <ProfileView userProfile={profile} />
+        <ProfileView
+          userProfile={userProfile.toJSON()}
+          userUploads={userUploads.map((u) => u.toJSON())}
+        />
 
         {/* <SendEmailAdmin */}
         {/*  userStatus={profile.status} */}

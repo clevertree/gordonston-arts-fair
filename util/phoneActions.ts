@@ -38,10 +38,10 @@ export async function sendSMSMessage({
         message
       })
     });
-    const responseJSON:SMSMessageResult = await response.json();
+    const responseJSON: SMSMessageResult = await response.json();
     const responseMessage = responseJSON.error
-        || responseJSON?.data?.message
-        || JSON.stringify(responseJSON);
+            || responseJSON?.data?.message
+            || JSON.stringify(responseJSON);
     if (!responseJSON?.data?.success) {
       return {
         status: 'error',
@@ -183,6 +183,6 @@ export async function loginPhoneValidationAction(
   return {
     status: 'success',
     message: 'Login successful. Redirecting...',
-    redirectURL: (await isAdmin(userID)) ? '/user' : '/dashboard'
+    redirectURL: (await isAdmin(userID)) ? '/user' : '/profile'
   };
 }

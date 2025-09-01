@@ -1,5 +1,5 @@
 import { validateSession } from '@util/session';
-import { fetchProfileByID } from '@util/profileActions';
+import { fetchProfileStatus } from '@util/profileActions';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Checkout from '@components/Payment/Checkout';
@@ -28,13 +28,16 @@ export default async function CheckoutPage() {
     return redirect(`/login?message=${e.message}`);
   }
   const feeAmount = parseInt(`${process.env.NEXT_PUBLIC_BOOTH_FEE}`, 10);
-  const profileData = await fetchProfileByID(session.userID);
+  const {
+    status: profileStatus,
+    user: userProfile,
+  } = await fetchProfileStatus(session.userID);
   const transactions = await fetchTransactions(session.userID);
   const alreadyPaid = transactions.find((t) => parseInt(`${t.amount}`, 10) === feeAmount) !== undefined;
   let feeText = alreadyPaid
     ? 'You have already paid this fee.'
     : `Please click below to pay the $${feeAmount} booth fee.`;
-  const eligibleToRegister = profileData.status === 'approved';
+  const eligibleToRegister = userProfile.status === 'approved';
   if (!eligibleToRegister) feeText = 'You are not eligible to pay the booth fee. Please contact the admin for booth approval';
   const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
@@ -42,7 +45,7 @@ export default async function CheckoutPage() {
     <Stack spacing={2}>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">Pay Artist Booth Fee</h1>
 
-      <ArtistStepper profileData={profileData} />
+      <ArtistStepper profileStatus={profileStatus} />
 
       <Checkout
         feeType="booth"
@@ -53,7 +56,7 @@ export default async function CheckoutPage() {
       />
       <UserTransactionView transactions={transactions} title={`${USER_LABEL} Transactions`} />
 
-      <Link href="/dashboard">Click here to return to your dashboard</Link>
+      <Link href="/profile">Click here to return to your profile</Link>
     </Stack>
   );
 }

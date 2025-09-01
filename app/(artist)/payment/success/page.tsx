@@ -9,7 +9,7 @@ export default async function PaymentSuccessPage() {
     <>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">Payment was successful</h1>
 
-      <Link href="/dashboard">Click here to return to your dashboard</Link>
+      <Link href="/profile">Click here to return to your profile</Link>
     </>
   );
 }

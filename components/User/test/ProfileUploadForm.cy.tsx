@@ -33,9 +33,11 @@ function ProfileUploadFormWrapper() {
       updateFile={async (p) => {
         setFileUpload(p);
         return {
-          status: {
-            status: true,
-            message: ''
+          message: 'File updated successfully.',
+          result: {
+            status: 'registered',
+            complete: false,
+            message: 'Please complete your Artist profile.'
           },
         };
       }}

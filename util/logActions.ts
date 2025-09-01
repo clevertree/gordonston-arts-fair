@@ -16,7 +16,7 @@ export async function fetchUserLogs(userID: number) {
 
   const logs = await UserLogModel.findAll({
     where: { user_id: userID },
-    order: [['created_at', 'DESC']]
+    order: [['createdAt', 'DESC']]
   });
 
   return logs.map((log) => log.toJSON()) as LogEntry[];

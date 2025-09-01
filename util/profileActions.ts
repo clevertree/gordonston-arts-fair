@@ -36,14 +36,29 @@ export async function updateProfile(updatedUserRow: InferAttributes<UserModel>) 
   if (!userRow) throw new Error(`User ID not found: ${userID}`);
 
   const updatedUserRowDB = await userRow.update({
+    user_id: userID,
     ...updatedUserRow,
-    phone: `${userRow.phone || ''}`.replace(/\D/g, ''),
-    phone2: `${userRow.phone2 || ''}`.replace(/\D/g, ''),
+    phone: `${updatedUserRow.phone || ''}`.replace(/\D/g, ''),
+    phone2: `${updatedUserRow.phone2 || ''}`.replace(/\D/g, ''),
   });
-  const profileStatus = getProfileStatus(updatedUserRowDB);
+  const {
+    status: profileStatus,
+  } = await fetchProfileStatus(userID);
+  return {
+    message: 'Profile updated successfully.',
+    result: profileStatus,
+    updatedUserRow: updatedUserRowDB.toJSON(),
+  };
+}
+
+export async function fetchProfileStatus(userID: number) {
+  const userProfile = await fetchProfileByID(userID);
+  const userUploads = await fetchUserFiles(userID);
+  const profileStatus = getProfileStatus(userProfile, userUploads);
   return {
     status: profileStatus,
-    updatedUserRow: updatedUserRowDB,
+    user: userProfile,
+    uploads: userUploads,
   };
 }
 
@@ -69,17 +84,23 @@ export async function uploadFile(file: File) {
     allowOverwrite: true
   });
 
-  const createAction = UserFileUploadModel.create({
+  const createAction = await UserFileUploadModel.create({
+    user_id: userID,
     title: file.name,
     width,
     height,
     url: putResult.url
   });
-  const profileStatus = getProfileStatus(userRow);
+  console.log('createAction', createAction);
+
+  const {
+    status: profileStatus,
+  } = await fetchProfileStatus(userID);
 
   return {
-    status: profileStatus,
-    createAction,
+    message: 'File uploaded successfully',
+    result: profileStatus,
+    // createAction,
   };
 }
 
@@ -90,7 +111,7 @@ export async function deleteFile(fileID: number) {
   const fileUpload = await UserFileUploadModel.findOne({
     where: {
       id: fileID,
-      userID: session.userID,
+      user_id: session.userID,
     }
   });
   if (!fileUpload) throw new Error(`File ID not found: ${fileID}`);
@@ -110,15 +131,16 @@ export async function deleteFile(fileID: number) {
   const deleteAction = await UserFileUploadModel.destroy({
     where: {
       id: fileID,
-      userID: session.userID,
+      user_id: session.userID,
     }
   });
 
-  const userRow = await fetchProfileByID(session.userID);
-  const profileStatus = getProfileStatus(userRow);
-
-  return {
+  const {
     status: profileStatus,
+  } = await fetchProfileStatus(session.userID);
+  return {
+    message: 'File deleted successfully',
+    result: profileStatus,
     deleteAction
   };
 }
@@ -136,13 +158,24 @@ export async function updateFile(updatedFile: InferAttributes<UserFileUploadMode
   const fileUpload = await UserFileUploadModel.findByPk(updatedFile.id);
   if (!fileUpload) throw new Error(`File ID not found: ${updatedFile.id}`);
 
-  const userRow = await fetchProfileByID(session.userID);
-  const profileStatus = getProfileStatus(userRow);
+  const {
+    status: profileStatus,
+  } = await fetchProfileStatus(session.userID);
 
   return {
-    status: profileStatus,
+    message: 'File description updated successfully',
+    result: profileStatus,
     updateAction: fileUpload.update(updatedFile)
   };
+}
+
+export async function fetchUserFiles(userID: number) {
+  await ensureDatabase();
+
+  return UserFileUploadModel.findAll({
+    where: { user_id: userID },
+    order: [['createdAt', 'DESC']]
+  });
 }
 
 export async function updateUserStatus(userID: number, newStatus: UserStatus, message: string) {

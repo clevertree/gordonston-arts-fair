@@ -37,7 +37,7 @@ export async function fetchTransactions(userID: number, options: TransactionSear
 
   const transactions = await TransactionModel.findAll({
     where: whereCondition,
-    order: [['created_at', 'DESC']]
+    order: [['createdAt', 'DESC']]
   });
 
   return transactions.map((transaction) => transaction.toJSON()) as TransactionEntry[];

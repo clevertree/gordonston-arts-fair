@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
-    <file url="file://$USER_HOME$/ParadigmThreatDB-2025_08_19_22_18_28-dump.sql" dialect="PostgreSQL" />
-    <file url="file://$USER_HOME$/ParadigmThreatDB-2025_08_19_22_21_02-dump.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/schema.sql" dialect="PostgreSQL" />
   </component>
 </project>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { validateByType, ValidationTypeList } from '@components/FormFields/validation';
 import { formatByType, FormatTypeList } from '@components/FormFields/formatting';
 
@@ -15,7 +15,7 @@ export interface FormFieldProps {
   required?: boolean,
   scrollIntoView?: boolean,
 
-  onBlur: () => void
+  onBlur: (e: any) => void
   onChange: (e: any) => void
 }
 
@@ -26,64 +26,92 @@ export interface ValidationError {
   scrollToField(): void
 }
 
-export interface FormHookObject<T extends object> {
-  formData: T,
-  validationState: ValidationState,
-  firstError?: ValidationError,
-
-  setFieldValue(fieldName: keyof T, value: string): void
-
-  setupInput(fieldName: keyof T,
-    label?: string,
-    validate?: ValidationTypeList,
-    autoFormat?:FormatTypeList,
-
-  ): FormFieldProps,
-}
-
-export type FormDataUpdateCallback<T extends object> = (formData: T) => any;
-
-export interface FormValues {
-  [fieldName: string]: any
-}
+// export type FormDataUpdateCallback<T extends object> = (formData: T) => any;
 
 export interface ValidationState {
   [fieldName: string]: ValidationError | undefined
 }
 
-export function useFormHook<T extends object>(
+export interface IFormHook<T extends object> {
+  // formData: T,
+  hasUnsavedData: boolean,
+  validationState: ValidationState,
+  firstError?: ValidationError,
+
+  // setFieldValue(fieldName: keyof T, value: string): void
+
+  setFieldValue(fieldName: keyof T, value: string): void,
+
+  setupInput(fieldName: keyof T,
+    label?: string,
+    validate?: ValidationTypeList,
+    autoFormat?: FormatTypeList,
+  ): FormFieldProps,
+}
+
+export interface IFormHookProps<T extends object> {
+  formData: T,
   defaultFormData: T,
-  updateFormData: FormDataUpdateCallback<T>,
+
+  setFieldValue(fieldName: keyof T, value: string): void,
+
+  // updateFormData: FormDataUpdateCallback<T>,
   showError: boolean,
+}
+
+export function useFormHook<T extends object>(
+  {
+    formData,
+    defaultFormData,
+    setFieldValue,
+    showError = true,
+  }: IFormHookProps<T>
 ) {
-  if (!defaultFormData) throw new Error('Invalid form data');
+  // if (!defaultFormData) throw new Error('Invalid form data');
   const [autoScrollField, setAutoScrollField] = useState<string | null>(null);
   const [validationState, setValidationState] = useState<ValidationState>({});
-  const formData = useMemo<T>(() => ({ ...defaultFormData }), [defaultFormData]);
-  const formHookObject: FormHookObject<T> = {
-    formData,
-    validationState,
-    setupInput,
-    setFieldValue(fieldName: keyof T, value: string) {
-      setFieldValue(fieldName, value);
-      updateFormData(formData);
-    },
-  };
+  // const formData = useMemo<T>(() => ({ ...defaultFormData }), [defaultFormData]);
 
-  function setFieldValue(fieldName: keyof T, value: string | undefined) {
-    if (value !== undefined) {
-      formData[fieldName] = value as any;
-    } else {
-      delete formData[fieldName];
+  // Check for unsaved data
+  let hasUnsavedData = false;
+  const formFields = Object.keys(defaultFormData) as (keyof T)[];
+  for (let i = 0; i < formFields.length; i++) {
+    const key = formFields[i];
+    if (Object.prototype.hasOwnProperty.call(defaultFormData, key)) {
+      const value = formData[key];
+      const defaultValue = defaultFormData[key];
+      if (typeof value !== 'object') {
+        if ((value || '') !== (defaultValue || '')) {
+          hasUnsavedData = true;
+        }
+      }
     }
   }
+  const formHookObject: IFormHook<T> = {
+    // formData,
+    hasUnsavedData,
+    validationState,
+    setupInput,
+    setFieldValue
+    // setFieldValue(fieldName: keyof T, value: string) {
+    //   setFieldValue(fieldName, value);
+    //   updateFormData(formData);
+    // },
+  };
+
+  // function setFieldValue(fieldName: keyof T, value: string | undefined) {
+  //   if (value !== undefined) {
+  //     formData[fieldName] = value as any;
+  //   } else {
+  //     delete formData[fieldName];
+  //   }
+  // }
 
   function setupInput(
     fieldName: Extract<keyof T, string>,
     label?: string,
     validate?: ValidationTypeList,
-    autoFormat?:FormatTypeList,
-
+    autoFormat?: FormatTypeList,
   ) {
     const currentValue = formData[fieldName] as string || '';
     // Validation
@@ -106,10 +134,11 @@ export function useFormHook<T extends object>(
           updateValidationState(newValidationMessage);
         }
       },
-      onBlur: () => {
+      onBlur: (e: any) => {
         // Update form data if the value changed
-        if (JSON.stringify(defaultFormData[fieldName]) !== JSON.stringify(formData[fieldName])) {
-          updateFormData(formData);
+        // debugger;
+        if (defaultFormData[fieldName] !== e.target.value) {
+          setFieldValue(fieldName, e.target.value);
         }
       }
     };

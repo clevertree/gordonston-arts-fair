@@ -34,23 +34,25 @@
 //   // path: string
 // }
 
-import { UserModel } from '@util/models';
+import { UserFileUploadModel, UserModel } from '@util/models';
 import { UserStatus } from '@types';
 import { InferAttributes } from 'sequelize';
 
+export type IProfileStatusAction = 'upload-files' | 'pay-fee-registration' | 'pay-fee-booth';
+
 export interface IProfileStatus {
-  status: boolean,
+  status: UserStatus,
+  complete: boolean,
   message: string,
-  action?: 'upload-files' | 'pay-fee-registration' | 'pay-fee-booth'
+  action?: IProfileStatusAction
 }
 
-export function getProfileStatus(userRow: UserModel):IProfileStatus {
+export function getProfileStatus(userRow: UserModel, userUploads: UserFileUploadModel[]): IProfileStatus {
   const {
     status,
-    uploads
   } = userRow;
 
-  const variables : { [key in keyof InferAttributes<UserModel>]?: string } = {
+  const variables: { [key in keyof InferAttributes<UserModel>]?: string } = {
     first_name: 'First Name',
     last_name: 'Last Name',
     phone: 'Phone Number',
@@ -60,65 +62,74 @@ export function getProfileStatus(userRow: UserModel):IProfileStatus {
     zipcode: 'ZIP Code',
     category: 'Category',
     description: 'Description',
-    uploads: 'Uploads'
+  };
+  const returnValue = {
+    status,
+    complete: false,
+    message: 'Please complete your Artist Profile',
   };
 
   const fields = Object.keys(variables) as Array<keyof InferAttributes<UserModel>>;
   const missingFields = fields.filter((field) => !userRow[field]).length;
   if (missingFields >= Object.values(variables).length - 1) {
-    return {
-      status: false,
-      message: 'Please complete your Artist Profile',
-    };
+    return returnValue;
   }
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i];
     if (!userRow[field]) {
       return {
-        status: false,
+        ...returnValue,
         message: `Please complete your ${variables[field]}`,
       };
     }
   }
 
-  if (!uploads || Object.keys(uploads).length === 0) {
+  if (userUploads.length === 0) {
     return {
-      status: false,
+      ...returnValue,
       message: 'Please upload at least one file',
       action: 'upload-files'
     };
   }
 
+  returnValue.complete = true;
+
   switch (status) {
-    case 'registered': return {
-      status: false,
-      message: 'Please pay your registration fee to submit your profile for approval.',
-      action: 'pay-fee-registration'
-    };
-    case 'submitted': return {
-      status: false,
-      message: 'Your profile is pending approval. Please wait for approval.',
-    };
-    case 'approved': return {
-      status: false,
-      message: 'Your artist profile is approved. Please pay your booth fee to complete registration.',
-      action: 'pay-fee-booth'
-    };
-    case 'standby': return {
-      status: false,
-      message: 'Your artist profile is on standby. Please wait for approval.',
-    };
-    case 'declined': return {
-      status: false,
-      message: 'Your artist profile has been declined. Please contact us for more information.',
-    };
-    case 'paid': return {
-      status: true,
-      message: 'Your artist profile is paid and registered.',
-    };
+    case 'registered':
+      return {
+        ...returnValue,
+        message: 'Please pay your registration fee to submit your profile for approval.',
+        action: 'pay-fee-registration'
+      };
+    case 'submitted':
+      return {
+        ...returnValue,
+        message: 'Your profile is pending approval. Please wait for approval.',
+      };
+    case 'approved':
+      return {
+        ...returnValue,
+        message: 'Your artist profile is approved. Please pay your booth fee to complete registration.',
+        action: 'pay-fee-booth'
+      };
+    case 'standby':
+      return {
+        ...returnValue,
+        message: 'Your artist profile is on standby. Please wait for approval.',
+      };
+    case 'declined':
+      return {
+        ...returnValue,
+        message: 'Your artist profile has been declined. Please contact us for more information.',
+      };
+    case 'paid':
+      return {
+        ...returnValue,
+        message: 'Your artist profile is paid and registered.',
+      };
     default:
       return {
-        status: false,
+        ...returnValue,
         message: 'Your profile status is unknown. Please contact us for more information.',
       };
   }

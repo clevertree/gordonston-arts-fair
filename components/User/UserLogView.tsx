@@ -19,7 +19,7 @@ export default async function UserLogView({ logs, title }: AdminUserLogProps) {
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow className="bg-blue-500 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
+            <TableRow className="bg-blue-800 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
               <TableCell align="center">Date</TableCell>
               <TableCell align="center">Type</TableCell>
               <TableCell align="center">Message</TableCell>

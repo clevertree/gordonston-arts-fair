@@ -29,7 +29,7 @@ export default function RootLayout({
           <Link href="/#artist-amenities">Amenities</Link>
           <Link href="/#volunteering">Volunteer</Link>
           <Link href="/#faq">FAQ</Link>
-          {process.env.SHOW_LOGIN === 'true' && <Link href="/dashboard">Profile</Link>}
+          {process.env.SHOW_LOGIN === 'true' && <Link href="/profile">Profile</Link>}
         </FloatingDiv>
         <div className="relative overflow-hidden">
           <Image

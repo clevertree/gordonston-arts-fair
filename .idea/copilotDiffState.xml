@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/components/Image/ReloadingImage.tsx">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/components/Image/ReloadingImage.tsx" />
+              <option name="originalContent" value="'use client';&#10;&#10;import React from 'react';&#10;import Image from 'next/image';&#10;import { ImageProps } from 'next/dist/shared/lib/get-img-props';&#10;&#10;export default function ReloadingImage({ alt, ...props }: ImageProps) {&#10;  let retries = 0;&#10;  return (&#10;    &lt;Image&#10;      alt={alt}&#10;      onError={(e: any) =&gt; {&#10;        if (retries &lt; 3) {&#10;          retries += 1;&#10;          setTimeout(() =&gt; {&#10;            e.target.src += '?&amp;';&#10;          }, 5000);&#10;        }&#10;      }}&#10;      loading=&quot;lazy&quot;&#10;      {...props}&#10;    /&gt;&#10;  );&#10;}&#10;" />
+              <option name="updatedContent" value="'use client';&#10;&#10;import React, { useRef, useState } from 'react';&#10;import Image from 'next/image';&#10;import { ImageProps } from 'next/dist/shared/lib/get-img-props';&#10;&#10;export default function ReloadingImage({ alt, ...props }: ImageProps) {&#10;  const [retries, setRetries] = useState(0);&#10;  const timeoutRef = useRef&lt;NodeJS.Timeout | null&gt;(null);&#10;&#10;  return (&#10;    &lt;Image&#10;      alt={alt}&#10;      onError={(e: any) =&gt; {&#10;        if (retries &lt; 3) {&#10;          // Clear existing timeout before setting a new one&#10;          if (timeoutRef.current) {&#10;            clearTimeout(timeoutRef.current);&#10;          }&#10;&#10;          setRetries((prev) =&gt; prev + 1);&#10;          timeoutRef.current = setTimeout(() =&gt; {&#10;            e.target.src += '?&amp;';&#10;          }, 5000);&#10;        }&#10;      }}&#10;      loading=&quot;lazy&quot;&#10;      {...props}&#10;    /&gt;&#10;  );&#10;}" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

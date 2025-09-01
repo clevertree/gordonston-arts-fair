@@ -2,7 +2,7 @@ import SelectField from './SelectField';
 import TextField from './TextField';
 import * as validation from './validation';
 import * as formatting from './formatting';
-import type { FormFieldProps, FormHookObject } from './formFieldHooks';
+import type { FormFieldProps, IFormHook } from './formFieldHooks';
 import { useFormHook } from './formFieldHooks';
 
 export {
@@ -10,7 +10,7 @@ export {
   TextField,
   useFormHook,
   FormFieldProps,
-  FormHookObject,
+  IFormHook,
   validation,
   formatting
 };

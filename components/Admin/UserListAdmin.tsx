@@ -92,12 +92,26 @@ export default async function UserListAdmin({
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow className="bg-blue-500 [&_th]:bold [&_th]:text-white [&_a]:text-white [&_th]:px-4 [&_th]:py-2">
+            <TableRow
+              className="bg-blue-800 [&_th]:bold [&_th]:text-white [&_a]:text-white [&_th]:px-4 [&_th]:py-2"
+            >
               <TableCell>{getSortLink(args, 'email', 'Email')}</TableCell>
-              <TableCell className={styles.hideOnMobile}>{getSortLink(args, 'last_name', 'Name')}</TableCell>
+              <TableCell
+                className={styles.hideOnMobile}
+              >
+                {getSortLink(args, 'last_name', 'Name')}
+              </TableCell>
               <TableCell className={styles.hideOnTablet}>Type</TableCell>
-              <TableCell className={styles.hideOnMobile}>{getSortLink(args, 'created_at', 'Created')}</TableCell>
-              <TableCell className={styles.hideOnMobile}>{getSortLink(args, 'status', 'Status')}</TableCell>
+              <TableCell
+                className={styles.hideOnMobile}
+              >
+                {getSortLink(args, 'created_at', 'Created')}
+              </TableCell>
+              <TableCell
+                className={styles.hideOnMobile}
+              >
+                {getSortLink(args, 'status', 'Status')}
+              </TableCell>
               <TableCell className={styles.hideOnTablet}>Images</TableCell>
               <TableCell className={styles.hideOnMobile}>Edit</TableCell>
             </TableRow>

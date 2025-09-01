@@ -20,8 +20,9 @@ export default function ArtistLayout({
       <header>
         <FloatingDiv className="header-container">
           <Link href="/">Home</Link>
-          <Link href="/dashboard">Dashboard</Link>
+          <Link href="/profile">Your Artist Profile</Link>
           <Link href="/profile/edit">Edit Profile</Link>
+          <Link href="/profile/upload">Upload Images</Link>
           <Link href="/logout">Log out</Link>
         </FloatingDiv>
       </header>

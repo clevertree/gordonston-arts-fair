@@ -1,42 +1,46 @@
-import { getProfileStatus } from '@util/profile';
+import { IProfileStatus } from '@util/profile';
 import {
   Alert, Step, StepLabel, Stepper
 } from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
-import { UserModel } from '@util/models';
 
 interface ArtistStepperProps {
-  profileData: UserModel,
+  profileStatus: IProfileStatus,
   showAlert?: boolean
 }
 
-export function ArtistStepper({ profileData, showAlert }: ArtistStepperProps) {
+export function ArtistStepper({
+  profileStatus: {
+    status,
+    complete,
+    message,
+  }, showAlert
+}: ArtistStepperProps) {
   let activeStep = 0;
-  let message: ['info' | 'success', string] = ['info', 'Please complete your Artist profile.'];
-  const profileStatus = getProfileStatus(profileData);
+  let returnMessage: ['info' | 'success', string] = ['info', 'Please complete your Artist profile.'];
   let redirectURL: React.JSX.Element;
-  if (profileStatus.status) {
+  if (complete) {
     activeStep = 1;
-    message = ['info', 'Please pay the artist registration fee to submit your profile for approval.'];
+    returnMessage = ['info', 'Please pay the artist registration fee to submit your profile for approval.'];
     redirectURL = <Link href="/payment/registration">Click here to pay Registration Fee</Link>;
   } else {
-    message = ['info', profileStatus.message];
+    returnMessage = ['info', message];
     redirectURL = <Link href="/profile/edit">Click here to return to profile editor</Link>;
   }
-  if (profileData.status === 'submitted') {
+  if (status === 'submitted') {
     activeStep = 2;
-    message = ['info', 'Please wait for approval from the Gordonston Arts Fair Administrators.'];
+    returnMessage = ['info', 'Please wait for approval from the Gordonston Arts Fair Administrators.'];
     redirectURL = <Link href="/profile">Click here to return to profile</Link>;
   }
-  if (profileData.status === 'approved') {
+  if (status === 'approved') {
     activeStep = 3;
-    message = ['info', 'Please pay the artist booth fee to complete your artist registration.'];
+    returnMessage = ['info', 'Please pay the artist booth fee to complete your artist registration.'];
     redirectURL = <Link href="/payment/booth">Click here to pay Booth Fee</Link>;
   }
-  if (profileData.status === 'paid') {
+  if (status === 'paid') {
     activeStep = 4;
-    message = ['success', 'Your artist registration is complete!'];
+    returnMessage = ['success', 'Your artist registration is complete!'];
     redirectURL = <Link href="/profile">Click here to return to profile</Link>;
   }
 
@@ -67,11 +71,11 @@ export function ArtistStepper({ profileData, showAlert }: ArtistStepperProps) {
       </Stepper>
 
       {showAlert && (
-      <Alert severity={message[0]}>
-        {message[1]}
-        {' '}
-        {redirectURL}
-      </Alert>
+        <Alert severity={returnMessage[0]}>
+          {returnMessage[1]}
+          {' '}
+          {redirectURL}
+        </Alert>
       )}
     </>
   );

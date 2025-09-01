@@ -15,14 +15,18 @@ import { getStatusName } from '@util/profile';
 import ReloadingImage from '@components/Image/ReloadingImage';
 import Link from 'next/link';
 import { formatPhone } from '@components/FormFields/formatting';
-import { UserModel } from '@util/models';
+import { UserFileUploadModel, UserModel } from '@util/models';
 
 interface ProfileViewProps {
   userProfile: UserModel
+  userUploads: UserFileUploadModel[]
 }
 
-function ProfileView({ userProfile }: ProfileViewProps) {
-  const { uploads: uploadList = [], status } = userProfile;
+function ProfileView({
+  userProfile,
+  userUploads
+}: ProfileViewProps) {
+  const { status } = userProfile;
 
   const profileInfoLabels: {
     [key in keyof UserModel]?: string
@@ -96,9 +100,9 @@ function ProfileView({ userProfile }: ProfileViewProps) {
       <Stack direction="column">
         <Box className="bg-green-700 bold text-white p-4 py-2 rounded-md">
           File uploads:
-          {uploadList.length}
+          {userUploads.length}
         </Box>
-        {uploadList.map(({
+        {userUploads.map(({
           title, description, url, width, height
         }) => (
           <Stack
@@ -139,8 +143,10 @@ function ProfileView({ userProfile }: ProfileViewProps) {
               </Link>
             </Box>
             )}
+
           </Stack>
         ))}
+        <Link href="/profile/upload">Click here to manage your image uploads</Link>
       </Stack>
 
     </Box>

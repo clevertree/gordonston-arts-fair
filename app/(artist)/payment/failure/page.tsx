@@ -10,7 +10,7 @@ export default async function PaymentFailurePage() {
     <Stack spacing={2}>
       <h1 className="m-auto text-red-400 italic">Payment failed</h1>
 
-      <Link href="/dashboard">Click here to return to your dashboard</Link>
+      <Link href="/profile">Click here to return to your profile</Link>
     </Stack>
   );
 }

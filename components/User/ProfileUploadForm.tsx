@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useRef, useState } from 'react';
+import Image from 'next/image';
 import {
   Alert, Button, Link, Stack, TableCell, TableRow
 } from '@mui/material';
@@ -10,7 +11,7 @@ import type { AlertColor } from '@mui/material/Alert';
 import { IProfileStatus } from '@util/profile';
 import { UserFileUploadModel } from '@util/models';
 import { InferAttributes } from 'sequelize';
-import ReloadingImage from '@components/Image/ReloadingImage';
+import { useRouter } from 'next/navigation';
 
 type UploadModelClient = InferAttributes<UserFileUploadModel>;
 
@@ -19,15 +20,11 @@ interface ProfileUploadFormProps {
 
   // uploadHooks: { [fileID: number]: FormHookObject<UserFileUploadModel> },
 
-  updateFile(updatedFile: UploadModelClient): Promise<{
-    status: IProfileStatus
-  }>,
+  updateFile(updatedFile: UploadModelClient): Promise<{ result: IProfileStatus, message: string }>,
 
   // onFileDeleted(): void,
 
-  deleteFile(fileID: number): Promise<{
-    status: IProfileStatus
-  }>,
+  deleteFile(fileID: number): Promise<{ result: IProfileStatus, message: string }>,
 
   onUpdate(newStatus: IProfileStatus): void,
 
@@ -49,13 +46,40 @@ export function ProfileUploadForm({
   const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
   const [fileUploadClient, setFileUploadClient] = useState<UploadModelClient>(fileUploadServer);
 
-  const formUpload = useFormHook(
-    fileUploadClient,
-    setFileUploadClient,
-    status === 'error'
-  );
+  const router = useRouter();
 
-  const handleSubmit = useCallback(async () => {
+  const formUpload = useFormHook({
+    formData: fileUploadClient,
+    defaultFormData: fileUploadServer,
+    setFieldValue(fieldName, value) {
+      setFileUploadClient((prev) => ({
+        ...prev,
+        [fieldName]: value
+      }));
+    },
+    showError: status === 'error'
+  });
+
+  const handleDelete = useCallback(async () => {
+    // eslint-disable-next-line no-alert
+    if (!window.confirm(
+      `Are you sure you want to permanently delete this file: ${fileUploadServer.title}`
+    )) return;
+    // Submit to server
+    setStatus('updating');
+    setMessage(['info', 'Deleting image...']);
+    try {
+      const { message: deleteMessage } = await deleteFile(fileUploadServer.id);
+      setStatus('ready');
+      setMessage(['success', deleteMessage]);
+      router.refresh();
+    } catch (e: any) {
+      setStatus('ready');
+      setMessage(['error', e.message]);
+    }
+  }, [deleteFile, fileUploadServer.id, fileUploadServer.title, router]);
+
+  const handleUpdate = useCallback(async () => {
     // Validation
     const { firstError } = formUpload;
     if (firstError) {
@@ -71,8 +95,10 @@ export function ProfileUploadForm({
     setMessage(['info', 'Submitting form...']);
     try {
       // userProfileClient.uploads = profileUploads;
-      const { status: updatedStatus } = await updateFile(fileUploadClient);
+      const { result: updatedStatus, message: updateMessage } = await updateFile(fileUploadClient);
       onUpdate(updatedStatus);
+      setStatus('ready');
+      setMessage(['success', updateMessage]);
     } catch (e: any) {
       setStatus('ready');
       setMessage(['error', e.message]);
@@ -91,9 +117,9 @@ export function ProfileUploadForm({
       <TableCell component="th" scope="row" sx={{ verticalAlign: 'top' }}>
 
         {message && message[1] && (
-          <Alert severity={message[0]}>
-            {message[1]}
-          </Alert>
+        <Alert severity={message[0]}>
+          {message[1]}
+        </Alert>
         )}
         <form
           id={`profile-editor-form-upload-${fileUploadServer.id}`}
@@ -102,7 +128,7 @@ export function ProfileUploadForm({
                     // onChange={handleFormChange}
           onSubmit={async (e: any) => {
             e.preventDefault();
-            await handleSubmit();
+            await handleUpdate();
           }}
           className="scroll-mt-8"
         >
@@ -132,10 +158,10 @@ export function ProfileUploadForm({
               type="submit"
               variant="contained"
               color="primary"
-              disabled={formUpload.hasUnsavedValues}
+              disabled={!formUpload.hasUnsavedData}
               onClick={(e) => {
                 e.preventDefault();
-                handleSubmit().then();
+                handleUpdate().then();
               }}
             >
               Update Image
@@ -144,13 +170,7 @@ export function ProfileUploadForm({
               variant="outlined"
               color="secondary"
               sx={{ float: 'right' }}
-              onClick={async () => {
-                // eslint-disable-next-line no-alert
-                if (!window.confirm(
-                  `Are you sure you want to permanently delete this file: ${fileUploadServer.id}`
-                )) return;
-                await deleteFile(fileUploadServer.id);
-              }}
+              onClick={handleDelete}
             >
               Delete Image
             </Button>
@@ -160,7 +180,7 @@ export function ProfileUploadForm({
       <TableCell sx={{ position: 'relative', width: '50%' }}>
         {fileUploadServer.url && (
         <Link href={fileUploadServer.url} target="_blank" rel="noreferrer">
-          <ReloadingImage
+          <Image
             loading="lazy"
             src={fileUploadServer.url}
             alt={fileUploadClient.title}

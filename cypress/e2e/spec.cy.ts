@@ -12,7 +12,7 @@ describe('template spec', () => {
         cy.get('h1').should('contain', 'Gordonston');
         cy.checkA11y();
 
-        cy.get('a[href="/dashboard"]').last().click();
+        cy.get('a[href="/profile"]').last().click();
         cy.get('h1').should('contain', 'Artist Login');
         cy.checkA11y();
 
@@ -29,13 +29,16 @@ describe('template spec', () => {
         cy.get('input[name="phone"]').type("1234567890{enter}")
 
 
-        cy.get('h1').should('contain', 'Artist Dashboard');
+        cy.get('h1').should('contain', 'Artist Profile');
         cy.injectAxe();
         cy.checkA11y();
 
 
         cy.get('a[href="/profile/edit"]').last().click();
         cy.get('h1').should('contain', 'Edit Artist Profile');
+
+        cy.get('a[href="/profile/upload"]').last().click();
+        cy.get('h1').should('contain', 'Upload Artist Images');
 
 
     });

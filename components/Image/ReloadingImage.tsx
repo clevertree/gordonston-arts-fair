@@ -1,18 +1,25 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import Image from 'next/image';
 import { ImageProps } from 'next/dist/shared/lib/get-img-props';
 
 export default function ReloadingImage({ alt, ...props }: ImageProps) {
-  let retries = 0;
+  const [retries, setRetries] = useState(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   return (
     <Image
       alt={alt}
       onError={(e: any) => {
         if (retries < 3) {
-          retries += 1;
-          setTimeout(() => {
+          // Clear existing timeout before setting a new one
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+          }
+
+          setRetries((prev) => prev + 1);
+          timeoutRef.current = setTimeout(() => {
             e.target.src += '?&';
           }, 5000);
         }

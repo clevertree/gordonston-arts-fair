@@ -1,5 +1,5 @@
 import { validateSession } from '@util/session';
-import { fetchProfileByID } from '@util/profileActions';
+import { fetchProfileStatus } from '@util/profileActions';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Checkout from '@components/Payment/Checkout';
@@ -9,7 +9,6 @@ import { Stack } from '@mui/material';
 import process from 'node:process';
 import { fetchTransactions } from '@util/transActions';
 import UserTransactionView from '@components/User/UserTransactionView';
-import { getProfileStatus } from '@util/profile';
 import { SessionPayload } from '../../../../types';
 
 export const metadata = {
@@ -29,13 +28,15 @@ export default async function CheckoutPage() {
     return redirect(`/login?message=${e.message}`);
   }
   const feeAmount = parseInt(`${process.env.NEXT_PUBLIC_REGISTRATION_FEE}`, 10);
-  const profileData = await fetchProfileByID(session.userID);
+  const {
+    status: profileStatus
+  } = await fetchProfileStatus(session.userID);
   const transactions = await fetchTransactions(session.userID);
   const alreadyPaid = transactions.find((t) => parseInt(`${t.amount}`, 10) === feeAmount) !== undefined;
   const {
-    status: eligibleToRegister,
+    complete: eligibleToRegister,
     message: eligibleToRegisterString
-  } = getProfileStatus(profileData);
+  } = profileStatus;
   let feeText = alreadyPaid
     ? 'You have already paid this fee.'
     : `Please click below to pay the $${feeAmount} registration fee.`;
@@ -48,7 +49,7 @@ export default async function CheckoutPage() {
     <Stack spacing={2}>
       <h1 className="items-center text-[color:var(--gold-color)] italic">Pay Artist Registration Fee</h1>
 
-      <ArtistStepper profileData={profileData} />
+      <ArtistStepper profileStatus={profileStatus} />
 
       <Checkout
         feeType="registration"
@@ -58,7 +59,7 @@ export default async function CheckoutPage() {
         disabled={alreadyPaid || !eligibleToRegister}
       />
       <UserTransactionView transactions={transactions} title={`${USER_LABEL} Transactions`} />
-      <Link href="/dashboard">Click here to return to your dashboard</Link>
+      <Link href="/profile">Click here to return to your profile</Link>
     </Stack>
   );
 }

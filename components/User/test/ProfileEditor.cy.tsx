@@ -67,7 +67,7 @@ describe('<ProfileEditor />', () => {
     cy.get('textarea[name="description"]').type('Description');
     cy.get('button[type="submit"]').click();
 
-    cy.get('div').should('contain', 'Please upload at least one image of your artwork to complete your profile.');
+    cy.get('div').should('contain', 'Please complete your Artist profile.');
   });
 });
 
@@ -99,17 +99,24 @@ function ProfileEditorWrapper() {
   } as UserModel));
   return (
     <ProfileEditor
+      profileStatus={{
+        status: 'registered',
+        complete: false,
+        message: 'Please complete your Artist profile.'
+      }}
       userProfile={userProfile as UserModel}
       updateProfile={async (p) => {
         setUserProfile(p);
         return {
-          status: {
-            status: true,
-            message: ''
+          message: 'Profile updated successfully.',
+          result: {
+            status: 'registered',
+            complete: false,
+            message: 'Please complete your Artist profile.'
           },
+          updatedUserRow: p,
         };
       }}
-      uploadFile={cy.stub()}
       deleteFile={cy.stub()}
       updateFile={cy.stub()}
     />
