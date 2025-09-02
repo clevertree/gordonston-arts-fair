@@ -31,7 +31,7 @@ export default async function CheckoutPage() {
   const {
     status: profileStatus
   } = await fetchProfileStatus(session.userID);
-  const transactions = await fetchTransactions(session.userID);
+
   const alreadyPaid = transactions.find((t) => parseInt(`${t.amount}`, 10) === feeAmount) !== undefined;
   const {
     complete: eligibleToRegister,
@@ -58,7 +58,16 @@ export default async function CheckoutPage() {
         stripePublishableKey={stripePublishableKey}
         disabled={alreadyPaid || !eligibleToRegister}
       />
-      <UserTransactionView transactions={transactions} title={`${USER_LABEL} Transactions`} />
+
+      <UserTransactionView
+        title={`${USER_LABEL} Transactions`}
+        fetchUserTransactions={async (options) => {
+          'use server';
+
+          return fetchTransactions(session.userID, options);
+        }}
+      />
+
       <Link href="/profile">Click here to return to your profile</Link>
     </Stack>
   );

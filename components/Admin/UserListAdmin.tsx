@@ -1,6 +1,10 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Box,
+  Button,
   Paper,
   Table,
   TableBody,
@@ -10,53 +14,120 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
+import type { AlertColor } from '@mui/material/Alert';
 import Link from 'next/link';
 import { getFullName, getStatusName } from '@util/profile';
-import { profileStatuses } from '@types';
-import { UserModel } from '@util/models';
+import { profileStatuses, UserSearchParams } from '@types';
+import { snakeCaseToTitleCase } from '@util/format';
+import { IUserSearchResponse } from '@util/userActions';
 import { PaginationLinks } from '@components/Pagination/PaginationLinks';
-import { SortLinks } from '@components/Pagination/SortLinks';
-import { EnumLinks } from '@components/Pagination/EnumLinks';
-import { UserSearchParams } from '@util/user';
-import { SortLink } from '@components/Pagination/SortLink';
 import styles from './UserListAdmin.module.css';
 
 interface AdminUserListProps {
-  userList: UserModel[],
+  listUsersAsAdmin(args: UserSearchParams): Promise<IUserSearchResponse>,
   // totalCount: number,
-  pageCount: number,
-  searchParams: UserSearchParams
 }
 
 const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
 export default function UserListAdmin({
-  userList,
-  // totalCount,
-  pageCount,
-  searchParams: args = {}
+  listUsersAsAdmin,
 }: AdminUserListProps) {
+  const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
+  const [data, setData] = useState<IUserSearchResponse>({
+    userList: [],
+    pageCount: 0,
+    totalCount: 0
+  });
+  const {
+    userList,
+    pageCount,
+  } = data;
+  const [args, setArgs] = useState<UserSearchParams>({
+  });
+
+  useEffect(() => {
+    setMessage(['info', 'Fetching user logs...']);
+    try {
+      listUsersAsAdmin(args).then(setData);
+      setMessage(['info', '']);
+    } catch (e: any) {
+      setMessage(['error', e.message]);
+    }
+  }, [args, listUsersAsAdmin]);
+
   return (
     <Box className="flex flex-col min-w-full m-auto p-6 rounded-2xl border-2 border-[#ccca]">
       <Typography variant="h4" gutterBottom>
         {`${USER_LABEL} Management`}
       </Typography>
 
+      {message && message[1] && (
+      <Alert severity={message[0]}>
+        {message[1]}
+      </Alert>
+      )}
+
       <div className="flex flex-row flex-wrap justify-between items-center">
         Show status:
-        <EnumLinks<UserSearchParams>
-          variableName="status"
-          valueList={['all', ...profileStatuses]}
-          args={args}
-        />
+        <Paper className="flex flex-row flex-wrap  gap-1 p-1 mb-1" elevation={2}>
+          <Button
+            size="x-small"
+            variant="contained"
+            color={!args.status ? 'secondary' : 'primary'}
+            onClick={() => setArgs({ ...args, status: undefined })}
+          >
+            All
+          </Button>
+          {profileStatuses.map((value) => (
+            <Button
+              key={value}
+              size="x-small"
+              variant="contained"
+              onClick={() => setArgs({ ...args, status: value })}
+              color={value === args.status ? 'secondary' : 'primary'}
+            >
+              {snakeCaseToTitleCase(value)}
+            </Button>
+          ))}
+        </Paper>
       </div>
 
       <div className="flex flex-row flex-wrap justify-between items-center">
         Sort by:
-        <SortLinks
-          args={args}
-          fieldList={['email', 'last_name', 'created_at', 'status']}
-        />
+        <Paper className="flex flex-row flex-wrap  gap-1 p-1 mb-1" elevation={2}>
+          {['email', 'last_name', 'created_at', 'status'].map((field) => (
+            <Button
+              key={field}
+              size="x-small"
+              variant="contained"
+              onClick={() => setArgs({
+                ...args,
+                orderBy: field,
+                order: args.orderBy === field && args.order === 'asc' ? 'desc' : 'asc'
+              })}
+              color={field === args.orderBy ? 'secondary' : 'primary'}
+            >
+              {snakeCaseToTitleCase(field)}
+            </Button>
+          ))}
+          <Button
+            size="x-small"
+            variant="contained"
+            onClick={() => setArgs({ ...args, order: 'asc' })}
+            color={args.order === 'asc' ? 'secondary' : 'primary'}
+          >
+            Ascending
+          </Button>
+          <Button
+            size="x-small"
+            variant="contained"
+            onClick={() => setArgs({ ...args, order: 'desc' })}
+            color={args.order === 'desc' ? 'secondary' : 'primary'}
+          >
+            Descending
+          </Button>
+        </Paper>
       </div>
 
       <div className="flex flex-row flex-wrap justify-end items-center">
@@ -72,40 +143,46 @@ export default function UserListAdmin({
             <TableRow
               className="bg-blue-700 [&_th]:bold [&_th]:text-white [&_a]:text-white [&_th]:px-4 [&_th]:py-2"
             >
-              <TableCell>
-                <SortLink
-                  variable="email"
-                  args={args}
-                  title="Email"
-                />
+              <TableCell
+                className="cursor-pointer underline hover:text-blue-200"
+                onClick={() => setArgs({
+                  ...args,
+                  orderBy: 'email',
+                  order: args.orderBy === 'email' && args.order === 'asc' ? 'desc' : 'asc'
+                })}
+              >
+                Date
               </TableCell>
               <TableCell
-                className={styles.hideOnMobile}
+                className="cursor-pointer underline hover:text-blue-200"
+                onClick={() => setArgs({
+                  ...args,
+                  orderBy: 'last_name',
+                  order: args.orderBy === 'last_name' && args.order === 'asc' ? 'desc' : 'asc'
+                })}
               >
-                <SortLink
-                  variable="last_name"
-                  args={args}
-                  title="Name"
-                />
+                Full Name
               </TableCell>
               <TableCell className={styles.hideOnTablet}>Type</TableCell>
               <TableCell
-                className={styles.hideOnMobile}
+                className={`${styles.hideOnMobile} cursor-pointer underline hover:text-blue-200`}
+                onClick={() => setArgs({
+                  ...args,
+                  orderBy: 'created_at',
+                  order: args.orderBy === 'created_at' && args.order === 'asc' ? 'desc' : 'asc'
+                })}
               >
-                <SortLink
-                  variable="created_at"
-                  args={args}
-                  title="Created"
-                />
+                Created
               </TableCell>
               <TableCell
-                className={styles.hideOnMobile}
+                className={`${styles.hideOnMobile} cursor-pointer underline hover:text-blue-200`}
+                onClick={() => setArgs({
+                  ...args,
+                  orderBy: 'status',
+                  order: args.orderBy === 'status' && args.order === 'asc' ? 'desc' : 'asc'
+                })}
               >
-                <SortLink
-                  variable="status"
-                  args={args}
-                  title="Status"
-                />
+                Status
               </TableCell>
               <TableCell className={styles.hideOnTablet}>Images</TableCell>
               <TableCell className={styles.hideOnMobile}>Edit</TableCell>

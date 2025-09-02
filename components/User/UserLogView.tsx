@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   Box,
   Button,
   Paper,
@@ -13,6 +14,7 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
+import type { AlertColor } from '@mui/material/Alert';
 
 import { UserLogSearchParams } from '@util/logActions';
 import { logTypes } from '@types';
@@ -25,18 +27,33 @@ interface UserLogProps {
 }
 
 export default function UserLogView({ fetchUserLogs, title }: UserLogProps) {
-  const [logs, setLogs] = useState<UserLogModel[]>([]);
+  const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
+  const [data, setData] = useState<UserLogModel[]>([]);
   const [args, setArgs] = useState<UserLogSearchParams>({
     type: 'message',
   });
+
   useEffect(() => {
-    fetchUserLogs(args).then(setLogs);
+    setMessage(['info', 'Fetching user data...']);
+    try {
+      fetchUserLogs(args).then(setData);
+      setMessage(['info', '']);
+    } catch (e: any) {
+      setMessage(['error', e.message]);
+    }
   }, [args, fetchUserLogs]);
+
   return (
     <Box className="flex flex-col min-w-full m-auto p-6 rounded-2xl border-2 border-[#ccca]">
       <Typography component="h2" gutterBottom>
         {title}
       </Typography>
+
+      {message && message[1] && (
+      <Alert severity={message[0]}>
+        {message[1]}
+      </Alert>
+      )}
 
       <div className="flex flex-row">
         <Paper className="flex flex-row flex-wrap  gap-1 p-1 mb-1" elevation={2}>
@@ -61,6 +78,7 @@ export default function UserLogView({ fetchUserLogs, title }: UserLogProps) {
           ))}
         </Paper>
       </div>
+
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -77,7 +95,7 @@ export default function UserLogView({ fetchUserLogs, title }: UserLogProps) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {logs.map(({
+            {data.map(({
               id, type, message, createdAt
             }) => (
               <TableRow

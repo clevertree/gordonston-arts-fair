@@ -3,7 +3,8 @@ import { Stack } from '@mui/material';
 
 import { validateAdminSession } from '@util/sessionActions';
 import { listUsersAsAdmin } from '@util/userActions';
-import { UserSearchParams } from '@util/user';
+
+import { UserSearchParams } from '@types';
 
 export const metadata = {
   title: 'Admin User List',
@@ -18,14 +19,20 @@ interface AdminUserListPageProps {
 export default async function AdminUserListPage({ searchParams }:AdminUserListPageProps) {
   await validateAdminSession();
   const userSearchParams = await searchParams;
-  const userResult = await listUsersAsAdmin(userSearchParams);
   return (
     <Stack spacing={2}>
       <h1 className="m-auto text-[color:var(--gold-color)] italic">
         {`Manage ${USER_LABEL}s`}
       </h1>
 
-      <AdminUserList {...userResult} searchParams={userSearchParams} />
+      <AdminUserList
+        listUsersAsAdmin={async (args) => {
+          'use server';
+
+          return listUsersAsAdmin(args);
+        }}
+
+      />
     </Stack>
   );
 }

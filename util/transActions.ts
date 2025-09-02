@@ -3,30 +3,19 @@
 'use server';
 
 import { ensureDatabase } from '@util/database';
-import { TransactionModel } from '@util/models';
+import { UserTransactionModel } from '@util/models';
+import { TransactionType } from '@types';
 
-export type TransactionType = 'charge.succeeded' | 'charge.refunded';
-
-export interface TransactionEntry {
-  id: number,
-  user_id: number,
-  full_name: string,
-  email: string,
-  phone: string,
-  type: TransactionType,
-  amount: number,
-  created_at: Date,
-  content: any
-}
-
-export interface TransactionSearchParams {
+export interface UserTransactionSearchParams {
   type?: TransactionType,
   amount?: number,
+  order?: 'asc' | 'desc',
+  orderBy?: string,
   page?: number,
-  pageCount?: number
+  limit?: number
 }
 
-export async function fetchTransactions(userID: number, options: TransactionSearchParams = {}) {
+export async function fetchTransactions(userID: number, options: UserTransactionSearchParams = {}) {
   await ensureDatabase();
 
   const { type, amount } = options;
@@ -35,12 +24,12 @@ export async function fetchTransactions(userID: number, options: TransactionSear
   if (type) whereCondition.type = type;
   if (amount !== undefined && amount !== null) whereCondition.amount = amount;
 
-  const transactions = await TransactionModel.findAll({
+  const transactions = await UserTransactionModel.findAll({
     where: whereCondition,
     order: [['createdAt', 'DESC']]
   });
 
-  return transactions.map((transaction) => transaction.toJSON()) as TransactionEntry[];
+  return transactions.map((transaction) => transaction.toJSON()) as UserTransactionModel[];
 }
 
 export async function addTransaction(
@@ -54,7 +43,7 @@ export async function addTransaction(
 ) {
   await ensureDatabase();
 
-  await TransactionModel.create({
+  await UserTransactionModel.create({
     user_id: userID,
     type,
     amount,

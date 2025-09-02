@@ -105,8 +105,8 @@ export class UserModel extends Model {
   @HasMany(() => UserFileUploadModel)
     uploads!: UserFileUploadModel[];
 
-  @HasMany(() => TransactionModel)
-    transactions!: TransactionModel[];
+  @HasMany(() => UserTransactionModel)
+    transactions!: UserTransactionModel[];
 }
 
 // export type UserUpdateModel = InferAttributes<UserModel>;
@@ -186,7 +186,7 @@ export class UserLogModel extends Model {
   tableName: 'transactions',
   timestamps: true
 })
-export class TransactionModel extends Model {
+export class UserTransactionModel extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)
@@ -265,7 +265,7 @@ const sequelize = new Sequelize(databaseUrl, {
   models: [UserModel,
     UserLogModel,
     UserFileUploadModel,
-    TransactionModel,
+    UserTransactionModel,
     TwoFactorCodeModel]
 });
 

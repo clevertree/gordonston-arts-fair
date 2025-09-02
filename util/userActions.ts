@@ -4,8 +4,14 @@
 
 import { ensureDatabase } from '@util/database';
 import { UserModel } from '@util/models';
-import { UserSearchParams } from '@util/user';
 
+import { UserSearchParams } from '@types';
+
+export interface IUserSearchResponse {
+  userList: UserModel[];
+  totalCount: number;
+  pageCount: number;
+}
 export async function listUsersAsAdmin(params: UserSearchParams) {
   await ensureDatabase();
 
@@ -31,7 +37,7 @@ export async function listUsersAsAdmin(params: UserSearchParams) {
     userList: userList.map((user) => user.toJSON()) as UserModel[],
     totalCount: count,
     pageCount: Math.ceil(count / limit)
-  };
+  } as IUserSearchResponse;
 }
 
 export async function fetchUserID(email: string) {

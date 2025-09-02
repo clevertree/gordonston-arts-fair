@@ -61,3 +61,13 @@ export const profileStatuses: UserStatus[] = [
   'paid',
   'imported'
 ];
+export type TransactionType = 'charge.succeeded' | 'charge.refunded';
+export const transactionTypes: TransactionType[] = ['charge.succeeded', 'charge.refunded'];
+
+export interface UserSearchParams {
+  status?: string,
+  order?: 'asc' | 'desc',
+  orderBy?: string,
+  page?: number,
+  limit?: number
+}

@@ -29,7 +29,6 @@ export default async function ProfilePage() {
     uploads: userUploads
   } = await fetchProfileStatus(session.userID);
 
-  const transactions = await fetchTransactions(session.userID);
   const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
   return (
@@ -42,7 +41,15 @@ export default async function ProfilePage() {
         userProfile={userProfile}
         userUploads={userUploads}
       />
-      <UserTransactionView transactions={transactions} title={`${USER_LABEL} Transactions`} />
+      <UserTransactionView
+        title={`${USER_LABEL} Transactions`}
+        fetchUserTransactions={async (options) => {
+          'use server';
+
+          return fetchTransactions(session.userID, options);
+        }}
+      />
+
       <UserLogView
         title={`${USER_LABEL} Logs`}
         fetchUserLogs={async (args) => {
