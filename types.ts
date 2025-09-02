@@ -38,6 +38,19 @@ export type LogType =
     | 'message-error'
     | 'status-change';
 
+export const logTypes: LogType[] = [
+  'log-in',
+  'log-in-error',
+  'log-out',
+  'register',
+  'register-error',
+  'password-reset',
+  'password-reset-error',
+  'message',
+  'message-error',
+  'status-change'
+];
+
 export const profileStatuses: UserStatus[] = [
   'unregistered',
   'registered',

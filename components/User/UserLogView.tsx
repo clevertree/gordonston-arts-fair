@@ -2,7 +2,10 @@ import {
   Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography
 } from '@mui/material';
 
-import { LogEntry } from '@util/logActions';
+import { LogEntry, UserLogSearchParams } from '@util/logActions';
+import { EnumLinks } from '@components/Pagination/EnumLinks';
+import { UserSearchParams } from '@util/user';
+import { logTypes, profileStatuses } from '@types';
 
 interface AdminUserLogProps {
   logs: LogEntry[],
@@ -16,6 +19,14 @@ export default async function UserLogView({ logs, title }: AdminUserLogProps) {
         {title}
       </Typography>
 
+      <div className="flex flex-row flex-wrap justify-between items-center">
+        Show status:
+        <EnumLinks<UserLogSearchParams>
+          variableName="type"
+          valueList={['all', ...logTypes]}
+          args={args}
+        />
+      </div>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>

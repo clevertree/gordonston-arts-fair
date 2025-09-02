@@ -31,7 +31,10 @@ export async function fetchUserLogs(userID: number, searchParams: UserLogSearchP
   const offset = (page - 1) * limit;
 
   const logs = await UserLogModel.findAll({
-    where: { user_id: userID, type },
+    where: {
+      user_id: userID,
+      ...(type ? { type } : {})
+    },
     order: [[orderBy, order === 'desc' ? 'DESC' : 'ASC']],
     limit,
     offset
