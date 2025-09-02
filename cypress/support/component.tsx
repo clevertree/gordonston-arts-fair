@@ -13,7 +13,6 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 import 'cypress-axe';
-import { AppRouterContext } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
 // Import commands.js using ES2015 syntax:
 import './commands';
@@ -22,10 +21,8 @@ import './commands';
 // require('./commands')
 import {mount} from 'cypress/react';
 import {Box} from '@mui/material';
-import {AppRouterCacheProvider} from '@mui/material-nextjs/v15-appRouter';
-import {StyledEngineProvider} from '@mui/material/styles';
-// import ThemeProvider from '@provider/themeProvider';
 import '../../app/globals.scss';
+import ThemeRegistry from "@components/Theme/ThemeRegistry";
 
 
 // Augment the Cypress namespace to include type definitions for
@@ -48,15 +45,11 @@ Cypress.Commands.add('mount', (component) => {
     };
     const wrappedContent = (
         <Box p={2}>
-            <AppRouterContext.Provider value={mockRouter}>
-            <AppRouterCacheProvider options={{enableCssLayer: true}}>
-                <StyledEngineProvider injectFirst>
-                    {/*<ThemeProvider>*/}
-                    {component}
-                    {/*</ThemeProvider>*/}
-                </StyledEngineProvider>
-            </AppRouterCacheProvider>
-            </AppRouterContext.Provider>
+            {/*<AppRouterContext.Provider value={mockRouter}>*/}
+            <ThemeRegistry>
+            {component}
+            </ThemeRegistry>
+            {/*</AppRouterContext.Provider>*/}
         </Box>
     );
     return mount(wrappedContent);

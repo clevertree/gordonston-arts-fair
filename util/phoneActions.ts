@@ -3,7 +3,7 @@
 /* eslint-disable no-console */
 // Initialize Stripe with type checking for the secret key
 import { randomInt } from 'node:crypto';
-import { addUserLogEntry } from '@util/logActions';
+import { addUserUserLogModel } from '@util/logActions';
 import { ensureDatabase } from '@util/database';
 import { add2FACode, delete2FACode, fetch2FACode } from '@util/2faActions';
 import { UserModel } from '@util/models';
@@ -132,7 +132,7 @@ export async function loginPhoneValidationAction(
     // eslint-disable-next-line no-console
     console.error('Invalid phone login request:', phone, code, twoFactorResult);
     // Add an error log entry
-    await addUserLogEntry(null, 'log-in-error', 'Invalid phone login request');
+    await addUserUserLogModel(null, 'log-in-error', 'Invalid phone login request');
     return {
       message: 'Invalid login request',
       status: 'error',
@@ -154,7 +154,7 @@ export async function loginPhoneValidationAction(
     // User already exists
     userID = user.id;
     // Add a log entry
-    await addUserLogEntry(userID, 'log-in');
+    await addUserUserLogModel(userID, 'log-in');
   } else {
     // Register a new user
     const newUser = await UserModel.create({
@@ -167,13 +167,13 @@ export async function loginPhoneValidationAction(
     console.log(`Registered a new user (${userID}): `, phone);
 
     // Add a log entry
-    await addUserLogEntry(userID, 'register');
+    await addUserUserLogModel(userID, 'register');
 
     // Send the registration SMS
     const loginURL = `${process.env.NEXT_PUBLIC_BASE_URL}/login`;
     const phoneTemplate = UserRegistrationSMSTemplate(phone, loginURL);
     const smsResult = await sendSMSMessage(phoneTemplate);
-    await addUserLogEntry(userID, smsResult.status === 'success' ? 'message' : 'message-error', smsResult.message);
+    await addUserUserLogModel(userID, smsResult.status === 'success' ? 'message' : 'message-error', smsResult.message);
   }
 
   await startSession(userID);

@@ -1,6 +1,7 @@
 import { Paper } from '@mui/material';
 import Link from 'next/link';
-import { getParamsURL, snakeCaseToTitleCase } from './util';
+import { snakeCaseToTitleCase } from '@util/format';
+import { getParamsURL } from './util';
 
 export interface ISearchArgs<FieldList=string> {
   order?: 'asc' | 'desc',

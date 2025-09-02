@@ -19,7 +19,7 @@ export default async function UserTransactionView({ transactions, title }: Admin
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow className="bg-blue-800 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
+            <TableRow className="bg-blue-700 [&_th]:bold [&_th]:text-white [&_th]:px-4 [&_th]:py-2">
               <TableCell align="center">Date</TableCell>
               <TableCell align="center">Type</TableCell>
               <TableCell align="center">Full Name</TableCell>

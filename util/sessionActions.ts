@@ -14,7 +14,7 @@ export async function logoutAction(): Promise<ActionResponse> {
     // const { userID } = oldSession;
 
     // Add a log entry
-    // await addUserLogEntry(userID, 'log-out');
+    // await addUserUserLogModel(userID, 'log-out');
   } catch (e:any) {
     console.error('Error logging out: ', e);
   }

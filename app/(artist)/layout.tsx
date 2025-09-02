@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
-import React, { Suspense } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import FloatingDiv from '@components/FloatingDiv/FloatingDiv';
-import { SuspenseContent } from '@app/suspenseContent';
 
 export const metadata: Metadata = {
   title: 'Gordonston Art Fair',
@@ -28,9 +27,7 @@ export default function ArtistLayout({
       </header>
       <article role="main" className="max-w-screen-lg flex flex-col z-[2] m-auto p-4">
         {testMode && <div className="bg-red-800 text-white font-bold text-center p-2">TEST MODE</div>}
-        <Suspense fallback={<SuspenseContent />}>
-          {children}
-        </Suspense>
+        {children}
       </article>
       <footer className="footer-container">
         <div className="p-4 pb-6 text-center">

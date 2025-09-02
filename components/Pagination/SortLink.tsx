@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { getParamsURL, ISearchArgs, snakeCaseToTitleCase } from './util';
+import { snakeCaseToTitleCase } from '@util/format';
+import { getParamsURL, ISearchArgs } from './util';
 
 export interface ISortLink {
   variable: string,

@@ -4,13 +4,6 @@ import { ensureDatabase } from '@util/database';
 import { UserLogModel } from '@util/models';
 import type { LogType } from '@types';
 
-export type LogEntry = {
-  id: number,
-  type: LogType,
-  message: string,
-  created_at: Date,
-};
-
 export interface UserLogSearchParams {
   type?: LogType,
   order?: 'asc' | 'desc',
@@ -40,10 +33,10 @@ export async function fetchUserLogs(userID: number, searchParams: UserLogSearchP
     offset
   });
 
-  return logs.map((log) => log.toJSON()) as LogEntry[];
+  return logs.map((log) => log.toJSON()) as UserLogModel[];
 }
 
-export async function addUserLogEntry(id: number | null, type: LogType, message: string = '') {
+export async function addUserUserLogModel(id: number | null, type: LogType, message: string = '') {
   await ensureDatabase();
 
   await UserLogModel.create({

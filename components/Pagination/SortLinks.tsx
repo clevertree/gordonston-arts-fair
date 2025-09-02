@@ -1,7 +1,8 @@
 import { Paper } from '@mui/material';
 import Link from 'next/link';
 import { SortLink } from '@components/Pagination/SortLink';
-import { getParamsURL, ISearchArgs, snakeCaseToTitleCase } from './util';
+import { snakeCaseToTitleCase } from '@util/format';
+import { getParamsURL, ISearchArgs } from './util';
 
 export interface ISortLinks<FieldList=string> {
   fieldList: FieldList[],

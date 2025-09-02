@@ -4,7 +4,7 @@
 
 import { del, put } from '@vercel/blob';
 import { ensureDatabase } from '@util/database';
-import { addUserLogEntry } from '@util/logActions';
+import { addUserUserLogModel } from '@util/logActions';
 import { imageDimensionsFromStream } from 'image-dimensions';
 import { UserFileUploadModel, UserModel } from '@util/models';
 import { UserStatus } from '@types';
@@ -192,7 +192,7 @@ export async function updateUserStatus(userID: number, newStatus: UserStatus, me
   );
 
   // Add a log entry
-  await addUserLogEntry(userID, 'status-change', message);
+  await addUserUserLogModel(userID, 'status-change', message);
 
   return {
     message: 'Status updated successfully',

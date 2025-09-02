@@ -70,7 +70,7 @@ export default function UserListAdmin({
         <Table>
           <TableHead>
             <TableRow
-              className="bg-blue-800 [&_th]:bold [&_th]:text-white [&_a]:text-white [&_th]:px-4 [&_th]:py-2"
+              className="bg-blue-700 [&_th]:bold [&_th]:text-white [&_a]:text-white [&_th]:px-4 [&_th]:py-2"
             >
               <TableCell>
                 <SortLink

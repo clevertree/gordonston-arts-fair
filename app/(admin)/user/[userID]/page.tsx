@@ -58,7 +58,14 @@ export default async function AdminUserManagementPage({
         {/*  sendMail={sendMail} */}
         {/* /> */}
 
-        <UserLogView logs={userLogs} title={`${USER_LABEL} Logs`} />
+        <UserLogView
+          title={`${USER_LABEL} Logs`}
+          fetchUserLogs={async (args) => {
+            'use server';
+
+            return fetchUserLogs(userProfile.id, args);
+          }}
+        />
 
       </Stack>
     </Stack>
