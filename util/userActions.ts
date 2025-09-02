@@ -4,14 +4,7 @@
 
 import { ensureDatabase } from '@util/database';
 import { UserModel } from '@util/models';
-
-export interface UserSearchParams {
-  status?: string,
-  order?: 'asc' | 'desc',
-  orderBy?: string,
-  page?: number,
-  limit?: number
-}
+import { UserSearchParams } from '@util/user';
 
 export async function listUsersAsAdmin(params: UserSearchParams) {
   await ensureDatabase();

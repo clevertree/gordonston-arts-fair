@@ -1,5 +1,3 @@
-'use server';
-
 import {
   Alert,
   Box,
@@ -14,9 +12,13 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { getFullName, getStatusName } from '@util/profile';
-import { UserSearchParams } from '@util/userActions';
-import { profileStatuses, UserStatus } from '@types';
+import { profileStatuses } from '@types';
 import { UserModel } from '@util/models';
+import { PaginationLinks } from '@components/Pagination/PaginationLinks';
+import { SortLinks } from '@components/Pagination/SortLinks';
+import { EnumLinks } from '@components/Pagination/EnumLinks';
+import { UserSearchParams } from '@util/user';
+import { SortLink } from '@components/Pagination/SortLink';
 import styles from './UserListAdmin.module.css';
 
 interface AdminUserListProps {
@@ -26,17 +28,14 @@ interface AdminUserListProps {
   searchParams: UserSearchParams
 }
 
-type OrderFieldType = 'email' | 'last_name' | 'created_at' | 'status';
-
 const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
-export default async function UserListAdmin({
+export default function UserListAdmin({
   userList,
   // totalCount,
   pageCount,
   searchParams: args = {}
 }: AdminUserListProps) {
-  const statusOptions: Array<UserStatus | 'all'> = ['all', ...profileStatuses];
   return (
     <Box className="flex flex-col min-w-full m-auto p-6 rounded-2xl border-2 border-[#ccca]">
       <Typography variant="h4" gutterBottom>
@@ -45,48 +44,26 @@ export default async function UserListAdmin({
 
       <div className="flex flex-row flex-wrap justify-between items-center">
         Show status:
-        <Paper className="flex flex-row flex-wrap gap-3 p-1 px-4" elevation={2}>
-          {statusOptions.map((status) => (
-            <Link
-              key={status}
-              href={getSearchStatusURL(args, status)}
-              className={status === args.status ? 'font-bold' : ''}
-            >
-              {ucFirst(status)}
-            </Link>
-          ))}
-        </Paper>
+        <EnumLinks<UserSearchParams>
+          variableName="status"
+          valueList={['all', ...profileStatuses]}
+          args={args}
+        />
       </div>
 
       <div className="flex flex-row flex-wrap justify-between items-center">
         Sort by:
-        <Paper className="flex flex-row flex-wrap gap-3 p-1 px-4 mb-1" elevation={2}>
-          {getSortLink(args, 'email', 'Email')}
-          {getSortLink(args, 'last_name', 'Name')}
-          {getSortLink(args, 'created_at', 'Created')}
-          {getSortLink(args, 'status', 'Status')}
-        </Paper>
-        <Paper className="flex flex-row flex-wrap gap-3 p-1 px-4" elevation={2}>
-          <Link
-            href={getParamsURL({ ...args, order: args.order === 'asc' ? 'desc' : 'asc' })}
-            className={args.order === 'asc' ? 'font-bold' : ''}
-          >
-            Ascending
-          </Link>
-          <Link
-            href={getParamsURL({ ...args, order: args.order === 'asc' ? 'desc' : 'asc' })}
-            className={args.order === 'desc' ? 'font-bold' : ''}
-          >
-            Descending
-          </Link>
-        </Paper>
+        <SortLinks
+          args={args}
+          fieldList={['email', 'last_name', 'created_at', 'status']}
+        />
       </div>
 
-      <div className="flex flex-row flex-wrap justify-between items-center">
-        Page:
-        <Paper className="flex flex-row flex-wrap gap-3 p-1 px-4" elevation={2}>
-          {getPageLinks(args, pageCount)}
-        </Paper>
+      <div className="flex flex-row flex-wrap justify-end items-center">
+        <PaginationLinks
+          args={args}
+          pageCount={pageCount}
+        />
       </div>
 
       <TableContainer component={Paper}>
@@ -95,22 +72,40 @@ export default async function UserListAdmin({
             <TableRow
               className="bg-blue-800 [&_th]:bold [&_th]:text-white [&_a]:text-white [&_th]:px-4 [&_th]:py-2"
             >
-              <TableCell>{getSortLink(args, 'email', 'Email')}</TableCell>
+              <TableCell>
+                <SortLink
+                  variable="email"
+                  args={args}
+                  title="Email"
+                />
+              </TableCell>
               <TableCell
                 className={styles.hideOnMobile}
               >
-                {getSortLink(args, 'last_name', 'Name')}
+                <SortLink
+                  variable="last_name"
+                  args={args}
+                  title="Name"
+                />
               </TableCell>
               <TableCell className={styles.hideOnTablet}>Type</TableCell>
               <TableCell
                 className={styles.hideOnMobile}
               >
-                {getSortLink(args, 'created_at', 'Created')}
+                <SortLink
+                  variable="created_at"
+                  args={args}
+                  title="Created"
+                />
               </TableCell>
               <TableCell
                 className={styles.hideOnMobile}
               >
-                {getSortLink(args, 'status', 'Status')}
+                <SortLink
+                  variable="status"
+                  args={args}
+                  title="Status"
+                />
               </TableCell>
               <TableCell className={styles.hideOnTablet}>Images</TableCell>
               <TableCell className={styles.hideOnMobile}>Edit</TableCell>
@@ -161,112 +156,14 @@ export default async function UserListAdmin({
         </Alert>
       )}
 
-      <div className="flex flex-row flex-wrap justify-between items-center">
-        Page:
-        <Paper className="flex flex-row flex-wrap gap-3 p-1 px-4" elevation={2}>
-          {getPageLinks(args, pageCount)}
-        </Paper>
+      <div className="flex flex-row flex-wrap justify-end items-center">
+        <PaginationLinks
+          args={args}
+          pageCount={pageCount}
+        />
       </div>
 
     </Box>
 
   );
 }
-
-function getPageLinks(searchParams: UserSearchParams, pageCount: number) {
-  const currentPage = searchParams.page || 0;
-  const pages = [];
-  pages.push(
-    (currentPage > 1 ? (
-      <Link
-        key="previous"
-        href={getParamsURL({ ...searchParams, page: currentPage - 1 })}
-      >
-        Previous
-      </Link>
-    ) : 'Previous')
-  );
-  for (let i = 1; i <= pageCount; i++) {
-    pages.push(
-      <Link
-        href={getParamsURL({ ...searchParams, page: i })}
-        className={i === currentPage ? 'font-bold' : ''}
-        key={i}
-      >
-        {i}
-      </Link>
-    );
-  }
-  pages.push(
-    (currentPage < pageCount ? (
-      <Link
-        key="next"
-        href={getParamsURL({ ...searchParams, page: currentPage + 1 })}
-      >
-        Next
-      </Link>
-    ) : 'Next')
-  );
-  return pages;
-}
-
-function getSearchStatusURL(searchParams: UserSearchParams, value: UserStatus | 'all') {
-  const newParams = { ...searchParams, status: value };
-  return getParamsURL(newParams);
-}
-
-function getSortLink(searchParams: UserSearchParams, variable: OrderFieldType, title: string) {
-  const href = getSortURL(searchParams, variable);
-  return (
-    <Link
-      href={href}
-      className={variable === searchParams.orderBy ? 'font-bold' : ''}
-    >
-      {title}
-    </Link>
-  );
-}
-
-function getSortURL(searchParams: UserSearchParams, variable: OrderFieldType) {
-  let {
-    order,
-    orderBy,
-  } = searchParams;
-  if (orderBy && orderBy === variable) {
-    // If the same variable was hit twice, toggle the order
-    order = order === 'asc' ? 'desc' : 'asc';
-  }
-  switch (variable) {
-    case 'email':
-    case 'last_name':
-    case 'created_at':
-    case 'status':
-      orderBy = variable;
-      break;
-    default:
-      throw new Error(`Invalid sort param: ${variable}`);
-  }
-  const newParams = { ...searchParams, order, orderBy };
-  return getParamsURL(newParams);
-}
-
-function getParamsURL(searchParams: UserSearchParams) {
-  const {
-    page,
-    limit,
-    status,
-    order,
-    orderBy
-  } = searchParams;
-  // eslint-disable-next-line prefer-template
-  return `?page=${page}`
-      + (limit ? `&pageCount=${limit}` : '')
-      + (status ? `&status=${status}` : '')
-      + (order ? `&order=${order}` : '')
-      + (orderBy ? `&orderBy=${orderBy}` : '');
-}
-
-const ucFirst = (str: string) => {
-  if (!str) return str; // Handle empty string or undefined
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
