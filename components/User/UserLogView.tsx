@@ -96,7 +96,7 @@ export default function UserLogView({ fetchUserLogs, title }: UserLogProps) {
           </TableHead>
           <TableBody>
             {data.map(({
-              id, type, message, createdAt
+              id, type, message: logMessage, createdAt
             }) => (
               <TableRow
                 key={id}
@@ -109,7 +109,7 @@ export default function UserLogView({ fetchUserLogs, title }: UserLogProps) {
                   {type}
                 </TableCell>
                 <TableCell align="center">
-                  {message}
+                  {logMessage}
                 </TableCell>
               </TableRow>
             ))}

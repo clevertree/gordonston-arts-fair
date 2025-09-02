@@ -30,7 +30,7 @@ export class UserModel extends Model {
     id!: number;
 
   @Unique
-  @AllowNull(true)
+  @AllowNull(false)
   @Column(DataType.STRING(64))
     email!: string;
 
@@ -38,9 +38,9 @@ export class UserModel extends Model {
   @Column(DataType.ENUM('user', 'admin'))
     type!: UserType;
 
-  @AllowNull(true)
-  @Column(DataType.STRING)
-    password?: string;
+  // @AllowNull(true)
+  // @Column(DataType.STRING)
+  //   password?: string;
 
   @AllowNull(true)
   @Column(DataType.STRING(64))

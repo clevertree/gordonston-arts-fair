@@ -24,7 +24,6 @@ export default async function AdminUserManagementPage({
   const { userID } = await params;
   const userProfile = await fetchProfileByID(userID);
   const userUploads = await fetchUserFiles(userProfile.id);
-  const userLogs = await fetchUserLogs(userProfile.id);
 
   return (
     <Stack spacing={2}>

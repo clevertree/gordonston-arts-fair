@@ -96,7 +96,7 @@ export default function UserListAdmin({
       <div className="flex flex-row flex-wrap justify-between items-center">
         Sort by:
         <Paper className="flex flex-row flex-wrap  gap-1 p-1 mb-1" elevation={2}>
-          {['email', 'last_name', 'created_at', 'status'].map((field) => (
+          {['email', 'last_name', 'createdAt', 'status'].map((field) => (
             <Button
               key={field}
               size="x-small"
@@ -132,7 +132,8 @@ export default function UserListAdmin({
 
       <div className="flex flex-row flex-wrap justify-end items-center">
         <PaginationLinks
-          args={args}
+          page={args.page || 1}
+          setPage={(page:number) => setArgs({ ...args, page })}
           pageCount={pageCount}
         />
       </div>
@@ -168,8 +169,8 @@ export default function UserListAdmin({
                 className={`${styles.hideOnMobile} cursor-pointer underline hover:text-blue-200`}
                 onClick={() => setArgs({
                   ...args,
-                  orderBy: 'created_at',
-                  order: args.orderBy === 'created_at' && args.order === 'asc' ? 'desc' : 'asc'
+                  orderBy: 'createdAt',
+                  order: args.orderBy === 'createdAt' && args.order === 'asc' ? 'desc' : 'asc'
                 })}
               >
                 Created
@@ -235,7 +236,8 @@ export default function UserListAdmin({
 
       <div className="flex flex-row flex-wrap justify-end items-center">
         <PaginationLinks
-          args={args}
+          page={args.page || 1}
+          setPage={(page:number) => setArgs({ ...args, page })}
           pageCount={pageCount}
         />
       </div>
