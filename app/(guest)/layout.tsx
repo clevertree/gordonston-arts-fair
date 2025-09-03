@@ -21,6 +21,7 @@ export default function ArtistLayout({
         <FloatingDiv className="header-container">
           <Link href="/">Home</Link>
           <Link href="/login">Log in</Link>
+          <Link href="/apply">Apply</Link>
         </FloatingDiv>
       </header>
       <article role="main" className="max-w-screen-lg flex flex-col z-[2] m-auto p-4">
