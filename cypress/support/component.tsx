@@ -23,6 +23,7 @@ import {mount} from 'cypress/react';
 import {Box} from '@mui/material';
 import '../../app/globals.scss';
 import ThemeRegistry from "@components/Theme/ThemeRegistry";
+import {AppRouterContext} from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
 
 // Augment the Cypress namespace to include type definitions for
@@ -45,11 +46,11 @@ Cypress.Commands.add('mount', (component) => {
     };
     const wrappedContent = (
         <Box p={2}>
-            {/*<AppRouterContext.Provider value={mockRouter}>*/}
+            <AppRouterContext.Provider value={mockRouter}>
             <ThemeRegistry>
             {component}
             </ThemeRegistry>
-            {/*</AppRouterContext.Provider>*/}
+            </AppRouterContext.Provider>
         </Box>
     );
     return mount(wrappedContent);

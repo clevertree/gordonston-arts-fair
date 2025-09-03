@@ -29,14 +29,23 @@ export class UserModel extends Model {
   @Column(DataType.INTEGER)
     id!: number;
 
-  @Unique
-  @AllowNull(false)
-  @Column(DataType.STRING(64))
-    email!: string;
-
   @AllowNull(false)
   @Column(DataType.ENUM('user', 'admin'))
     type!: UserType;
+
+  @Unique
+  @AllowNull(true)
+  @Column(DataType.STRING(64))
+    email!: string;
+
+  @Unique
+  @AllowNull(true)
+  @Column(DataType.STRING(64))
+    phone?: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(64))
+    phone2?: string | null;
 
   // @AllowNull(true)
   // @Column(DataType.STRING)
@@ -69,15 +78,6 @@ export class UserModel extends Model {
   @AllowNull(true)
   @Column(DataType.STRING(10))
     zipcode?: string;
-
-  @Unique
-  @AllowNull(true)
-  @Column(DataType.STRING(64))
-    phone?: string;
-
-  @AllowNull(true)
-  @Column(DataType.STRING(64))
-    phone2?: string | null;
 
   @AllowNull(true)
   @Column(DataType.STRING(256))
