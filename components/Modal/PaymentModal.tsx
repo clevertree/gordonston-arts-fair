@@ -36,11 +36,17 @@ export default function PaymentModal({
         </Typography>
         <Button
           variant="contained"
-          color="primary"
-          sx={{ float: 'right' }}
+          color="success"
           onClick={onClick}
         >
           Pay Registration Fee
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={onClose}
+        >
+          Return to Uploaded Images
         </Button>
       </Box>
     </Dialog>

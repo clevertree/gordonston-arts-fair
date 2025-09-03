@@ -167,7 +167,7 @@ export function ProfileUploads({
                                     // uploadHooks={formUploadList}
                   deleteFile={deleteFile}
                   updateFile={updateFile}
-                  onUpdate={handleUserProfileUpdate}
+                  // onUpdate={handleUserProfileUpdate}
                 />
               ))}
             </TableBody>
@@ -176,7 +176,9 @@ export function ProfileUploads({
       </Box>
 
       <PaymentModal
-        text="Please pay the registration fee to submit your registration for review."
+        text={'Please pay the registration fee to submit your registration for review.'
+            + ' You will be notified when your registration is approved.'
+      + ' Profile details and images can still be changed after submission.'}
         title="Your Profile is complete."
         open={showModal === 'pay-fee-registration'}
         onClose={() => setShowModal('none')}

@@ -26,7 +26,7 @@ interface ProfileUploadFormProps {
 
   deleteFile(fileID: number): Promise<{ result: IProfileStatus, message: string }>,
 
-  onUpdate(newStatus: IProfileStatus): void,
+  // onUpdate(newStatus: IProfileStatus): void,
 
   // status: 'ready' | 'unsaved' | 'updating' | 'error'
 }
@@ -37,7 +37,7 @@ export function ProfileUploadForm({
   updateFile,
   // onFileDeleted,
   deleteFile,
-  onUpdate,
+  // onUpdate,
   // status
 }: ProfileUploadFormProps) {
   // eslint-disable-next-line no-param-reassign
@@ -95,8 +95,8 @@ export function ProfileUploadForm({
     setMessage(['info', 'Submitting form...']);
     try {
       // userProfileClient.uploads = profileUploads;
-      const { result: updatedStatus, message: updateMessage } = await updateFile(fileUploadClient);
-      onUpdate(updatedStatus);
+      const { message: updateMessage } = await updateFile(fileUploadClient);
+      // onUpdate(updatedStatus);
       setStatus('ready');
       setMessage(['success', updateMessage]);
     } catch (e: any) {
@@ -107,7 +107,7 @@ export function ProfileUploadForm({
       behavior: 'smooth',
       block: 'start',
     });
-  }, [fileUploadClient, formUpload, onUpdate, updateFile]);
+  }, [fileUploadClient, formUpload, updateFile]);
 
   const formRef = useRef<HTMLFormElement>(null);
   return (

@@ -43,6 +43,7 @@ export type IProfileStatusAction = 'upload-files' | 'pay-fee-registration' | 'pa
 export interface IProfileStatus {
   status: UserStatus,
   complete: boolean,
+  formFilled: boolean,
   message: string,
   action?: IProfileStatusAction
 }
@@ -66,6 +67,7 @@ export function getProfileStatus(userRow: UserModel, userUploads: UserFileUpload
   const returnValue = {
     status,
     complete: false,
+    formFilled: false,
     message: 'Please complete your Artist Profile',
   };
 
@@ -83,6 +85,8 @@ export function getProfileStatus(userRow: UserModel, userUploads: UserFileUpload
       };
     }
   }
+
+  returnValue.formFilled = true;
 
   if (userUploads.length === 0) {
     return {

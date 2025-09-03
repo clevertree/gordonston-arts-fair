@@ -14,32 +14,38 @@ export function ArtistStepper({
   profileStatus: {
     status,
     complete,
+    formFilled,
     message,
   }, showAlert
 }: ArtistStepperProps) {
   let activeStep = 0;
-  let returnMessage: ['info' | 'success', string] = ['info', 'Please complete your Artist profile.'];
-  let redirectURL: React.JSX.Element;
-  if (complete) {
+  let returnMessage: ['info' | 'success', string] = ['info', message];
+  let redirectURL: React.JSX.Element = <Link href="/profile/edit">Click here to return to profile editor</Link>;
+
+  if (formFilled) {
     activeStep = 1;
-    returnMessage = ['info', 'Please pay the artist registration fee to submit your profile for approval.'];
-    redirectURL = <Link href="/payment/registration">Click here to pay Registration Fee</Link>;
-  } else {
-    returnMessage = ['info', message];
-    redirectURL = <Link href="/profile/edit">Click here to return to profile editor</Link>;
+    returnMessage = ['info', 'Please upload at least one image of your artwork to complete your profile.'];
+    redirectURL = <Link href="/profile/upload">Click here to upload artist images</Link>;
   }
-  if (status === 'submitted') {
+
+  if (complete) {
     activeStep = 2;
+    returnMessage = ['info', 'Please pay the artist registration fee to submit your profile for approval.'];
+    redirectURL = <Link href="/payment/registration">Click here to pay the Registration Fee</Link>;
+  }
+
+  if (status === 'submitted') {
+    activeStep = 3;
     returnMessage = ['info', 'Please wait for approval from the Gordonston Arts Fair Administrators.'];
     redirectURL = <Link href="/profile">Click here to return to profile</Link>;
   }
   if (status === 'approved') {
-    activeStep = 3;
+    activeStep = 4;
     returnMessage = ['info', 'Please pay the artist booth fee to complete your artist registration.'];
-    redirectURL = <Link href="/payment/booth">Click here to pay Booth Fee</Link>;
+    redirectURL = <Link href="/payment/booth">Click here to pay the Booth Fee</Link>;
   }
   if (status === 'paid') {
-    activeStep = 4;
+    activeStep = 5;
     returnMessage = ['success', 'Your artist registration is complete!'];
     redirectURL = <Link href="/profile">Click here to return to profile</Link>;
   }
@@ -50,6 +56,11 @@ export function ArtistStepper({
         <Step>
           <Link href="/profile/edit">
             <StepLabel>Artist Profile</StepLabel>
+          </Link>
+        </Step>
+        <Step>
+          <Link href="/profile/upload">
+            <StepLabel>Upload Images</StepLabel>
           </Link>
         </Step>
         <Step>

@@ -37,12 +37,12 @@ function ProfileUploadFormWrapper() {
           result: {
             status: 'registered',
             complete: false,
+            formFilled: false,
             message: 'Please complete your Artist profile.'
           },
         };
       }}
       deleteFile={cy.stub()}
-      onUpdate={cy.stub()}
     />
   );
 }

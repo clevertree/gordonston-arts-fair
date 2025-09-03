@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserLogModel } from '@util/models';
-import UserLogView from './UserLogView';
+import UserLogView from '../UserLogView';
 
 describe('<UserLogView />', () => {
   it('renders', () => {

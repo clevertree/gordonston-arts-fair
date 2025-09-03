@@ -101,6 +101,7 @@ function ProfileEditorWrapper() {
     <ProfileEditor
       profileStatus={{
         status: 'registered',
+        formFilled: false,
         complete: false,
         message: 'Please complete your Artist profile.'
       }}
@@ -112,6 +113,7 @@ function ProfileEditorWrapper() {
           result: {
             status: 'registered',
             complete: false,
+            formFilled: false,
             message: 'Please complete your Artist profile.'
           },
           updatedUserRow: p,
