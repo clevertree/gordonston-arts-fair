@@ -73,20 +73,24 @@ export async function POST(request: Request) {
       } = metadata as unknown as FeeMetaData;
       console.log('STRIPE', amount / 100, event.type);
       await addTransaction(userID, event.type, amount / 100, name, email, phone, event.data.object);
-      const profileInfo = await fetchProfileByID(userID);
+      if (userID) {
+        const profileInfo = await fetchProfileByID(userID);
 
-      switch (feeType) {
-        case 'registration':
-          if (profileInfo.status === 'registered') {
-            await updateUserStatus(userID, 'submitted', 'Registration fee paid');
-          }
-          break;
-        case 'booth':
-          if (profileInfo.status === 'approved') {
-            await updateUserStatus(userID, 'paid', 'Booth fee paid');
-          }
-          break;
-        default:
+        switch (feeType) {
+          case 'registration':
+            if (profileInfo.status === 'registered') {
+              await updateUserStatus(userID, 'submitted', 'Registration fee paid');
+            }
+            break;
+          case 'booth':
+            if (profileInfo.status === 'approved') {
+              await updateUserStatus(userID, 'paid', 'Booth fee paid');
+            }
+            break;
+          default:
+        }
+      } else {
+        console.error('No userID passed back from stripe');
       }
 
       break;
