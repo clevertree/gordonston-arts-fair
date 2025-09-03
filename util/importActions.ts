@@ -135,7 +135,11 @@ export async function importDBFromCSV() {
     }
 
     console.info('Importing profile: ', email);
-    await insertUser(email, row as unknown as RowData);
+    try {
+      await insertUser(email, row as unknown as RowData);
+    } catch (e: any) {
+      console.error('Error importing profile: ', email, e.message);
+    }
     // const currentUserProfile = (await sql`SELECT *
     //                                       FROM user
     //                                       WHERE email = ${email}`) as unknown as UserProfile;

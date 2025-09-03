@@ -72,7 +72,11 @@ function LoginPhoneForm({
             {message[1]}
           </Alert>
         )}
+        <Alert severity="error">
+          Temporarily Disabled
+        </Alert>
         <TextField
+          disabled
           name="phone"
           type="tel"
           required
@@ -91,7 +95,8 @@ function LoginPhoneForm({
           type="submit"
           variant="contained"
           color="primary"
-          disabled={status === 'submitting'}
+          disabled
+        // disabled  disabled={status === 'submitting'}
         >
           Login
         </Button>
