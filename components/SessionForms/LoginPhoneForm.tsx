@@ -16,7 +16,7 @@ interface LoginPhoneFormProps {
 function LoginPhoneForm({
   loginPhoneAction
 }: LoginPhoneFormProps) {
-  const [status, setStatus] = useState<'ready' | 'submitting'>('ready');
+  const [, setStatus] = useState<'ready' | 'submitting'>('ready');
   const [message, setMessage] = useState<[AlertColor, string]>(['info', 'A code will be sent to your phone']);
   const [phone, setPhone] = useState('');
 
