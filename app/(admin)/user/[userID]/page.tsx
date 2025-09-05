@@ -1,4 +1,3 @@
-import { validateAdminSession } from '@util/sessionActions';
 import { fetchProfileByID, fetchUserFiles, updateUserStatus } from '@util/profileActions';
 import Link from 'next/link';
 import UserStatusEditorAdmin from '@components/Admin/UserStatusEditorAdmin';
@@ -7,6 +6,7 @@ import { Stack } from '@mui/material';
 import UserLogView from '@components/User/UserLogView';
 import React from 'react';
 import { fetchUserLogs } from '@util/logActions';
+import { validateAdminSession } from '@util/session';
 
 export const metadata = {
   title: 'Manage an Artist',

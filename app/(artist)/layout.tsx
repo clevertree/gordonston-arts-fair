@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import React from 'react';
 import Link from 'next/link';
 import FloatingDiv from '@components/FloatingDiv/FloatingDiv';
+import { ClerkSessionContent } from '@components/SessionForms/ClerkSessionContent';
 
 export const metadata: Metadata = {
   title: 'Gordonston Art Fair',
@@ -22,7 +23,7 @@ export default function ArtistLayout({
           <Link href="/profile">Your Artist Profile</Link>
           <Link href="/profile/edit">Edit Profile</Link>
           <Link href="/profile/upload">Upload Images</Link>
-          <Link href="/logout">Log out</Link>
+          <ClerkSessionContent />
         </FloatingDiv>
       </header>
       <article role="main" className="max-w-screen-lg flex flex-col z-[2] m-auto p-4">

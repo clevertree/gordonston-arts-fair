@@ -81,13 +81,19 @@ a:active {
   column-gap: 0.75rem;
   justify-content: space-evenly;
   background-color: #000000;
-  color: var(--foreground-color);
+  color: var(--foreground-inverted-color) !important;
+
+  span, a {
+    font-size: 17px;
+    font-family: "Alegreya Sans", sans-serif;
+    font-weight: 400;
+    color: var(--link-color-inverted) !important;
+  }
 
   /* unvisited link */
   a:link {
     color: var(--link-color-inverted);
     text-decoration: none;
-
   }
 
   /* visited link */

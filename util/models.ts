@@ -33,6 +33,11 @@ export class UserModel extends Model {
   @Column(DataType.ENUM('user', 'admin'))
     type!: UserType;
 
+  // @Unique
+  // @AllowNull(true)
+  // @Column(DataType.STRING(256))
+  //   auth_id!: string;
+
   @Unique
   @AllowNull(true)
   @Column(DataType.STRING(64))

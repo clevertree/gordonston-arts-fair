@@ -1,54 +1,60 @@
 export class HttpError extends Error {
-    readonly statusCode: number;
-    readonly code?: string;
-    readonly details?: Record<string, unknown>;
+  readonly statusCode: number;
 
-    constructor(
-        statusCode: number,
-        message: string,
-        options?: {
-            code?: string;
-            details?: Record<string, unknown>;
-        }
-    ) {
-        super(message);
-        this.name = 'HttpError';
-        this.statusCode = statusCode;
-        this.code = options?.code;
-        this.details = options?.details;
+  readonly code?: string;
 
-        // Maintains proper stack trace for where our error was thrown
-        Error.captureStackTrace(this, HttpError);
+  readonly details?: Record<string, unknown>;
+
+  constructor(
+    statusCode: number,
+    message: string,
+    options?: {
+      code?: string;
+      details?: Record<string, unknown>;
     }
+  ) {
+    super(message);
+    this.name = 'HttpError';
+    this.statusCode = statusCode;
+    this.code = options?.code;
+    this.details = options?.details;
 
-    toJSON() {
-        return {
-            error: {
-                message: this.message,
-                code: this.code,
-                statusCode: this.statusCode,
-                ...(this.details && { details: this.details })
-            }
-        };
-    }
+    // Maintains proper stack trace for where our error was thrown
+    Error.captureStackTrace(this, HttpError);
+  }
 
-    static BadRequest(message = 'Bad Request', options?: { code?: string; details?: Record<string, unknown> }) {
-        return new HttpError(400, message, options);
-    }
+  toJSON() {
+    return {
+      error: {
+        message: this.message,
+        code: this.code,
+        statusCode: this.statusCode,
+        ...(this.details && { details: this.details })
+      }
+    };
+  }
 
-    static Unauthorized(message = 'Unauthorized', options?: { code?: string; details?: Record<string, unknown> }) {
-        return new HttpError(401, message, options);
-    }
+  static BadRequest(message = 'Bad Request', options?: { code?: string; details?: Record<string, unknown> }) {
+    return new HttpError(400, message, options);
+  }
 
-    static Forbidden(message = 'Forbidden', options?: { code?: string; details?: Record<string, unknown> }) {
-        return new HttpError(403, message, options);
-    }
+  static Unauthorized(message = 'Unauthorized', options?: { code?: string; details?: Record<string, unknown> }) {
+    return new HttpError(401, message, options);
+  }
 
-    static NotFound(message = 'Not Found', options?: { code?: string; details?: Record<string, unknown> }) {
-        return new HttpError(404, message, options);
-    }
+  static Forbidden(message = 'Forbidden', options?: { code?: string; details?: Record<string, unknown> }) {
+    return new HttpError(403, message, options);
+  }
 
-    static InternalServer(message = 'Internal Server Error', options?: { code?: string; details?: Record<string, unknown> }) {
-        return new HttpError(500, message, options);
-    }
+  static NotFound(message = 'Not Found', options?: { code?: string; details?: Record<string, unknown> }) {
+    return new HttpError(404, message, options);
+  }
+
+  static InternalServer(message = 'Internal Server Error', options?: { code?: string; details?: Record<string, unknown> }) {
+    return new HttpError(500, message, options);
+  }
+}
+
+export class UnauthorizedError extends Error {
+
 }

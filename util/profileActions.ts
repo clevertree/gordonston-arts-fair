@@ -11,7 +11,8 @@ import { UserStatus } from '@types';
 import { getProfileStatus } from '@util/profile';
 import { InferAttributes } from 'sequelize';
 import { validateSession } from '@util/session';
-import { HttpError } from '@util/exception/httpError';
+import { HttpError, UnauthorizedError } from '@util/exception/httpError';
+import { currentUser } from '@clerk/nextjs/server'; // For currentUser()
 
 export async function fetchProfileByID(userID: number): Promise<UserModel> {
   await ensureDatabase();
@@ -21,28 +22,60 @@ export async function fetchProfileByID(userID: number): Promise<UserModel> {
   return userRow;
 }
 
-export async function updateProfile(updatedUserRow: InferAttributes<UserModel>) {
-  const { userID } = await validateSession();
-  if (updatedUserRow.id !== userID) {
-    throw HttpError.Forbidden(
-      'You are not authorized to update this profile'
+export async function fetchProfileFromSession(): Promise<UserModel> {
+  await validateSession();
+  const user = await currentUser();
+  if (!user) {
+    throw new UnauthorizedError(
+      'No user was provided by Clerk. Please contact the site administrator to resolve this issue.'
     );
   }
+  const email = `${user.primaryEmailAddress?.emailAddress}`.toLowerCase() || null;
+  const phone = `${user.primaryPhoneNumber?.phoneNumber}`.replace(/\D/g, '') || null;
 
   await ensureDatabase();
 
-  const userRow = await UserModel.findByPk(userID);
-  if (!userRow) throw new Error(`User ID not found: ${userID}`);
+  if (email) {
+    const userRow = await UserModel.findOne({
+      where: {
+        email
+      }
+    });
+    if (userRow) return userRow;
+  } else if (phone) {
+    const userRow = await UserModel.findOne({
+      where: {
+        phone
+      }
+    });
+    if (userRow) return userRow;
+  } else {
+    throw new UnauthorizedError(
+      'No phone or email was provided by Clerk. Please contact the site administrator to resolve this issue.'
+    );
+  }
 
-  const updatedUserRowDB = await userRow.update({
-    user_id: userID,
+  return UserModel.create({
+    email,
+    phone,
+    type: 'user',
+    status: 'registered',
+    created_at: new Date(),
+    updated_at: new Date(),
+  });
+}
+
+export async function updateProfile(updatedUserRow: InferAttributes<UserModel>) {
+  const userProfile = await fetchProfileFromSession();
+
+  const updatedUserRowDB = await userProfile.update({
     ...updatedUserRow,
     phone: `${updatedUserRow.phone || ''}`.replace(/\D/g, ''),
     phone2: `${updatedUserRow.phone2 || ''}`.replace(/\D/g, ''),
   });
   const {
     status: profileStatus,
-  } = await fetchProfileStatus(userID);
+  } = await fetchProfileStatus(userProfile);
   return {
     message: 'Profile updated successfully.',
     result: profileStatus,
@@ -50,26 +83,19 @@ export async function updateProfile(updatedUserRow: InferAttributes<UserModel>) 
   };
 }
 
-export async function fetchProfileStatus(userID: number) {
-  const userProfile = await fetchProfileByID(userID);
-  const userUploads = await fetchUserFiles(userID);
+export async function fetchProfileStatus(userProfile: UserModel) {
+  const userUploads = await fetchUserFiles(userProfile.id);
   const profileStatus = getProfileStatus(userProfile, userUploads);
   return {
     status: profileStatus,
-    user: userProfile,
     uploads: userUploads,
   };
 }
 
 export async function uploadFile(file: File) {
-  const { userID } = await validateSession();
+  const userProfile = await fetchProfileFromSession();
 
-  await ensureDatabase();
-
-  const userRow = await UserModel.findByPk(userID);
-  if (!userRow) throw new Error(`User ID not found: ${userID}`);
-
-  const imagePath = `uploads/${userID}`;
+  const imagePath = `uploads/${userProfile.id}`;
   const imageDimensions = await imageDimensionsFromStream(file.stream());
   if (!imageDimensions) throw new Error('Failed to get image dimensions');
   const { width, height } = imageDimensions;
@@ -84,7 +110,7 @@ export async function uploadFile(file: File) {
   });
 
   const createAction = await UserFileUploadModel.create({
-    user_id: userID,
+    user_id: userProfile.id,
     title: file.name,
     width,
     height,
@@ -94,7 +120,7 @@ export async function uploadFile(file: File) {
 
   const {
     status: profileStatus,
-  } = await fetchProfileStatus(userID);
+  } = await fetchProfileStatus(userProfile);
 
   return {
     message: 'File uploaded successfully',
@@ -104,22 +130,15 @@ export async function uploadFile(file: File) {
 }
 
 export async function deleteFile(fileID: number) {
-  const session = await validateSession();
+  const userProfile = await fetchProfileFromSession();
 
-  await ensureDatabase();
   const fileUpload = await UserFileUploadModel.findOne({
     where: {
       id: fileID,
-      user_id: session.userID,
+      user_id: userProfile.id,
     }
   });
   if (!fileUpload) throw new Error(`File ID not found: ${fileID}`);
-
-  if (fileUpload.user_id !== session.userID) {
-    throw HttpError.Forbidden(
-      'You are not authorized to delete this file'
-    );
-  }
 
   try {
     await del(fileUpload.url);
@@ -130,13 +149,13 @@ export async function deleteFile(fileID: number) {
   const deleteAction = await UserFileUploadModel.destroy({
     where: {
       id: fileID,
-      user_id: session.userID,
+      user_id: userProfile.id,
     }
   });
 
   const {
     status: profileStatus,
-  } = await fetchProfileStatus(session.userID);
+  } = await fetchProfileStatus(userProfile);
   return {
     message: 'File deleted successfully',
     result: profileStatus,
@@ -145,8 +164,8 @@ export async function deleteFile(fileID: number) {
 }
 
 export async function updateFile(updatedFile: InferAttributes<UserFileUploadModel>) {
-  const session = await validateSession();
-  if (updatedFile.user_id !== session.userID) {
+  const userProfile = await fetchProfileFromSession();
+  if (updatedFile.user_id !== userProfile.id) {
     throw HttpError.Forbidden(
       'You are not authorized to update this file'
     );
@@ -159,7 +178,7 @@ export async function updateFile(updatedFile: InferAttributes<UserFileUploadMode
 
   const {
     status: profileStatus,
-  } = await fetchProfileStatus(session.userID);
+  } = await fetchProfileStatus(userProfile);
 
   return {
     message: 'File description updated successfully',

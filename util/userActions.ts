@@ -3,7 +3,7 @@
 'use server';
 
 import { ensureDatabase } from '@util/database';
-import { UserModel } from '@util/models';
+import { UserFileUploadModel, UserModel } from '@util/models';
 
 import { UserSearchParams } from '@types';
 
@@ -23,20 +23,37 @@ export async function listUsersAsAdmin(params: UserSearchParams) {
   } = params;
   const page = params.page || 1;
 
-  const whereCondition = status && status !== 'all' ? { status } : {};
   const offset = (page - 1) * limit;
 
-  const { count, rows: userList } = await UserModel.findAndCountAll({
-    where: whereCondition,
+  const result = await UserModel.findAndCountAll({
+    // attributes: {
+    //   include: [
+    //     [Sequelize.fn('COUNT', Sequelize.col('UserFileUploadModel.id')), 'uploadCount']
+    //   ]
+    // },
+    include: [{
+      model: UserFileUploadModel,
+      // as: 'uploads',
+      // attributes: [
+      //   [Sequelize.fn('COUNT', Sequelize.col('UserFileUploadModel.id')), 'uploadCount']
+      //
+      // ],
+      required: false,
+    }],
+    where: {
+      ...(status && status !== 'all' ? { status } : {}),
+    },
+    group: ['UserModel.id'],
     order: [[orderBy, order === 'desc' ? 'DESC' : 'ASC']],
     limit,
     offset
   });
 
+  const totalCount = result.count.reduce((sum, groupResult) => sum + groupResult.count, 0);
   return {
-    userList: userList.map((user) => user.toJSON()) as UserModel[],
-    totalCount: count,
-    pageCount: Math.ceil(count / limit)
+    userList: result.rows.map((user) => user.toJSON()) as UserModel[],
+    totalCount,
+    pageCount: Math.ceil(totalCount / limit)
   } as IUserSearchResponse;
 }
 
@@ -50,15 +67,4 @@ export async function fetchUserID(email: string) {
 
   if (!user) throw new Error(`User ID not found: ${email}`);
   return user.id;
-}
-
-export async function isAdmin(userID: number) {
-  await ensureDatabase();
-
-  const user = await UserModel.findByPk(userID, {
-    attributes: ['type']
-  });
-
-  if (!user) throw new Error(`User ID not found: ${userID}`);
-  return user.type === 'admin';
 }

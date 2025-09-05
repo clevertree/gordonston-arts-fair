@@ -31,7 +31,7 @@ export async function POST(
   } catch (e: any) {
     return redirect(`/login?message=${e.message}`);
   }
-  const profileData = await fetchProfileByID(session.userID);
+  const profileData = await fetchProfileByID(userProfile.id);
   const { feeType } = await params;
   const lineItem = {
     price_data: {

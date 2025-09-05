@@ -45,7 +45,6 @@ export default function UserListAdmin({
   } = data;
   const [args, setArgs] = useState<UserSearchParams>({
   });
-
   useEffect(() => {
     setMessage(['info', 'Fetching user logs...']);
     try {
@@ -217,7 +216,7 @@ export default function UserListAdmin({
                   {getStatusName(status)}
                 </TableCell>
                 <TableCell className={styles.hideOnTablet}>
-                  {Object.keys(uploads || {}).length}
+                  {uploads.length}
                 </TableCell>
                 <TableCell className={styles.hideOnMobile}>
                   <Link href={`/user/${id}`}>✎</Link>

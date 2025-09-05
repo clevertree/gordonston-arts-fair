@@ -30,8 +30,8 @@ export default async function CheckoutPage() {
   const feeAmount = parseInt(`${process.env.NEXT_PUBLIC_REGISTRATION_FEE}`, 10);
   const {
     status: profileStatus
-  } = await fetchProfileStatus(session.userID);
-  const transactions = await fetchTransactions(session.userID);
+  } = await fetchProfileStatus(userProfile.id);
+  const transactions = await fetchTransactions(userProfile.id);
   const alreadyPaid = transactions.find((t) => parseInt(`${t.amount}`, 10) === feeAmount) !== undefined;
   const {
     complete: eligibleToRegister,
@@ -64,7 +64,7 @@ export default async function CheckoutPage() {
         fetchUserTransactions={async (options) => {
           'use server';
 
-          return fetchTransactions(session.userID, options);
+          return fetchTransactions(userProfile.id, options);
         }}
       />
 

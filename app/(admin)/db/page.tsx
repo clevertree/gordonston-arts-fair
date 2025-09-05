@@ -1,6 +1,7 @@
 import { importDBFromCSV } from '@util/importActions';
-import { validateAdminSession } from '@util/sessionActions';
 import { redirect } from 'next/navigation';
+
+import { validateAdminSession } from '@util/session';
 
 export const metadata = {
   title: 'Admin User List',

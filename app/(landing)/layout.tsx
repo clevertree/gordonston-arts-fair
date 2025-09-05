@@ -6,6 +6,7 @@ import FloatingDiv from '@components/FloatingDiv/FloatingDiv';
 import Link from 'next/link';
 import Image from 'next/image';
 import { SuspenseContent } from '@app/suspenseContent';
+import { ClerkSessionContent } from '@components/SessionForms/ClerkSessionContent';
 import styles from './layout.module.css';
 
 export const metadata: Metadata = {
@@ -30,7 +31,7 @@ export default function RootLayout({
           <Link href="/#volunteering">Volunteer</Link>
           <Link href="/#faq">FAQ</Link>
           <Link href="/apply">Artists</Link>
-          {process.env.SHOW_LOGIN === 'true' && <Link href="/profile">Profile</Link>}
+          <ClerkSessionContent />
         </FloatingDiv>
         <div className="relative overflow-hidden">
           <Image
