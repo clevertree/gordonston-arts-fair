@@ -11,7 +11,6 @@ import { UserStatus } from '@types';
 import { getProfileStatus } from '@util/profile';
 import { InferAttributes } from 'sequelize';
 import { validateSession } from '@util/session';
-import { validateAdminSession } from '@util/sessionActions';
 import { HttpError } from '@util/exception/httpError';
 
 export async function fetchProfileByID(userID: number): Promise<UserModel> {
@@ -180,7 +179,6 @@ export async function fetchUserFiles(userID: number) {
 
 export async function updateUserStatus(userID: number, newStatus: UserStatus, message: string) {
   await ensureDatabase();
-  await validateAdminSession();
   await UserModel.update(
     {
       status: newStatus,
