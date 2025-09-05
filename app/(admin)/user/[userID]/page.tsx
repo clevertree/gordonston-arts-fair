@@ -1,5 +1,6 @@
-import { validateAdminSession } from '@util/sessionActions';
-import { fetchProfileByID, fetchUserFiles, updateUserStatus } from '@util/profileActions';
+import {
+  fetchProfileByID, fetchUserFiles, updateUserStatus, validateAdminSession
+} from '@util/profileActions';
 import Link from 'next/link';
 import UserStatusEditorAdmin from '@components/Admin/UserStatusEditorAdmin';
 import ProfileView from '@components/User/ProfileView';

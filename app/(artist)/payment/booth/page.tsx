@@ -31,8 +31,8 @@ export default async function CheckoutPage() {
   const {
     status: profileStatus,
     user: userProfile,
-  } = await fetchProfileStatus(session.userID);
-  const transactions = await fetchTransactions(session.userID);
+  } = await fetchProfileStatus(userProfile.id);
+  const transactions = await fetchTransactions(userProfile.id);
   const alreadyPaid = transactions.find((t) => parseInt(`${t.amount}`, 10) === feeAmount) !== undefined;
   let feeText = alreadyPaid
     ? 'You have already paid this fee.'
@@ -60,7 +60,7 @@ export default async function CheckoutPage() {
         fetchUserTransactions={async (options) => {
           'use server';
 
-          return fetchTransactions(session.userID, options);
+          return fetchTransactions(userProfile.id, options);
         }}
       />
 

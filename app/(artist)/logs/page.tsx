@@ -30,7 +30,7 @@ export default async function UserLogs() {
         fetchUserLogs={async (args) => {
           'use server';
 
-          return fetchUserLogs(session.userID, args);
+          return fetchUserLogs(userProfile.id, args);
         }}
       />
 

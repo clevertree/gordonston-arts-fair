@@ -35,6 +35,11 @@ export class UserModel extends Model {
 
   @Unique
   @AllowNull(true)
+  @Column(DataType.STRING(256))
+    auth_id!: string;
+
+  @Unique
+  @AllowNull(true)
   @Column(DataType.STRING(64))
     email!: string;
 

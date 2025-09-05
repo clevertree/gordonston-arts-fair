@@ -7,6 +7,7 @@ export interface SMSMessage {
 
 export interface SessionPayload extends JWTPayload {
   userID: number,
+  authID: string
   // expiresAt: Date
 }
 

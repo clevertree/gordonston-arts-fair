@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import React from 'react';
 import Link from 'next/link';
 import FloatingDiv from '@components/FloatingDiv/FloatingDiv';
+import {
+  ClerkProvider, SignedIn, SignedOut, SignInButton, SignUpButton, UserButton,
+} from '@clerk/nextjs';
 
 export const metadata: Metadata = {
   title: 'Gordonston Art Fair',
@@ -15,7 +18,7 @@ export default function ArtistLayout({
 }>) {
   const testMode = process.env.TEST_MODE !== 'false';
   return (
-    <>
+    <ClerkProvider>
       <header>
         <FloatingDiv className="header-container">
           <Link href="/">Home</Link>
@@ -24,6 +27,17 @@ export default function ArtistLayout({
           <Link href="/profile/upload">Upload Images</Link>
           <Link href="/logout">Log out</Link>
         </FloatingDiv>
+        <SignedOut>
+          <SignInButton />
+          <SignUpButton>
+            <button className="bg-[#6c47ff] text-ceramic-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer">
+              Sign Up
+            </button>
+          </SignUpButton>
+        </SignedOut>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
       </header>
       <article role="main" className="max-w-screen-lg flex flex-col z-[2] m-auto p-4">
         {testMode && <div className="bg-red-800 text-white font-bold text-center p-2">TEST MODE</div>}
@@ -36,6 +50,6 @@ export default function ArtistLayout({
           <Link href="mailto:admin@gordonstonartfair.com">admin@gordonstonartfair.com</Link>
         </div>
       </footer>
-    </>
+    </ClerkProvider>
   );
 }

@@ -1,6 +1,4 @@
-import { validateSession } from '@util/session';
-import { fetchProfileStatus } from '@util/profileActions';
-import { redirect } from 'next/navigation';
+import { fetchProfileFromSession, fetchProfileStatus } from '@util/profileActions';
 import ProfileView from '@components/User/ProfileView';
 import Link from 'next/link';
 import { ArtistStepper } from '@components/User/ArtistStepper';
@@ -10,24 +8,24 @@ import { fetchTransactions } from '@util/transActions';
 import { fetchUserLogs } from '@util/logActions';
 import UserTransactionView from '@components/User/UserTransactionView';
 import UserLogView from '@components/User/UserLogView';
-import { SessionPayload } from '../../../types';
 
 export const metadata = {
   title: 'Artist Profile',
 };
 
 export default async function ProfilePage() {
-  let session: SessionPayload | undefined;
-  try {
-    session = await validateSession();
-  } catch (e: any) {
-    return redirect(`/login?message=${e.message}`);
-  }
+  // let userID: number;
+  // try {
+  //   const session = await validateSession();
+  //   userID = session.userId;
+  // } catch (e: any) {
+  //   return redirect(`/login?message=${e.message}`);
+  // }
+  const userProfile = await fetchProfileFromSession();
   const {
     status: profileStatus,
-    user: userProfile,
     uploads: userUploads
-  } = await fetchProfileStatus(session.userID);
+  } = await fetchProfileStatus(userProfile);
 
   const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
@@ -46,7 +44,7 @@ export default async function ProfilePage() {
         fetchUserTransactions={async (options) => {
           'use server';
 
-          return fetchTransactions(session.userID, options);
+          return fetchTransactions(userProfile.id, options);
         }}
       />
 

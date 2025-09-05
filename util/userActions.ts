@@ -51,14 +51,3 @@ export async function fetchUserID(email: string) {
   if (!user) throw new Error(`User ID not found: ${email}`);
   return user.id;
 }
-
-export async function isAdmin(userID: number) {
-  await ensureDatabase();
-
-  const user = await UserModel.findByPk(userID, {
-    attributes: ['type']
-  });
-
-  if (!user) throw new Error(`User ID not found: ${userID}`);
-  return user.type === 'admin';
-}

@@ -1,8 +1,8 @@
 import AdminUserList from '@components/Admin/UserListAdmin';
 import { Stack } from '@mui/material';
 
-import { validateAdminSession } from '@util/sessionActions';
 import { listUsersAsAdmin } from '@util/userActions';
+import { validateAdminSession } from '@util/profileActions';
 
 export const metadata = {
   title: 'Admin User List',

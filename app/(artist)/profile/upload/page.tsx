@@ -25,7 +25,7 @@ export default async function ProfileUploadsPage() {
   const {
     status: profileStatus,
     uploads: userUploads
-  } = await fetchProfileStatus(session.userID);
+  } = await fetchProfileStatus(userProfile.id);
 
   return (
     <Stack spacing={2}>
