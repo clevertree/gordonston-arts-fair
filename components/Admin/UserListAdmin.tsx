@@ -33,6 +33,7 @@ const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 export default function UserListAdmin({
   listUsersAsAdmin,
 }: AdminUserListProps) {
+  const [status, setStatus] = useState<'ready' | 'loading'>('loading');
   const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
   const [data, setData] = useState<IUserSearchResponse>({
     userList: [],
@@ -44,11 +45,12 @@ export default function UserListAdmin({
     pageCount,
   } = data;
   const [args, setArgs] = useState<UserSearchParams>({
+    status: 'submitted'
   });
   useEffect(() => {
     setMessage(['info', 'Fetching user logs...']);
     try {
-      listUsersAsAdmin(args).then(setData);
+      listUsersAsAdmin(args).then(setData).then(() => setStatus('ready'));
       setMessage(['info', '']);
     } catch (e: any) {
       setMessage(['error', e.message]);
@@ -129,7 +131,8 @@ export default function UserListAdmin({
         </Paper>
       </div>
 
-      <div className="flex flex-row flex-wrap justify-end items-center">
+      <div className="flex flex-row flex-wrap justify-between items-center">
+        Page:
         <PaginationLinks
           page={args.page || 1}
           setPage={(page:number) => setArgs({ ...args, page })}
@@ -192,7 +195,7 @@ export default function UserListAdmin({
             {userList.map(({
               id,
               first_name, last_name, email,
-              type, createdAt, status, uploads
+              type, createdAt, status: userStatus, uploads
             }) => (
               <TableRow
                 key={email}
@@ -213,7 +216,7 @@ export default function UserListAdmin({
                     : 'N/A'}
                 </TableCell>
                 <TableCell className={styles.hideOnMobile}>
-                  {getStatusName(status)}
+                  {getStatusName(userStatus)}
                 </TableCell>
                 <TableCell className={styles.hideOnTablet}>
                   {uploads.length}
@@ -227,13 +230,19 @@ export default function UserListAdmin({
         </Table>
       </TableContainer>
 
-      {userList.length === 0 && (
-        <Alert severity="warning">
+      {status === 'ready' && userList.length === 0 && (
+        <Alert severity="info">
           No users found.
         </Alert>
       )}
+      {status === 'loading' && (
+        <Alert severity="info">
+          Querying Users...
+        </Alert>
+      )}
 
-      <div className="flex flex-row flex-wrap justify-end items-center">
+      <div className="flex flex-row flex-wrap justify-between items-center">
+        Page:
         <PaginationLinks
           page={args.page || 1}
           setPage={(page:number) => setArgs({ ...args, page })}

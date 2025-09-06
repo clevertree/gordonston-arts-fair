@@ -46,7 +46,7 @@ export default function Error({
           for assistance.
         </Typography>
         <SignedOut>
-          <SignInButton>
+          <SignInButton forceRedirectUrl="/redirect">
             <Button variant="contained">
               Click here to sign in
             </Button>

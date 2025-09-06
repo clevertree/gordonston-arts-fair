@@ -1,23 +1,16 @@
-import { validateSession } from '@util/session';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import React from 'react';
 import { Stack } from '@mui/material';
 import { fetchUserLogs } from '@util/logActions';
 import UserLogView from '@components/User/UserLogView';
-import { SessionPayload } from '../../../types';
+import { fetchProfileFromSession } from '@util/profileActions';
 
 export const metadata = {
   title: 'Artist Profile',
 };
 
 export default async function UserLogs() {
-  let session: SessionPayload | undefined;
-  try {
-    session = await validateSession();
-  } catch (e: any) {
-    return redirect(`/login?message=${e.message}`);
-  }
+  const userProfile = await fetchProfileFromSession();
 
   const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 

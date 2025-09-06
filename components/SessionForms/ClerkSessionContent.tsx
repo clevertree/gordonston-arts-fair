@@ -14,7 +14,7 @@ export function ClerkSessionContent() {
   return (
     <>
       <SignedOut>
-        <SignInButton />
+        <SignInButton forceRedirectUrl="/redirect" />
       </SignedOut>
       <SignedIn>
         <UserButton
@@ -26,12 +26,13 @@ export function ClerkSessionContent() {
           }}
         >
           <UserButton.MenuItems>
-            <UserButton.Link
-              label="Artist Profile"
-              labelIcon={<FaPaintBrush />}
-              href="/profile"
-            />
-            <UserButton.Action label="manageAccount" />
+            {userType !== 'admin' && (
+              <UserButton.Link
+                label="Artist Profile"
+                labelIcon={<FaPaintBrush />}
+                href="/profile"
+              />
+            )}
             {userType === 'admin'
                   && (
                   <UserButton.Link
@@ -40,6 +41,7 @@ export function ClerkSessionContent() {
                     href="/user"
                   />
                   )}
+            <UserButton.Action label="manageAccount" />
             <UserButton.Action label="signOut" />
           </UserButton.MenuItems>
         </UserButton>

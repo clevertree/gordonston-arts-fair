@@ -1,6 +1,4 @@
-import { validateSession } from '@util/session';
-import { fetchProfileStatus } from '@util/profileActions';
-import { redirect } from 'next/navigation';
+import { fetchProfileFromSession, fetchProfileStatus } from '@util/profileActions';
 import Link from 'next/link';
 import Checkout from '@components/Payment/Checkout';
 import { ArtistStepper } from '@components/User/ArtistStepper';
@@ -9,7 +7,6 @@ import { Stack } from '@mui/material';
 import process from 'node:process';
 import { fetchTransactions } from '@util/transActions';
 import UserTransactionView from '@components/User/UserTransactionView';
-import { SessionPayload } from '../../../../types';
 
 export const metadata = {
   title: 'Artist Checkout',
@@ -21,17 +18,11 @@ const stripePublishableKey = `${process.env.TEST_MODE === 'false'
 
 // TODO: setup userID in checkout session
 export default async function CheckoutPage() {
-  let session: SessionPayload | undefined;
-  try {
-    session = await validateSession();
-  } catch (e: any) {
-    return redirect(`/login?message=${e.message}`);
-  }
+  const userProfile = await fetchProfileFromSession();
   const feeAmount = parseInt(`${process.env.NEXT_PUBLIC_BOOTH_FEE}`, 10);
   const {
     status: profileStatus,
-    user: userProfile,
-  } = await fetchProfileStatus(userProfile.id);
+  } = await fetchProfileStatus(userProfile);
   const transactions = await fetchTransactions(userProfile.id);
   const alreadyPaid = transactions.find((t) => parseInt(`${t.amount}`, 10) === feeAmount) !== undefined;
   let feeText = alreadyPaid

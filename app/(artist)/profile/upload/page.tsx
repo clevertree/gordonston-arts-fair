@@ -1,13 +1,10 @@
-import { validateSession } from '@util/session';
 import {
-  deleteFile, fetchProfileStatus, updateFile, uploadFile
+  deleteFile, fetchProfileFromSession, fetchProfileStatus, updateFile, uploadFile
 } from '@util/profileActions';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { ArtistStepper } from '@components/User/ArtistStepper';
 import { Stack } from '@mui/material';
 import React from 'react';
-import { SessionPayload } from '@types';
 import { ProfileUploads } from '@components/User/ProfileUploads';
 
 export const metadata = {
@@ -15,17 +12,11 @@ export const metadata = {
 };
 
 export default async function ProfileUploadsPage() {
-  let session: SessionPayload | undefined;
-  try {
-    session = await validateSession();
-  } catch (e: any) {
-    return redirect(`/login?message=${e.message}`);
-  }
-
+  const userProfile = await fetchProfileFromSession();
   const {
     status: profileStatus,
     uploads: userUploads
-  } = await fetchProfileStatus(userProfile.id);
+  } = await fetchProfileStatus(userProfile);
 
   return (
     <Stack spacing={2}>

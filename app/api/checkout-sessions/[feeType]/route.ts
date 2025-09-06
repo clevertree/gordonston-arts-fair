@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import * as process from 'node:process';
-import { validateSession } from '@util/session';
-import { redirect } from 'next/navigation';
-import { fetchProfileByID } from '@util/profileActions';
-import { SessionPayload } from 'types';
+import { fetchProfileFromSession } from '@util/profileActions';
 
 const stripeSecretKey = `${process.env.TEST_MODE === 'false'
   ? process.env.STRIPE_SECRET_KEY_LIVE
@@ -25,13 +22,7 @@ export async function POST(
   request: Request,
   { params }: { params: Params }
 ) {
-  let session: SessionPayload | undefined;
-  try {
-    session = await validateSession();
-  } catch (e: any) {
-    return redirect(`/login?message=${e.message}`);
-  }
-  const profileData = await fetchProfileByID(userProfile.id);
+  const profileData = await fetchProfileFromSession();
   const { feeType } = await params;
   const lineItem = {
     price_data: {

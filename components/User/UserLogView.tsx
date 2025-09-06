@@ -30,7 +30,9 @@ export default function UserLogView({ fetchUserLogs, title }: UserLogProps) {
   const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
   const [data, setData] = useState<UserLogModel[]>([]);
   const [args, setArgs] = useState<UserLogSearchParams>({
-    type: 'message',
+    order: 'desc',
+    orderBy: 'createdAt',
+    // type: 'message',
   });
 
   useEffect(() => {

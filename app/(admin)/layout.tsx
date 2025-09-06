@@ -3,7 +3,8 @@ import React, { Suspense } from 'react';
 import Link from 'next/link';
 import FloatingDiv from '@components/FloatingDiv/FloatingDiv';
 import { SuspenseContent } from '@app/suspenseContent';
-import PackageJSON from '../../package.json';
+import { ClerkSessionContent } from '@components/SessionForms/ClerkSessionContent';
+import { FooterContent } from '@components/Layout/FooterContent';
 
 export const metadata: Metadata = {
   title: 'Gordonston Art Fair',
@@ -22,7 +23,7 @@ export default function AdminLayout({
         <FloatingDiv className="header-container">
           <Link href="/">Home</Link>
           <Link href="/user">User list</Link>
-          <Link href="/logout">Log out</Link>
+          <ClerkSessionContent />
         </FloatingDiv>
       </header>
       <article role="main" className="max-w-screen-lg flex flex-col z-[2] m-auto p-4">
@@ -31,23 +32,7 @@ export default function AdminLayout({
           {children}
         </Suspense>
       </article>
-      <footer className="footer-container">
-        <div className="p-2 text-center">
-          For administration support please email or text Ari Asulin at
-          {' '}
-          <Link href="mailto:ari@asu.edu">ari@asu.edu</Link>
-          {' '}
-          or
-          {' '}
-          <Link href="tel:602-632-6729">602-632-6729</Link>
-        </div>
-        <div className="p-2 text-center">
-          <Link href="http://github.com/clevertree/gordonston-arts-fair/">
-            Version:
-            {PackageJSON.version}
-          </Link>
-        </div>
-      </footer>
+      <FooterContent />
     </>
   );
 }

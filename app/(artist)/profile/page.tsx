@@ -14,13 +14,6 @@ export const metadata = {
 };
 
 export default async function ProfilePage() {
-  // let userID: number;
-  // try {
-  //   const session = await validateSession();
-  //   userID = session.userId;
-  // } catch (e: any) {
-  //   return redirect(`/login?message=${e.message}`);
-  // }
   const userProfile = await fetchProfileFromSession();
   const {
     status: profileStatus,
@@ -35,10 +28,12 @@ export default async function ProfilePage() {
 
       <ArtistStepper profileStatus={profileStatus} showAlert />
 
+      <Link href="/profile/edit">Click here to edit your profile</Link>
       <ProfileView
         userProfile={userProfile}
         userUploads={userUploads}
       />
+      <Link href="/profile/upload">Click here to manage your image uploads</Link>
       <UserTransactionView
         title={`${USER_LABEL} Transactions`}
         fetchUserTransactions={async (options) => {
@@ -57,7 +52,6 @@ export default async function ProfilePage() {
         }}
       />
 
-      <Link href="/profile/edit">Click here to edit your profile</Link>
     </Stack>
   );
 }

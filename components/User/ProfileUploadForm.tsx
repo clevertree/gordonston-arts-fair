@@ -105,7 +105,7 @@ export function ProfileUploadForm({
     }
     formRef.current?.scrollIntoView({
       behavior: 'smooth',
-      block: 'start',
+      block: 'end',
     });
   }, [fileUploadClient, formUpload, updateFile]);
 

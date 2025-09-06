@@ -146,7 +146,6 @@ function ProfileView({
 
           </Stack>
         ))}
-        <Link href="/profile/upload">Click here to manage your image uploads</Link>
       </Stack>
 
     </Box>

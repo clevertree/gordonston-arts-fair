@@ -3,6 +3,7 @@ import React from 'react';
 import Link from 'next/link';
 import FloatingDiv from '@components/FloatingDiv/FloatingDiv';
 import { ClerkSessionContent } from '@components/SessionForms/ClerkSessionContent';
+import { FooterContent } from '@components/Layout/FooterContent';
 
 export const metadata: Metadata = {
   title: 'Gordonston Art Fair',
@@ -30,13 +31,7 @@ export default function ArtistLayout({
         {testMode && <div className="bg-red-800 text-white font-bold text-center p-2">TEST MODE</div>}
         {children}
       </article>
-      <footer className="footer-container">
-        <div className="p-4 pb-6 text-center">
-          For help submitting your Artist Profile please contact the admin at
-          {' '}
-          <Link href="mailto:admin@gordonstonartfair.com">admin@gordonstonartfair.com</Link>
-        </div>
-      </footer>
+      <FooterContent />
     </>
   );
 }

@@ -20,11 +20,7 @@ export default async function AdminUserListPage() {
       </h1>
 
       <AdminUserList
-        listUsersAsAdmin={async (args) => {
-          'use server';
-
-          return listUsersAsAdmin(args);
-        }}
+        listUsersAsAdmin={listUsersAsAdmin}
 
       />
     </Stack>

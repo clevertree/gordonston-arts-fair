@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { SuspenseContent } from '@app/suspenseContent';
 import { ClerkSessionContent } from '@components/SessionForms/ClerkSessionContent';
+import { FooterContent } from '@components/Layout/FooterContent';
 import styles from './layout.module.css';
 
 export const metadata: Metadata = {
@@ -56,23 +57,7 @@ export default function RootLayout({
           {children}
         </Suspense>
       </article>
-      <footer className="footer-container">
-        <DateLocationApply />
-
-        <div className="p-4 pb-6 text-center">
-          This website is managed by
-          {' '}
-          <Link href="mailto:ari.asulin@gmail.com">Ari Asulin</Link>
-          {' '}
-          and can be edited via
-          {' '}
-          <Link href="https://github.com/clevertree/gordonston-arts-fair">Github.com</Link>
-          <br />
-          For help submitting your Artist Profile please contact the admin at
-          {' '}
-          <Link href="mailto:admin@gordonstonartfair.com">admin@gordonstonartfair.com</Link>
-        </div>
-      </footer>
+      <FooterContent showDates />
     </>
   );
 }

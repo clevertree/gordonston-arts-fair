@@ -1,8 +1,5 @@
 import {formatDate, getTimeSpan} from "../../../util/date";
-import LoginEmailForm from "../../../components/SessionForms/LoginEmailForm";
-import LoginPhoneForm from "../../../components/SessionForms/LoginPhoneForm";
-import {loginPhoneAction} from "../../../util/phoneActions";
-import {loginEmailAction} from "../../../util/emailActions";
+import {SignUpButton} from '@clerk/nextjs'; // or @clerk/clerk-react for plain React apps
 
 export const metadata = {
     title: 'Apply to Gordonston Art Fair',
@@ -94,7 +91,7 @@ I accept the above statements as detailed. I also confirm that the work entered
 and exhibited is created by me and that the work I bring will be similar to the
 images I submitted in quality and style.  I further attest that I have read,
 accept and agree to abide by all the rules and regulations outlined on the
-Gordonstonartfair.com "Exhibitor Information" and "Application Process" pages.
+GordonstonArtFair.com "Exhibitor Information" and "Application Process" pages.
 I understand that if I am accepted for the festival, my booth fee is due within
 30 days of acceptance. I also understand that I, as the artist,
 must be present for the duration of the event.
@@ -104,10 +101,12 @@ I accept and agree to the terms and conditions above.
 
 ## Log in to Register as an Artist
 
-<div className="grid md:grid-cols-2 gap-4 p-3">
-    <LoginEmailForm loginEmailAction={loginEmailAction} />
-    <LoginPhoneForm loginPhoneAction={loginPhoneAction} />
-</div>
+<SignUpButton mode='sign-up'
+    forceRedirectUrl='/redirect'>
+    <button
+    className="mt-4 rounded-md bg-blue-700 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-400"
+    >Register Now</button>
+</SignUpButton>
 
 If you have problems with this registration system and need assistance
 or have any questions related to the actual show or its jurying process,

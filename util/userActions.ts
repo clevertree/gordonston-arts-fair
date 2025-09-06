@@ -40,20 +40,20 @@ export async function listUsersAsAdmin(params: UserSearchParams) {
       // ],
       required: false,
     }],
+    distinct: true,
     where: {
       ...(status && status !== 'all' ? { status } : {}),
     },
-    group: ['UserModel.id'],
+    // group: ['UserModel.id'],
     order: [[orderBy, order === 'desc' ? 'DESC' : 'ASC']],
     limit,
     offset
   });
 
-  const totalCount = result.count.reduce((sum, groupResult) => sum + groupResult.count, 0);
   return {
     userList: result.rows.map((user) => user.toJSON()) as UserModel[],
-    totalCount,
-    pageCount: Math.ceil(totalCount / limit)
+    totalCount: result.count,
+    pageCount: Math.ceil(result.count / limit)
   } as IUserSearchResponse;
 }
 

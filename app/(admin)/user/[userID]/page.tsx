@@ -1,4 +1,6 @@
-import { fetchProfileByID, fetchUserFiles, updateUserStatus } from '@util/profileActions';
+import {
+  fetchProfileByID, fetchProfileFromSession, fetchUserFiles, updateUserStatus
+} from '@util/profileActions';
 import Link from 'next/link';
 import UserStatusEditorAdmin from '@components/Admin/UserStatusEditorAdmin';
 import ProfileView from '@components/User/ProfileView';
@@ -19,7 +21,8 @@ export default async function AdminUserManagementPage({
 }: {
   params: Promise<{ userID: number }>
 }) {
-  const adminSession = await validateAdminSession();
+  await validateAdminSession();
+  const adminProfile = await fetchProfileFromSession();
 
   const { userID } = await params;
   const userProfile = await fetchProfileByID(userID);
@@ -43,7 +46,7 @@ export default async function AdminUserManagementPage({
           updateUserStatus={async (newStatus) => {
             'use server';
 
-            return updateUserStatus(userProfile.id, newStatus, `${newStatus} set by admin #${adminSession.userID}`);
+            return updateUserStatus(userProfile.id, newStatus, `${newStatus} set by admin #${adminProfile.email}`);
           }}
         />
         <ProfileView
