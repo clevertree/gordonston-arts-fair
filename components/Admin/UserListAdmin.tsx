@@ -45,7 +45,8 @@ export default function UserListAdmin({
     pageCount,
   } = data;
   const [args, setArgs] = useState<UserSearchParams>({
-    status: 'submitted'
+    status: 'submitted',
+    limit: 20
   });
   useEffect(() => {
     setMessage(['info', 'Fetching user logs...']);
@@ -132,7 +133,7 @@ export default function UserListAdmin({
       </div>
 
       <div className="flex flex-row flex-wrap justify-between items-center">
-        Page:
+        {`Page ${args.page || 1} of ${pageCount} (Total Users: ${data.totalCount})`}
         <PaginationLinks
           page={args.page || 1}
           setPage={(page:number) => setArgs({ ...args, page })}
@@ -242,7 +243,7 @@ export default function UserListAdmin({
       )}
 
       <div className="flex flex-row flex-wrap justify-between items-center">
-        Page:
+        {`Page ${args.page || 1} of ${pageCount} (Total Users: ${data.totalCount})`}
         <PaginationLinks
           page={args.page || 1}
           setPage={(page:number) => setArgs({ ...args, page })}
