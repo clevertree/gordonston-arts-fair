@@ -155,7 +155,7 @@ export default function UserListAdmin({
                   order: args.orderBy === 'email' && args.order === 'asc' ? 'desc' : 'asc'
                 })}
               >
-                Date
+                Email
               </TableCell>
               <TableCell
                 className="cursor-pointer underline hover:text-blue-200"
