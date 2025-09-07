@@ -15,16 +15,16 @@ import {
   TextField
 } from '@mui/material';
 import React, { useRef, useState } from 'react';
-import { UserStatus } from '@util/schema';
 import type { AlertColor } from '@mui/material/Alert';
 import Mail from 'nodemailer/lib/mailer';
 import { useRouter } from 'next/navigation';
-import { templateList } from '../../template/email';
+import { templateList } from '@template/email';
+import {UserStatus} from "@types";
 import SelectField from '../FormFields/SelectField';
 
 interface SendEmailAdminProps {
-  userStatus: UserStatus,
   userEmail: string,
+  userStatus: UserStatus,
 
   sendMail(options: Mail.Options): Promise<{ success: boolean; message: string }>,
 }

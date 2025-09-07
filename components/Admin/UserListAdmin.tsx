@@ -220,7 +220,7 @@ export default function UserListAdmin({
                   {getStatusName(userStatus)}
                 </TableCell>
                 <TableCell className={styles.hideOnTablet}>
-                  {uploads.length}
+                  <Link href={`/user/${id}`}>{uploads.length}</Link>
                 </TableCell>
                 <TableCell className={styles.hideOnMobile}>
                   <Link href={`/user/${id}`}>✎</Link>

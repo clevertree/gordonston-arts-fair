@@ -1,7 +1,7 @@
 import Mail from 'nodemailer/lib/mailer';
 import UserRegistrationEmailTemplate from './user-registration-email';
 import User2FactorEmailTemplate from './user-2factor-email';
-import AcceptedEmailTemplate from './artist-accepted-email';
+import AcceptedEmailTemplate from './artist-approved-email';
 import DeclinedEmailTemplate from './artist-declined-email';
 import StandbyEmailTemplate from './artist-standby-email';
 

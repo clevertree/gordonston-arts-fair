@@ -43,10 +43,15 @@ export default async function AdminUserManagementPage({
 
         <UserStatusEditorAdmin
           userStatus={userProfile.status}
-          updateUserStatus={async (newStatus) => {
+          updateUserStatus={async (newStatus, sendEmailTemplate) => {
             'use server';
 
-            return updateUserStatus(userProfile.id, newStatus, `${newStatus} set by admin #${adminProfile.email}`);
+            return updateUserStatus(
+              userProfile.id,
+              newStatus,
+              `${newStatus} set by admin #${adminProfile.email}`,
+              sendEmailTemplate
+            );
           }}
         />
         <ProfileView
@@ -55,8 +60,8 @@ export default async function AdminUserManagementPage({
         />
 
         {/* <SendEmailAdmin */}
-        {/*  userStatus={profile.status} */}
-        {/*  userEmail={profile.email} */}
+        {/*  userStatus={userProfile.status} */}
+        {/*  userEmail={userProfile.email} */}
         {/*  sendMail={sendMail} */}
         {/* /> */}
 

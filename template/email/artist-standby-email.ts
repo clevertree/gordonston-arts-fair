@@ -1,7 +1,7 @@
 import { formatDate } from '@util/date';
 import Mail from 'nodemailer/lib/mailer';
 
-export default function ArtistAcceptedEmailTemplate(
+export default function ArtistStandbyEmailTemplate(
   to: string,
 ):Mail.Options {
   const eventDate = new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`);

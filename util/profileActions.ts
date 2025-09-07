@@ -12,7 +12,11 @@ import { getProfileStatus } from '@util/profile';
 import { InferAttributes } from 'sequelize';
 import { validateSession } from '@util/session';
 import { HttpError, UnauthorizedError } from '@util/exception/httpError';
-import { currentUser } from '@clerk/nextjs/server'; // For currentUser()
+import { currentUser } from '@clerk/nextjs/server';
+import ArtistApprovedEmailTemplate from '@template/email/artist-approved-email';
+import { sendMail } from '@util/emailActions';
+import ArtistStandbyEmailTemplate from '@template/email/artist-standby-email';
+import ArtistDeclinedEmailTemplate from '@template/email/artist-declined-email'; // For currentUser()
 
 export async function fetchProfileByID(userID: number): Promise<UserModel> {
   await ensureDatabase();
@@ -196,22 +200,62 @@ export async function fetchUserFiles(userID: number) {
   });
 }
 
-export async function updateUserStatus(userID: number, newStatus: UserStatus, message: string) {
+export async function updateUserStatus(
+  userID: number,
+  newStatus: UserStatus,
+  message: string,
+  sendEmailTemplate: boolean = true
+) {
   await ensureDatabase();
+  const userProfile = await fetchProfileByID(userID);
   await UserModel.update(
     {
       status: newStatus,
       updated_at: new Date()
     },
     {
-      where: { id: userID }
+      where: { id: userProfile.id }
     }
   );
 
   // Add a log entry
   await addUserUserLogModel(userID, 'status-change', message);
 
+  if (sendEmailTemplate && userProfile.email) {
+    const emailTemplate = await getUserStatusEmailTemplate(userID, newStatus);
+    if (emailTemplate) {
+      await sendMail(emailTemplate);
+      return {
+        message: `Status updated successfully to ${newStatus}. Email sent to artist.`,
+      };
+    }
+    return {
+      message: `Status updated successfully to ${newStatus}. No Email template is associate with status change.`,
+    };
+  }
+
   return {
-    message: 'Status updated successfully',
+    message: `Status updated successfully to ${newStatus}. No Email was sent`,
   };
+}
+
+export async function getUserStatusEmailTemplate(userID: number, status: UserStatus) {
+  await ensureDatabase();
+  const userProfile = await fetchProfileByID(userID);
+  switch (status) {
+    case 'approved':
+      return ArtistApprovedEmailTemplate(
+        userProfile.email,
+      );
+    case 'standby':
+      return ArtistStandbyEmailTemplate(
+        userProfile.email,
+      );
+    case 'declined':
+      return ArtistDeclinedEmailTemplate(
+        userProfile.email,
+      );
+    default:
+      return null;
+  }
 }

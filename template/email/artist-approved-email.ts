@@ -1,15 +1,15 @@
 import { formatDate } from '@util/date';
 import Mail from 'nodemailer/lib/mailer';
 
-export default function ArtistAcceptedEmailTemplate(
+export default function ArtistApprovedEmailTemplate(
   to: string,
 ):Mail.Options {
   const eventDate = new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`);
   const boothFee = process.env.NEXT_PUBLIC_BOOTH_FEE;
   const registrationFeeDate = new Date(`${process.env.NEXT_PUBLIC_REGISTRATION_FEE_DATE}`);
-  const paymentURL = `${process.env.NEXT_PUBLIC_BASE_URL}/payment`;
+  const paymentURL = `${process.env.NEXT_PUBLIC_BASE_URL}/payment/booth`;
 
-  const subject = 'Your exhibit has been accepted';
+  const subject = 'Your exhibit has been approved';
 
   const html = `<p>Dear Artist,</p>
 

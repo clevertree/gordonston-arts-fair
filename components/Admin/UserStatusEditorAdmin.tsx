@@ -4,6 +4,7 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   MenuItem,
   Paper,
   Table,
@@ -23,7 +24,7 @@ import { profileStatuses, UserStatus } from '@types';
 interface UserStatusEditorAdminProps {
   userStatus: UserStatus,
 
-  updateUserStatus(newStatus: UserStatus): Promise<{ message: string }>
+  updateUserStatus(newStatus: UserStatus, sendEmailTemplate: boolean): Promise<{ message: string }>
 }
 
 const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
@@ -31,6 +32,7 @@ const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 export default function UserStatusEditorAdmin({
   userStatus, updateUserStatus
 }: UserStatusEditorAdminProps) {
+  const [sendEmailTemplate, setSendEmailTemplate] = useState(true);
   const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
   const [updatedUserStatus, setUpdatedUserStatus] = useState(userStatus);
   const formRef = useRef<HTMLFormElement>(null);
@@ -41,7 +43,10 @@ export default function UserStatusEditorAdmin({
       <form
         ref={formRef}
         action={async () => {
-          const { message: updateMessage } = await updateUserStatus(updatedUserStatus);
+          const { message: updateMessage } = await updateUserStatus(
+            updatedUserStatus,
+            sendEmailTemplate
+          );
           setMessage(['success', updateMessage]);
           formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
           router.refresh(); // Refresh the current page
@@ -92,7 +97,14 @@ export default function UserStatusEditorAdmin({
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell align="right" colSpan={2}>
+                <TableCell align="right">
+                  Send Email Template?
+                  <Checkbox
+                    onClick={() => setSendEmailTemplate(!sendEmailTemplate)}
+                    checked={sendEmailTemplate}
+                  />
+                </TableCell>
+                <TableCell align="left">
                   <Button
                     type="submit"
                     variant="contained"
