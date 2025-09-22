@@ -41,6 +41,7 @@ function ProfileView({
     state: 'State',
     zipcode: 'Zipcode',
     category: 'Category',
+    description: 'Description',
   };
   const profileInfoFields = Object.keys(profileInfoLabels) as (keyof UserModel)[];
 

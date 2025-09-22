@@ -46,7 +46,7 @@ export default function UserListAdmin({
   } = data;
   const [args, setArgs] = useState<UserSearchParams>({
     status: 'submitted',
-    limit: 20
+    limit: 50
   });
   useEffect(() => {
     setMessage(['info', 'Fetching user logs...']);
@@ -167,16 +167,16 @@ export default function UserListAdmin({
               >
                 Full Name
               </TableCell>
-              <TableCell className={styles.hideOnTablet}>Type</TableCell>
+              <TableCell className={styles.hideOnTablet}>Category</TableCell>
               <TableCell
                 className={`${styles.hideOnMobile} cursor-pointer underline hover:text-blue-200`}
                 onClick={() => setArgs({
                   ...args,
-                  orderBy: 'createdAt',
-                  order: args.orderBy === 'createdAt' && args.order === 'asc' ? 'desc' : 'asc'
+                  orderBy: 'updatedAt',
+                  order: args.orderBy === 'updatedAt' && args.order === 'asc' ? 'desc' : 'asc'
                 })}
               >
-                Created
+                Updated
               </TableCell>
               <TableCell
                 className={`${styles.hideOnMobile} cursor-pointer underline hover:text-blue-200`}
@@ -196,24 +196,24 @@ export default function UserListAdmin({
             {userList.map(({
               id,
               first_name, last_name, email,
-              type, createdAt, status: userStatus, uploads
+              category, updatedAt, status: userStatus, uploads
             }) => (
               <TableRow
                 key={email}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell scope="row">
-                  <Link href={`/user/${id}`}>{email}</Link>
+                  <Link href={`mailto:${email}`}>{email}</Link>
                 </TableCell>
                 <TableCell className={styles.hideOnMobile}>
                   {getFullName(first_name, last_name)}
                 </TableCell>
                 <TableCell className={styles.hideOnTablet}>
-                  {type === 'admin' ? '🔑 Admin' : '🎨 Artist'}
+                  {category}
                 </TableCell>
                 <TableCell className={styles.hideOnMobile}>
-                  {createdAt
-                    ? new Date(createdAt).toLocaleDateString()
+                  {updatedAt
+                    ? new Date(updatedAt).toLocaleDateString()
                     : 'N/A'}
                 </TableCell>
                 <TableCell className={styles.hideOnMobile}>

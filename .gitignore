@@ -42,3 +42,9 @@ cypress/screenshots
 
 # Exports
 export.csv
+
+# clerk configuration (can include secrets)
+/.clerk/
+
+
+.idea

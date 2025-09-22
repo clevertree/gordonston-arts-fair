@@ -9,6 +9,8 @@ import UserLogView from '@components/User/UserLogView';
 import React from 'react';
 import { fetchUserLogs } from '@util/logActions';
 import { validateAdminSession } from '@util/session';
+import UserTransactionView from '@components/User/UserTransactionView';
+import { fetchTransactions } from '@util/transActions';
 
 export const metadata = {
   title: 'Manage an Artist',
@@ -73,7 +75,14 @@ export default async function AdminUserManagementPage({
             return fetchUserLogs(userProfile.id, args);
           }}
         />
+        <UserTransactionView
+          title={`${USER_LABEL} Transactions`}
+          fetchUserTransactions={async (options) => {
+            'use server';
 
+            return fetchTransactions(userProfile.id, options);
+          }}
+        />
       </Stack>
     </Stack>
   );
