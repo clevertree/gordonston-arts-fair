@@ -47,6 +47,7 @@ function ProfileEditor({
     category: categoryInput,
   } = userProfileClient;
 
+  const firstRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const formInfo = useFormHook({
     formData: userProfileClient,
@@ -68,6 +69,12 @@ function ProfileEditor({
       setStatus('ready');
     }
   }, [formInfo.hasUnsavedData, status]);
+
+  useEffect(() => {
+    if (firstRef.current) {
+      firstRef.current.focus();
+    }
+  }, [firstRef]);
 
   const handleSubmit = async () => {
     // Validation
@@ -144,6 +151,7 @@ function ProfileEditor({
           </Typography>
           <fieldset disabled={status === 'updating'} className="grid md:grid-cols-4 gap-4">
             <TextField
+                inputRef={firstRef}
               helperText="Please enter your first name"
               {...formInfo.setupInput('first_name', 'First Name', 'required')}
               required
