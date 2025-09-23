@@ -1,12 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import {
-  Alert, Box, Button, TextField, Typography
-} from '@mui/material';
-import type { AlertColor } from '@mui/material/Alert';
+import React, {FormEvent, useEffect, useState} from 'react';
+import {Alert, Box, Button, TextField, Typography} from '@mui/material';
+import type {AlertColor} from '@mui/material/Alert';
 
-import { ActionResponse } from '../../types';
+import {ActionResponse} from '../../types';
 
 interface LoginValidationFormProps {
   loginValidationAction(code: number): Promise<ActionResponse>,
@@ -38,14 +36,14 @@ function LoginValidationForm({
         setMessage([response.status, response.message]);
         if (response.redirectURL) document.location.href = response.redirectURL;
       }
-    } catch (e: any) {
-      setMessage(['error', e.message]);
+    } catch (e: unknown) {
+      setMessage(['error', (e as Error).message]);
     } finally {
       setStatus('ready');
     }
   }
 
-  const handleSubmit = (event: any) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setStatus('submitting');
     setMessage(['info', 'Submitting log-in form...']);

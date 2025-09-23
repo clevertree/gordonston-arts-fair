@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Alert,
   Box,
@@ -14,12 +14,12 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
-import type { AlertColor } from '@mui/material/Alert';
+import type {AlertColor} from '@mui/material/Alert';
 
-import { UserLogSearchParams } from '@util/logActions';
-import { logTypes } from '@types';
-import { snakeCaseToTitleCase } from '@util/format';
-import { UserLogModel } from '@util/models';
+import {UserLogSearchParams} from '@util/logActions';
+import {logTypes} from '@types';
+import {snakeCaseToTitleCase} from '@util/format';
+import {UserLogModel} from '@util/models';
 
 interface UserLogProps {
   fetchUserLogs(args: UserLogSearchParams): Promise<UserLogModel[]>,
@@ -40,8 +40,8 @@ export default function UserLogView({ fetchUserLogs, title }: UserLogProps) {
     try {
       fetchUserLogs(args).then(setData);
       setMessage(['info', '']);
-    } catch (e: any) {
-      setMessage(['error', e.message]);
+    } catch (e: unknown) {
+      setMessage(['error', (e as Error).message]);
     }
   }, [args, fetchUserLogs]);
 
@@ -58,7 +58,9 @@ export default function UserLogView({ fetchUserLogs, title }: UserLogProps) {
       )}
 
       <div className="flex flex-row">
-        <Paper className="flex flex-row flex-wrap  gap-1 p-1 mb-1" elevation={2}>
+        <Paper className="flex flex-row flex-wrap  gap-1 p-1 mb-1"
+               elevation={2}
+        >
           <Button
             size="x-small"
             variant="contained"
@@ -88,7 +90,10 @@ export default function UserLogView({ fetchUserLogs, title }: UserLogProps) {
               <TableCell
                 className="cursor-pointer underline hover:text-blue-200"
                 align="center"
-                onClick={() => setArgs({ ...args, order: args.order === 'asc' ? 'desc' : 'asc' })}
+                onClick={() => setArgs({
+                  ...args,
+                  order: args.order === 'asc' ? 'desc' : 'asc'
+                })}
               >
                 Date
               </TableCell>

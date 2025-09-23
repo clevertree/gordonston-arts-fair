@@ -1,6 +1,5 @@
 export type FormatType = 'phone';
-export type FormatValue = string | undefined;
-export type FormatCallback = (value: FormatValue) => FormatValue;
+export type FormatCallback = (value: string | undefined) => string | undefined;
 export type FormatTypeList = (FormatType | FormatCallback)
 | (FormatType | FormatCallback)[];
 
@@ -14,7 +13,7 @@ export const formatPhone: FormatCallback = (phoneNumber: string | undefined) => 
   return a + (b ? `-${b}${c ? `-${c}` : ''}` : '');
 };
 
-export function formatByType(type: FormatTypeList, value: string | undefined) {
+export function formatByType(type: FormatTypeList, value: string | undefined): string | undefined {
   if (Array.isArray(type)) {
     let formattedValue = value;
     for (let i = 0; i < type.length; i++) {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Alert,
   Box,
@@ -14,14 +14,16 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
-import type { AlertColor } from '@mui/material/Alert';
-import { transactionTypes } from '@types';
-import { snakeCaseToTitleCase } from '@util/format';
-import { UserTransactionModel } from '@util/models';
-import { UserTransactionSearchParams } from '@util/transActions';
+import type {AlertColor} from '@mui/material/Alert';
+import {transactionTypes} from '@types';
+import {snakeCaseToTitleCase} from '@util/format';
+import {UserTransactionModel} from '@util/models';
+import {UserTransactionSearchParams} from '@util/transActions';
 
 interface AdminUserTransactionProps {
-  fetchUserTransactions(args: UserTransactionSearchParams): Promise<UserTransactionModel[]>,
+  fetchUserTransactions(
+      args: UserTransactionSearchParams
+  ): Promise<UserTransactionModel[]>,
   title: string
 }
 
@@ -39,8 +41,8 @@ export default function UserTransactionView({
     try {
       fetchUserTransactions(args).then(setData);
       setMessage(['info', '']);
-    } catch (e: any) {
-      setMessage(['error', e.message]);
+    } catch (e: unknown) {
+      setMessage(['error', (e as Error).message]);
     }
   }, [args, fetchUserTransactions]);
 

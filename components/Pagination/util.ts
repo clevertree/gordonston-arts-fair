@@ -1,4 +1,4 @@
-export function getParamsURL(argsObject: Record<string, any>) {
+export function getParamsURL(argsObject: Record<string, string>) {
   const searchParams = new URLSearchParams(argsObject);
   return `?${searchParams.toString()}`;
 }

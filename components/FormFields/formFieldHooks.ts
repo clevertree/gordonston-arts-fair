@@ -1,8 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { validateByType, ValidationTypeList } from '@components/FormFields/validation';
-import { formatByType, FormatTypeList } from '@components/FormFields/formatting';
+import {useState} from 'react';
+import {
+  validateByType,
+  ValidationTypeList
+} from '@components/FormFields/validation';
+import {formatByType, FormatTypeList} from '@components/FormFields/formatting';
+
+export type FormFieldEvent = {
+  target: {
+    value: string | undefined
+  }
+}
 
 export interface FormFieldProps {
   name: string,
@@ -11,12 +20,12 @@ export interface FormFieldProps {
   color?: 'error' | 'primary',
   helperText?: string,
   helperTextError?: boolean,
-  slotProps?: any,
+  // slotProps?: any,
   required?: boolean,
   scrollIntoView?: boolean,
 
-  onBlur: (e: any) => void
-  onChange: (e: any) => void
+  onBlur: (e: FormFieldEvent) => void
+  onChange: (e: FormFieldEvent) => void
 }
 
 export interface ValidationError {
@@ -123,22 +132,23 @@ export function useFormHook<T extends object>(
       name: fieldName,
       label: label || fieldName,
       defaultValue: currentValue,
-      onChange: (e: any) => {
+      onChange: (e) => {
         const { value } = e.target;
         const formattedValue = autoFormat ? formatByType(autoFormat, value) : value;
-        if (formattedValue !== value) e.target.value = formattedValue;
-        setFieldValue(fieldName, formattedValue);
+        if (formattedValue !== value) e.target.value = `${formattedValue}`;
+        setFieldValue(fieldName, `${formattedValue}`);
         if (validate) {
           // Update form data when validation changes
-          const newValidationMessage = validateByType(validate, formattedValue, label || fieldName);
+          const newValidationMessage = validateByType(validate, `${formattedValue}`, label || fieldName);
           updateValidationState(newValidationMessage);
         }
       },
-      onBlur: (e: any) => {
+      onBlur: (e) => {
         // Update form data if the value changed
         // debugger;
-        if (defaultFormData[fieldName] !== e.target.value) {
-          setFieldValue(fieldName, e.target.value);
+        const {value} = e.target;
+        if (typeof value !== "undefined" && defaultFormData[fieldName] !== value) {
+          setFieldValue(fieldName, value);
         }
       }
     };

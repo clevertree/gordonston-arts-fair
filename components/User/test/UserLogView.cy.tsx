@@ -15,6 +15,6 @@ describe('<UserLogView />', () => {
           user_id: 0,
         }
       ] as unknown as UserLogModel[]}
-    />);
+             />);
   });
 });

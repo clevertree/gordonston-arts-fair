@@ -14,13 +14,13 @@ import {
   TableRow,
   TextField
 } from '@mui/material';
-import React, { useRef, useState } from 'react';
-import type { AlertColor } from '@mui/material/Alert';
+import React, {useRef, useState} from 'react';
+import type {AlertColor} from '@mui/material/Alert';
 import Mail from 'nodemailer/lib/mailer';
-import { useRouter } from 'next/navigation';
-import { templateList } from '@template/email';
-import { UserModel } from '@util/models';
-import { MailResult } from '@types';
+import {useRouter} from 'next/navigation';
+import {templateList} from '@template/email';
+import {UserModel} from '@util/models';
+import {MailResult} from '@types';
 import SelectField from '@components/FormFields/SelectField';
 
 interface SendEmailAdminProps {
@@ -87,10 +87,10 @@ export default function SendEmailAdmin({
                     fullWidth
                     variant="outlined"
                     value={userStatus || ''}
-                    onChange={(e: any) => {
+                    onChange={(e) => {
                       setBody('');
                       setSubject('');
-                      const templateID = e.target.value;
+                      const templateID = e.target.value as number;
                       if (templateList[templateID]) {
                         const template = templateList[templateID];
                         if (template) {

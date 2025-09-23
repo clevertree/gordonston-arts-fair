@@ -14,12 +14,12 @@ import {
   TableHead,
   TableRow
 } from '@mui/material';
-import React, { useRef, useState } from 'react';
-import { getStatusName } from '@util/profile';
-import type { AlertColor } from '@mui/material/Alert';
-import { useRouter } from 'next/navigation';
-import { SelectField } from '@components/FormFields';
-import { profileStatuses, UserStatus } from '@types';
+import React, {useRef, useState} from 'react';
+import {getStatusName} from '@util/profile';
+import type {AlertColor} from '@mui/material/Alert';
+import {useRouter} from 'next/navigation';
+import {SelectField} from '@components/FormFields';
+import {profileStatuses, UserStatus} from '@types';
 
 interface UserStatusEditorAdminProps {
   userStatus: UserStatus,
@@ -81,8 +81,8 @@ export default function UserStatusEditorAdmin({
                     fullWidth
                     variant="outlined"
                     value={updatedUserStatus || ''}
-                    onChange={(e: any) => {
-                      const { value } = e.target;
+                    onChange={(e) => {
+                      const {value} = e.target as HTMLSelectElement;
                       if (value) setUpdatedUserStatus(value as UserStatus);
                     }}
                   >

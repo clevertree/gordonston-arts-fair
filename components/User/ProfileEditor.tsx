@@ -1,18 +1,16 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  Alert, Box, Button, MenuItem, Stack, Typography
-} from '@mui/material';
+import React, {FormEvent, useEffect, useRef, useState} from 'react';
+import {Alert, Box, Button, MenuItem, Stack, Typography} from '@mui/material';
 
-import { SelectField, TextField, useFormHook } from '@components/FormFields';
-import type { AlertColor } from '@mui/material/Alert';
-import { IProfileStatus, IProfileStatusAction } from '@util/profile';
+import {SelectField, TextField, useFormHook} from '@components/FormFields';
+import type {AlertColor} from '@mui/material/Alert';
+import {IProfileStatus, IProfileStatusAction} from '@util/profile';
 import PaymentModal from '@components/Modal/PaymentModal';
 import UploadsModal from '@components/Modal/UploadsModal';
-import { UserFileUploadModel, UserModel } from '@util/models';
-import { InferAttributes } from 'sequelize';
-import { useRouter } from 'next/navigation';
+import {UserFileUploadModel, UserModel} from '@util/models';
+import {InferAttributes} from 'sequelize';
+import {useRouter} from 'next/navigation';
 import Link from 'next/link';
 
 export interface ProfileEditorProps {
@@ -102,9 +100,9 @@ function ProfileEditor({
       if (action) {
         setShowModal(action);
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       setStatus('ready');
-      setMessage(['error', e.message]);
+      setMessage(['error', (e as Error).message]);
     }
     formRef.current?.scrollIntoView({
       behavior: 'smooth',
@@ -118,7 +116,7 @@ function ProfileEditor({
         id="profile-editor-form"
         method="post"
         ref={formRef}
-        onSubmit={async (e: any) => {
+        onSubmit={async (e: FormEvent<HTMLFormElement>) => {
           e.preventDefault();
           await handleSubmit();
         }}
@@ -146,7 +144,6 @@ function ProfileEditor({
           </Typography>
           <fieldset disabled={status === 'updating'} className="grid md:grid-cols-4 gap-4">
             <TextField
-              autoFocus
               helperText="Please enter your first name"
               {...formInfo.setupInput('first_name', 'First Name', 'required')}
               required

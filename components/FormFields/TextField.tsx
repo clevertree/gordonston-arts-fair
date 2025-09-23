@@ -1,4 +1,7 @@
-import { TextField as MUITextField, TextFieldProps as MUITextFieldProps } from '@mui/material';
+import {
+  TextField as MUITextField,
+  TextFieldProps as MUITextFieldProps
+} from '@mui/material';
 import React from 'react';
 
 type TextFieldProps = MUITextFieldProps & {
@@ -7,7 +10,7 @@ type TextFieldProps = MUITextFieldProps & {
   blurTimeout?: number,
 };
 
-let globalBlurTimeout: any;
+let globalBlurTimeout: number | undefined;
 export default function TextField({
   scrollIntoView,
   helperTextError,
@@ -34,26 +37,29 @@ export default function TextField({
         const inputField = e.target as HTMLInputElement;
         if (e.key === 'Enter' && inputField.form) {
           // Trigger onBlur if an Enter key is pressed
-          if (props.onBlur) props.onBlur(e as any);
+          // @ts-expect-error type mismatch
+          if (props.onBlur) props.onBlur(e);
         }
         if (blurTimeout) {
-          clearTimeout(globalBlurTimeout);
-          globalBlurTimeout = setTimeout(() => {
+          window.clearTimeout(globalBlurTimeout);
+          globalBlurTimeout = window.setTimeout(() => {
             if (props.onBlur) {
-              // console.info('blur timeout reached', props.name, `${inputField.value}`);
-              props.onBlur(e as any);
+              // @ts-expect-error type mismatch
+              props.onBlur(e);
             }
           }, blurTimeout);
         }
       }}
       slotProps={{
         input: {
-          onAnimationStart: (e: any): void => {
-            const value = `${e.target.value}`;
+          onAnimationStart: (e): void => {
+            // @ts-expect-error missing property
+            const value = `${e.target?.value}`;
             if (value && e.animationName === 'mui-auto-fill') {
               if (props.value !== value) {
                 // console.info('autofill detected', props.name, props.value, value);
-                if (props.onChange) props.onChange(e as any);
+                // @ts-expect-error type mismatch
+                if (props.onChange) props.onChange(e);
               }
             }
           },

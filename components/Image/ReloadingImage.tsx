@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, {SyntheticEvent, useRef, useState} from 'react';
 import Image from 'next/image';
-import { ImageProps } from 'next/dist/shared/lib/get-img-props';
+import {ImageProps} from 'next/dist/shared/lib/get-img-props';
 
 export default function ReloadingImage({ alt, ...props }: ImageProps) {
   const [retries, setRetries] = useState(0);
@@ -11,7 +11,7 @@ export default function ReloadingImage({ alt, ...props }: ImageProps) {
   return (
     <Image
       alt={alt}
-      onError={(e: any) => {
+      onError={(e: SyntheticEvent<HTMLImageElement, Event>) => {
         if (retries < 3) {
           // Clear existing timeout before setting a new one
           if (timeoutRef.current) {
@@ -20,7 +20,7 @@ export default function ReloadingImage({ alt, ...props }: ImageProps) {
 
           setRetries((prev) => prev + 1);
           timeoutRef.current = setTimeout(() => {
-            e.target.src += '?&';
+              (e.target as HTMLImageElement).src += '?&';
           }, 5000);
         }
       }}

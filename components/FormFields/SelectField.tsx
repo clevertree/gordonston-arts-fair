@@ -1,6 +1,9 @@
-import type { SelectProps as MUISelectProps } from '@mui/material';
+import type {SelectProps as MUISelectProps} from '@mui/material';
 import {
-  FormControl, FormHelperText, InputLabel, Select as MUISelect
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  Select as MUISelect
 } from '@mui/material';
 import React from 'react';
 
@@ -31,7 +34,7 @@ export default function SelectField({
       <MUISelect
         value={value || defaultValue} // Prevent usage of defaultValue
         labelId={labelName}
-        inputRef={(inputRef: any) => {
+        inputRef={(inputRef) => {
           if (inputRef && scrollIntoView) {
             const scrollOptions: ScrollIntoViewOptions = {
               behavior: 'smooth',
@@ -50,7 +53,8 @@ export default function SelectField({
         }}
         onChange={(...args) => {
           if (onChange) onChange(...args);
-          if (onBlur) onBlur(args[0] as any);
+          // @ts-expect-error type mismatch
+          if (onBlur) onBlur(args[0]);
         }}
         onBlur={onBlur}
         {...props}

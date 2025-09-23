@@ -56,17 +56,17 @@ export default function UserListAdmin({
     try {
       listUsersAsAdmin(args).then(setData).then(() => setStatus('ready'));
       setMessage(['info', '']);
-    } catch (e: any) {
-      setMessage(['error', e.message]);
+    } catch (e: unknown) {
+        setMessage(['error', (e as Error).message]);
     }
   }, [args, listUsersAsAdmin]);
 
     async function exportData(bookType: BookType) {
-        const data = await listUsersAsAdmin({
+        const exportedData = await listUsersAsAdmin({
             ...args,
             limit: 99999
         });
-        exportToExcel(data.userList, 'export.' + bookType, bookType);
+        exportToExcel(exportedData.userList, 'export.' + bookType, bookType);
     }
 
     return (
@@ -267,13 +267,15 @@ export default function UserListAdmin({
         <Stack spacing={2}>
             <Button variant='contained'
                     color='primary'
-                    onClick={() => exportData('xlsx')}>
+                    onClick={() => exportData('xlsx')}
+            >
                 Export to excel
             </Button>
 
             <Button variant='contained'
                     color='primary'
-                    onClick={() => exportData('csv')}>
+                    onClick={() => exportData('csv')}
+            >
                 Export to csv
             </Button>
         </Stack>

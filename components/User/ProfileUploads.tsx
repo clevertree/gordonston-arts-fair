@@ -1,9 +1,9 @@
 'use client';
 
-import { InferAttributes } from 'sequelize';
-import { UserFileUploadModel } from '@util/models';
-import { IProfileStatus, IProfileStatusAction } from '@util/profile';
-import React, { useCallback, useRef, useState } from 'react';
+import {InferAttributes} from 'sequelize';
+import {UserFileUploadModel} from '@util/models';
+import {IProfileStatus, IProfileStatusAction} from '@util/profile';
+import React, {useCallback, useRef, useState} from 'react';
 import {
   Alert,
   Box,
@@ -18,10 +18,10 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
-import { ProfileUploadForm } from '@components/User/ProfileUploadForm';
-import type { AlertColor } from '@mui/material/Alert';
+import {ProfileUploadForm} from '@components/User/ProfileUploadForm';
+import type {AlertColor} from '@mui/material/Alert';
 import PaymentModal from '@components/Modal/PaymentModal';
-import { useRouter } from 'next/navigation';
+import {useRouter} from 'next/navigation';
 
 interface ProfileUploadsProps {
   userUploads: UserFileUploadModel[],
@@ -111,7 +111,7 @@ export function ProfileUploads({
                         setMessage(['error', `File ${file.name} must be less than 5MB. Skipping ${file.name}`]);
                       }
                     }));
-                  } catch (error: any) {
+                  } catch (error: unknown) {
                     // eslint-disable-next-line no-console
                     console.error('Error uploading files', error);
                     // setStatus('error');

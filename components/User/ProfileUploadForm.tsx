@@ -1,8 +1,17 @@
 'use client';
 
-import React, {useCallback, useRef, useState} from 'react';
+import React, {FormEvent, useCallback, useRef, useState} from 'react';
 import Image from 'next/image';
-import {Alert, Button, Checkbox, FormControlLabel, Link, Stack, TableCell, TableRow} from '@mui/material';
+import {
+  Alert,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Link,
+  Stack,
+  TableCell,
+  TableRow
+} from '@mui/material';
 
 import {TextField, useFormHook} from '@components/FormFields';
 import type {AlertColor} from '@mui/material/Alert';
@@ -71,9 +80,9 @@ export function ProfileUploadForm({
       setStatus('ready');
       setMessage(['success', deleteMessage]);
       router.refresh();
-    } catch (e: any) {
+    } catch (e: unknown) {
       setStatus('ready');
-      setMessage(['error', e.message]);
+      setMessage(['error', (e as Error).message]);
     }
   }, [deleteFile, fileUploadServer.id, fileUploadServer.title, router]);
 
@@ -97,9 +106,9 @@ export function ProfileUploadForm({
       // onUpdate(updatedStatus);
       setStatus('ready');
       setMessage(['success', updateMessage]);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setStatus('ready');
-      setMessage(['error', e.message]);
+      setMessage(['error', (e as Error).message]);
     }
     formRef.current?.scrollIntoView({
       behavior: 'smooth',
@@ -124,7 +133,7 @@ export function ProfileUploadForm({
           method="post"
           ref={formRef}
                     // onChange={handleFormChange}
-          onSubmit={async (e: any) => {
+          onSubmit={async (e: FormEvent<HTMLFormElement>) => {
             e.preventDefault();
             await handleUpdate();
           }}
@@ -156,7 +165,7 @@ export function ProfileUploadForm({
                 control={<Checkbox
                     checked={!!fileUploadClient.feature}
                     {...formUpload.setupInput('feature', 'Feature on Front page')}
-                />}
+                         />}
                 label="Feature this image on the ArtFair Website"
             />
             <Button

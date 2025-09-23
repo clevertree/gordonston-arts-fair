@@ -11,7 +11,8 @@
     "next",
     "next/core-web-vitals",
     "plugin:jsx-a11y/recommended",
-    "plugin:cypress/recommended"
+    "plugin:cypress/recommended",
+    "plugin:@typescript-eslint/recommended"
   ],
   "ignorePatterns": [
     "node_modules/",
@@ -32,7 +33,6 @@
     ]
   },
   "plugins": [
-    "testing-library",
     "jsx-a11y",
     "cypress"
   ],
@@ -97,15 +97,13 @@
     "@typescript-eslint/comma-dangle": "off",
     "@typescript-eslint/no-unused-vars": "warn",
     "@typescript-eslint/no-unused-expressions": "warn",
-    "@typescript-eslint/semi": "warn",
     "@typescript-eslint/no-shadow": "warn",
-    "@typescript-eslint/space-before-function-paren": "warn",
     "@next/next/no-img-element": "off",
     "semi": [
       "warn",
       "always"
     ],
-    "max-len": "warn",
+    "max-len": "off",
     "import/no-cycle": "warn",
     "no-continue": "warn",
     "no-restricted-syntax": "warn",

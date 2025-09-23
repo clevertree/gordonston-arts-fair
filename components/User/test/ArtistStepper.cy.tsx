@@ -12,6 +12,6 @@ describe('<ArtistStepper />', () => {
         formFilled: true,
         action: 'upload-files'
       }}
-    />);
+             />);
   });
 });
