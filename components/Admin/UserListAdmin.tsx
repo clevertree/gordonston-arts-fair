@@ -1,27 +1,30 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  Alert,
-  Box,
-  Button,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography
+    Alert,
+    Box,
+    Button,
+    Paper,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography
 } from '@mui/material';
-import type { AlertColor } from '@mui/material/Alert';
+import type {AlertColor} from '@mui/material/Alert';
 import Link from 'next/link';
-import { getFullName, getStatusName } from '@util/profile';
-import { profileStatuses, UserSearchParams } from '@types';
-import { snakeCaseToTitleCase } from '@util/format';
-import { IUserSearchResponse } from '@util/userActions';
-import { PaginationLinks } from '@components/Pagination/PaginationLinks';
+import {getFullName, getStatusName} from '@util/profile';
+import {profileStatuses, UserSearchParams} from '@types';
+import {snakeCaseToTitleCase} from '@util/format';
+import {IUserSearchResponse} from '@util/userActions';
+import {PaginationLinks} from '@components/Pagination/PaginationLinks';
 import styles from './UserListAdmin.module.css';
+import {exportToExcel} from "@util/export";
+import {BookType} from "xlsx";
 
 interface AdminUserListProps {
   listUsersAsAdmin(args: UserSearchParams): Promise<IUserSearchResponse>,
@@ -46,7 +49,7 @@ export default function UserListAdmin({
   } = data;
   const [args, setArgs] = useState<UserSearchParams>({
     status: 'submitted',
-    limit: 50
+      limit: 25
   });
   useEffect(() => {
     setMessage(['info', 'Fetching user logs...']);
@@ -58,7 +61,15 @@ export default function UserListAdmin({
     }
   }, [args, listUsersAsAdmin]);
 
-  return (
+    async function exportData(bookType: BookType) {
+        const data = await listUsersAsAdmin({
+            ...args,
+            limit: 99999
+        });
+        exportToExcel(data.userList, 'export.' + bookType, bookType);
+    }
+
+    return (
     <Box className="flex flex-col min-w-full m-auto p-6 rounded-2xl border-2 border-[#ccca]">
       <Typography variant="h4" gutterBottom>
         {`${USER_LABEL} Management`}
@@ -151,21 +162,21 @@ export default function UserListAdmin({
                 className="cursor-pointer underline hover:text-blue-200"
                 onClick={() => setArgs({
                   ...args,
-                  orderBy: 'email',
-                  order: args.orderBy === 'email' && args.order === 'asc' ? 'desc' : 'asc'
+                    orderBy: 'last_name',
+                    order: args.orderBy === 'last_name' && args.order === 'asc' ? 'desc' : 'asc'
                 })}
               >
-                Email
+                  Full Name
               </TableCell>
               <TableCell
                 className="cursor-pointer underline hover:text-blue-200"
                 onClick={() => setArgs({
                   ...args,
-                  orderBy: 'last_name',
-                  order: args.orderBy === 'last_name' && args.order === 'asc' ? 'desc' : 'asc'
+                    orderBy: 'email',
+                    order: args.orderBy === 'email' && args.order === 'asc' ? 'desc' : 'asc'
                 })}
               >
-                Full Name
+                  Email
               </TableCell>
               <TableCell className={styles.hideOnTablet}>Category</TableCell>
               <TableCell
@@ -189,7 +200,7 @@ export default function UserListAdmin({
                 Status
               </TableCell>
               <TableCell className={styles.hideOnTablet}>Images</TableCell>
-              <TableCell className={styles.hideOnMobile}>Edit</TableCell>
+                <TableCell className={styles.hideOnMobile}>Manage</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -202,11 +213,14 @@ export default function UserListAdmin({
                 key={email}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
+                  <TableCell className={styles.hideOnMobile}>
+                      <Link href={`/user/${id}`} target="_blank">
+                          {getFullName(first_name, last_name)}
+                      </Link>
+                  </TableCell>
                 <TableCell scope="row">
-                  <Link href={`mailto:${email}`}>{email}</Link>
-                </TableCell>
-                <TableCell className={styles.hideOnMobile}>
-                  {getFullName(first_name, last_name)}
+                    <Link href={`mailto:${email}`} target="_blank">✉</Link>
+                    {` ${email}`}
                 </TableCell>
                 <TableCell className={styles.hideOnTablet}>
                   {category}
@@ -250,7 +264,19 @@ export default function UserListAdmin({
           pageCount={pageCount}
         />
       </div>
+        <Stack spacing={2}>
+            <Button variant='contained'
+                    color='primary'
+                    onClick={() => exportData('xlsx')}>
+                Export to excel
+            </Button>
 
+            <Button variant='contained'
+                    color='primary'
+                    onClick={() => exportData('csv')}>
+                Export to csv
+            </Button>
+        </Stack>
     </Box>
 
   );

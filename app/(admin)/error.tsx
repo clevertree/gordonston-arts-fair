@@ -1,8 +1,15 @@
 'use client';
 
-import { useEffect } from 'react';
+// Error boundaries must be client components
 
-const testMode = process.env.TEST_MODE !== 'false';
+import React from 'react';
+import {
+  SignedIn, SignedOut, SignInButton, UserButton,
+} from '@clerk/nextjs';
+import { Button, Stack, Typography } from '@mui/material';
+import { MdError } from 'react-icons/md';
+import Link from 'next/link';
+
 export default function Error({
   error,
   reset,
@@ -10,26 +17,43 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.error(error);
-  }, [error]);
-
   return (
-    <main className="flex h-full flex-col items-center justify-center">
-      <h2 className="text-center">Something went wrong!</h2>
-      <code>{error.message}</code>
-      {testMode && <code>{error.stack}</code>}
-      <button
-        type="button"
-        className="mt-4 rounded-md bg-blue-700 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-400"
-        onClick={
-                    // Attempt to recover by trying to re-render
-                    () => reset()
-                }
-      >
-        Try again
-      </button>
-    </main>
+    <div>
+
+      <Stack spacing={4}>
+        <MdError size={100} color="red" style={{ margin: '0 auto' }} />
+        <Typography component="h2" align="center">
+          Error:
+          {' '}
+          {error.message}
+          . Please contact the
+          {' '}
+          <Link href={`mailto:admin@gordonstonartfair.com?subject=${error.message}`}>admin</Link>
+          {' '}
+          for assistance.
+        </Typography>
+        <SignedOut>
+          <SignInButton forceRedirectUrl="/redirect">
+            <Button variant="contained">
+              Click here to sign in
+            </Button>
+          </SignInButton>
+          {/* <SignUpButton> */}
+          {/*  <Button variant="contained"> */}
+          {/*    Click here to register */}
+          {/*  </Button> */}
+          {/* </SignUpButton> */}
+        </SignedOut>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+        <Button
+          variant="contained"
+          onClick={() => reset()}
+        >
+          Refresh the page
+        </Button>
+      </Stack>
+    </div>
   );
 }

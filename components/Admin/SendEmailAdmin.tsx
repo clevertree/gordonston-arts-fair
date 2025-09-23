@@ -19,21 +19,21 @@ import type { AlertColor } from '@mui/material/Alert';
 import Mail from 'nodemailer/lib/mailer';
 import { useRouter } from 'next/navigation';
 import { templateList } from '@template/email';
-import {UserStatus} from "@types";
-import SelectField from '../FormFields/SelectField';
+import { UserModel } from '@util/models';
+import { MailResult } from '@types';
+import SelectField from '@components/FormFields/SelectField';
 
 interface SendEmailAdminProps {
-  userEmail: string,
-  userStatus: UserStatus,
+  sendMail(options: Mail.Options): Promise<MailResult>,
 
-  sendMail(options: Mail.Options): Promise<{ success: boolean; message: string }>,
+  userProfile: UserModel
 }
 
 export default function SendEmailAdmin({
-  userStatus,
-  userEmail,
   sendMail,
+  userProfile
 }: SendEmailAdminProps) {
+  const { email: userEmail, status: userStatus } = userProfile;
   const [status, setStatus] = useState<'ready' | 'submitting'>('ready');
   const [message, setMessage] = useState<[AlertColor, string]>(['info', '']);
   const [email, setEmail] = useState(userEmail);
@@ -50,15 +50,14 @@ export default function SendEmailAdmin({
         action={async () => {
           setStatus('submitting');
 
-          // TOOD: send template instead of custom email?
-          const { success, message: updateMessage } = await sendMail({
+          const { status: updateStatus, message: updateMessage } = await sendMail({
             to: email,
             // html: body,
             text: body,
             subject
           });
           setStatus('ready');
-          setMessage([success ? 'success' : 'error', updateMessage]);
+          setMessage([updateStatus, updateMessage]);
           formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
           router.refresh(); // Refresh the current page
         }}
@@ -89,25 +88,33 @@ export default function SendEmailAdmin({
                     variant="outlined"
                     value={userStatus || ''}
                     onChange={(e: any) => {
-                      const templateName = e.target.value;
-                      if (templateName) {
-                        const template = templateList.find((t) => t.name === templateName);
+                      setBody('');
+                      setSubject('');
+                      const templateID = e.target.value;
+                      if (templateList[templateID]) {
+                        const template = templateList[templateID];
                         if (template) {
-                          setBody(template);
-                          setSubject(template.subject);
+                          const emailOptions = template(userProfile);
+                          setBody(`${emailOptions.text}`);
+                          setSubject(`${emailOptions.subject}`);
+                        } else {
+                          setMessage(['error', 'Invalid template ID. Please try again.']);
                         }
                       }
                     }}
                   >
-                    <MenuItem value="">Load a template</MenuItem>
-                    {templateList.map(({ name, subject: subjectString }) => (
-                      <MenuItem
-                        key={name}
-                        value={name}
-                      >
-                        {subjectString}
-                      </MenuItem>
-                    ))}
+                    <MenuItem value="-1">Load a template</MenuItem>
+                    {templateList.map((template, i) => {
+                      const emailOptions = template(userProfile);
+                      return (
+                        <MenuItem
+                          key={emailOptions.subject}
+                          value={i}
+                        >
+                          {emailOptions.subject}
+                        </MenuItem>
+                      );
+                    })}
                   </SelectField>
                 </TableCell>
               </TableRow>

@@ -1,17 +1,15 @@
 'use client';
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 import Image from 'next/image';
-import {
-  Alert, Button, Link, Stack, TableCell, TableRow
-} from '@mui/material';
+import {Alert, Button, Checkbox, FormControlLabel, Link, Stack, TableCell, TableRow} from '@mui/material';
 
-import { TextField, useFormHook } from '@components/FormFields';
-import type { AlertColor } from '@mui/material/Alert';
-import { IProfileStatus } from '@util/profile';
-import { UserFileUploadModel } from '@util/models';
-import { InferAttributes } from 'sequelize';
-import { useRouter } from 'next/navigation';
+import {TextField, useFormHook} from '@components/FormFields';
+import type {AlertColor} from '@mui/material/Alert';
+import {IProfileStatus} from '@util/profile';
+import {UserFileUploadModel} from '@util/models';
+import {InferAttributes} from 'sequelize';
+import {useRouter} from 'next/navigation';
 
 type UploadModelClient = InferAttributes<UserFileUploadModel>;
 
@@ -153,6 +151,13 @@ export function ProfileUploadForm({
                   shrink: true
                 }
               }}
+            />
+            <FormControlLabel
+                control={<Checkbox
+                    checked={!!fileUploadClient.feature}
+                    {...formUpload.setupInput('feature', 'Feature on Front page')}
+                />}
+                label="Feature this image on the ArtFair Website"
             />
             <Button
               type="submit"

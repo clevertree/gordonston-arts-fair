@@ -3,8 +3,8 @@
 import { HttpError, UnauthorizedError } from '@util/exception/httpError';
 import { auth, currentUser } from '@clerk/nextjs/server';
 
-const secretKey = process.env.SESSION_SECRET;
-const encodedKey = new TextEncoder().encode(secretKey);
+// const secretKey = process.env.SESSION_SECRET;
+// const encodedKey = new TextEncoder().encode(secretKey);
 
 // export async function encrypt(payload: SessionPayload) {
 //   return new SignJWT(payload)
@@ -27,7 +27,6 @@ const encodedKey = new TextEncoder().encode(secretKey);
 //     throw HttpError.Unauthorized('Failed to verify session - Please login');
 //   }
 // }
-
 // export async function startSession(userID: number, expiresInDays = 360) {
 //   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * expiresInDays);
 //
@@ -49,7 +48,6 @@ const encodedKey = new TextEncoder().encode(secretKey);
 //     path: '/',
 //   });
 // }
-
 // export async function endSession() {
 //   const session = await decryptSession();
 //   const cookieStore = await cookies();

@@ -1,8 +1,9 @@
 import { formatDate } from '@util/date';
 import Mail from 'nodemailer/lib/mailer';
+import { UserModel } from '@util/models';
 
 export default function ArtistStandbyEmailTemplate(
-  to: string,
+  { email: to }: UserModel,
 ):Mail.Options {
   const eventDate = new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`);
   const subject = 'Your exhibit has been put on standby';

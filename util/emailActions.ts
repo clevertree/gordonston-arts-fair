@@ -4,6 +4,7 @@
 
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
+import { MailResult } from '@types';
 
 const {
   SMTP_SERVER_HOST,
@@ -22,11 +23,6 @@ const transporter = nodemailer.createTransport({
     pass: SMTP_SERVER_PASSWORD,
   },
 });
-
-export interface MailResult {
-  status: 'success' | 'error';
-  message: string;
-}
 
 export async function sendMail(options: Mail.Options): Promise<MailResult> {
   const email = `${options.to}`;

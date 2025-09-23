@@ -72,3 +72,8 @@ export interface UserSearchParams {
   page?: number,
   limit?: number
 }
+
+export interface MailResult {
+  status: 'success' | 'error';
+  message: string;
+}

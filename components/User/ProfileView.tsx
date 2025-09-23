@@ -52,7 +52,7 @@ function ProfileView({
       case 'phone2':
         return value ? <Link href={`tel:${value}`}>{formatPhone(`${value}`)}</Link> : 'N/A';
       case 'email':
-        return value ? <Link href={`mailto:${value}`}>{`${value}`}</Link> : 'N/A';
+        return value ? <Link href={`mailto:${value}`} target="_blank">{`${value}`}</Link> : 'N/A';
       default:
         return value;
     }

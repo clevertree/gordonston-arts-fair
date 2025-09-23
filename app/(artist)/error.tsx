@@ -2,7 +2,7 @@
 
 // Error boundaries must be client components
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   SignedIn, SignedOut, SignInButton, UserButton,
 } from '@clerk/nextjs';
@@ -17,19 +17,6 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  // const router = useRouter();
-  useEffect(() => {
-    // Log the error to an error reporting service
-    // if (error instanceof HttpError.Unauthorized) {
-    //   router.push('/login');
-    // }
-    //   if(error.message.includes('Unauthorized')) {
-    //       setTimeout(() => {
-    //           router.push('/login');
-    //       }, 2000)
-    //   }
-  }, [error]);
-
   return (
     <div>
 

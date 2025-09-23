@@ -1,27 +1,18 @@
 import Mail from 'nodemailer/lib/mailer';
-import UserRegistrationEmailTemplate from './user-registration-email';
-import User2FactorEmailTemplate from './user-2factor-email';
-import AcceptedEmailTemplate from './artist-approved-email';
-import DeclinedEmailTemplate from './artist-declined-email';
-import StandbyEmailTemplate from './artist-standby-email';
+import { UserModel } from '@util/models';
+import AcceptedEmailTemplate from '@template/email/artist-approved-email';
+import DeclinedEmailTemplate from '@template/email/artist-declined-email';
+import StandbyEmailTemplate from '@template/email/artist-standby-email';
 
-export type EmailTemplate = (...args: any[]) => Mail.Options;
+export type EmailTemplate = (userProfile: UserModel) => Mail.Options;
 
-const testMode = process.env.TEST_MODE !== 'false';
 const templateList: EmailTemplate[] = [
   AcceptedEmailTemplate,
   DeclinedEmailTemplate,
   StandbyEmailTemplate,
-  ...(testMode ? [
-    UserRegistrationEmailTemplate,
-    User2FactorEmailTemplate,
-  ] : []),
 ];
 
 export {
-  UserRegistrationEmailTemplate,
-  // UserPasswordResetEmailTemplate,
-  User2FactorEmailTemplate,
   AcceptedEmailTemplate,
   DeclinedEmailTemplate,
   StandbyEmailTemplate,

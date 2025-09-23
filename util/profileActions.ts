@@ -35,38 +35,51 @@ export async function fetchProfileFromSession(): Promise<UserModel> {
     );
   }
   const email = `${user.primaryEmailAddress?.emailAddress}`.toLowerCase() || null;
-  const phone = `${user.primaryPhoneNumber?.phoneNumber}`.replace(/\D/g, '') || null;
-
-  await ensureDatabase();
-
-  if (email) {
-    const userRow = await UserModel.findOne({
-      where: {
-        email
-      }
-    });
-    if (userRow) return userRow;
-  } else if (phone) {
-    const userRow = await UserModel.findOne({
-      where: {
-        phone
-      }
-    });
-    if (userRow) return userRow;
-  } else {
+  // const phone = `${user.primaryPhoneNumber?.phoneNumber}`.replace(/\D/g, '') || null;
+  if (!email) {
     throw new UnauthorizedError(
-      'No phone or email was provided by Clerk. Please contact the site administrator to resolve this issue.'
+      'No email was provided by Clerk. Please contact the site administrator to resolve this issue.'
     );
   }
+  return fetchOrCreateProfileByEmail(email);
+}
 
-  return UserModel.create({
+export async function fetchOrCreateProfileByEmail(email: string): Promise<UserModel> {
+  await ensureDatabase();
+
+  // if (email) {
+  const userRow = await UserModel.findOne({
+    where: {
+      email
+    }
+  });
+  if (userRow) return userRow;
+  // } else if (phone) {
+  //   const userRow = await UserModel.findOne({
+  //     where: {
+  //       phone
+  //     }
+  //   });
+  //   if (userRow) return userRow;
+  // } else {
+  //   throw new UnauthorizedError(
+  //     'No phone or email was provided by Clerk.
+  //     Please contact the site administrator to resolve this issue.'
+  //   );
+  // }
+
+  const newUser = await UserModel.create({
     email,
-    phone,
+    // phone,
     type: 'user',
     status: 'registered',
     created_at: new Date(),
     updated_at: new Date(),
   });
+
+  await addUserUserLogModel(newUser.id, 'register', 'User registered via Clerk');
+
+  return newUser;
 }
 
 export async function updateProfile(updatedUserRow: InferAttributes<UserModel>) {
@@ -245,15 +258,15 @@ export async function getUserStatusEmailTemplate(userID: number, status: UserSta
   switch (status) {
     case 'approved':
       return ArtistApprovedEmailTemplate(
-        userProfile.email,
+        userProfile,
       );
     case 'standby':
       return ArtistStandbyEmailTemplate(
-        userProfile.email,
+        userProfile,
       );
     case 'declined':
       return ArtistDeclinedEmailTemplate(
-        userProfile.email,
+        userProfile,
       );
     default:
       return null;

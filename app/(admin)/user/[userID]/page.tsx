@@ -11,6 +11,8 @@ import { fetchUserLogs } from '@util/logActions';
 import { validateAdminSession } from '@util/session';
 import UserTransactionView from '@components/User/UserTransactionView';
 import { fetchTransactions } from '@util/transActions';
+import { sendMail } from '@util/emailActions';
+import SendEmailAdmin from '@components/Admin/SendEmailAdmin';
 
 export const metadata = {
   title: 'Manage an Artist',
@@ -61,11 +63,10 @@ export default async function AdminUserManagementPage({
           userUploads={userUploads.map((u) => u.toJSON())}
         />
 
-        {/* <SendEmailAdmin */}
-        {/*  userStatus={userProfile.status} */}
-        {/*  userEmail={userProfile.email} */}
-        {/*  sendMail={sendMail} */}
-        {/* /> */}
+        <SendEmailAdmin
+          userProfile={userProfile.toJSON()}
+          sendMail={sendMail}
+        />
 
         <UserLogView
           title={`${USER_LABEL} Logs`}

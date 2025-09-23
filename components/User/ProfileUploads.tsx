@@ -97,13 +97,19 @@ export function ProfileUploads({
                 const input = e.target;
                 if (input && input.files) {
                   let count = 0;
+                  let errorCount = 0;
                   // setStatus('updating');
                   setMessage(['info', `Uploading ${input.files.length} files...`]);
                   let lastStatus: IProfileStatus | undefined;
                   try {
                     await Promise.all(Array.from(input.files).map(async (file) => {
-                      lastStatus = (await uploadFile(file)).result;
-                      count += 1;
+                      if (file.size < 1024 * 1024 * 5) {
+                        lastStatus = (await uploadFile(file)).result;
+                        count += 1;
+                      } else {
+                        errorCount += 1;
+                        setMessage(['error', `File ${file.name} must be less than 5MB. Skipping ${file.name}`]);
+                      }
                     }));
                   } catch (error: any) {
                     // eslint-disable-next-line no-console
@@ -118,10 +124,14 @@ export function ProfileUploads({
                     setMessage(['error', 'There was an error uploading your files.']);
                     return;
                   }
+                  if (errorCount > 0) {
+                    setMessage(['info', 'There was an error uploading some of your files.']);
+                  } else {
+                    setMessage(['success', `${count} file${count === 1 ? ' has been' : 's have been'} uploaded`]);
+                  }
 
                   if (lastStatus) handleUserProfileUpdate(lastStatus);
 
-                  setMessage(['success', `${count} file${count === 1 ? ' has been' : 's have been'} uploaded`]);
                   router.refresh();
                   // if (updatedUserProfile) {
                   //   setUserProfileClient((oldProfile) => ({

@@ -15,16 +15,16 @@ export function FooterContent({ showDates = false }: FooterContentProps) {
         <span>
           This website is managed by
           {' '}
-          <Link href="mailto:ari.asulin@gmail.com">Ari Asulin</Link>
+          <Link href="mailto:ari.asulin@gmail.com" target="_blank">Ari Asulin</Link>
           {' '}
           and can be edited via
           {' '}
-          <Link href="https://github.com/clevertree/gordonston-arts-fair">Github.com</Link>
+          <Link href="https://github.com/clevertree/gordonston-arts-fair" target="_blank">Github.com</Link>
         </span>
         <span>
           For help submitting your Artist Profile please contact the admin at
           {' '}
-          <Link href="mailto:admin@gordonstonartfair.com">admin@gordonstonartfair.com</Link>
+          <Link href="mailto:admin@gordonstonartfair.com" target="_blank">admin@gordonstonartfair.com</Link>
         </span>
         <span>
           <Link href="/privacy">Privacy Policy</Link>

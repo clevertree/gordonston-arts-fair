@@ -13,7 +13,7 @@ import {
   Table,
   Unique
 } from 'sequelize-typescript';
-import type { LogType, UserStatus, UserType } from '@types';
+import type {LogType, UserStatus, UserType} from '@types';
 
 // User model with decorators
 import pg from 'pg';
@@ -151,7 +151,10 @@ export class UserFileUploadModel extends Model {
 
   @AllowNull(false)
   @Column(DataType.INTEGER)
-    height!: number;
+  height!: number;
+
+  @Column({type:DataType.BOOLEAN, defaultValue:false})
+  feature!: boolean;
 
   @BelongsTo(() => UserModel)
     user!: UserModel;
@@ -278,7 +281,7 @@ const sequelize = new Sequelize(databaseUrl, {
 export async function initDatabase() {
   try {
     // await sequelize.authenticate();
-    await sequelize.sync();
+    await sequelize.sync({ alter: false, force: false, logging: true});
     console.log('Database connection established successfully.');
   } catch (error) {
     console.error('Unable to connect to the database:', error);

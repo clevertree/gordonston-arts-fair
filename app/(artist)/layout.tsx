@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
-import React from 'react';
+import React, { Suspense } from 'react';
 import Link from 'next/link';
 import FloatingDiv from '@components/FloatingDiv/FloatingDiv';
 import { ClerkSessionContent } from '@components/SessionForms/ClerkSessionContent';
 import { FooterContent } from '@components/Layout/FooterContent';
+import { SuspenseContent } from '@app/suspenseContent';
 
 export const metadata: Metadata = {
   title: 'Gordonston Art Fair',
@@ -29,7 +30,9 @@ export default function ArtistLayout({
       </header>
       <article role="main" className="max-w-screen-lg flex flex-col z-[2] m-auto p-4">
         {testMode && <div className="bg-red-800 text-white font-bold text-center p-2">TEST MODE</div>}
-        {children}
+        <Suspense fallback={<SuspenseContent />}>
+          {children}
+        </Suspense>
       </article>
       <FooterContent />
     </>

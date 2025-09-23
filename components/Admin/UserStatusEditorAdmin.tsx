@@ -38,19 +38,20 @@ export default function UserStatusEditorAdmin({
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
 
+  async function handleSubmit() {
+    const { message: updateMessage } = await updateUserStatus(
+      updatedUserStatus,
+      sendEmailTemplate
+    );
+    setMessage(['success', updateMessage]);
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    router.refresh(); // Refresh the current page
+  }
+
   return (
     <Box className="flex flex-col min-w-full m-auto p-6 rounded-2xl border-2 border-[#ccca]">
       <form
         ref={formRef}
-        action={async () => {
-          const { message: updateMessage } = await updateUserStatus(
-            updatedUserStatus,
-            sendEmailTemplate
-          );
-          setMessage(['success', updateMessage]);
-          formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-          router.refresh(); // Refresh the current page
-        }}
         method="POST"
       >
         {message && message[1] && (
@@ -106,7 +107,7 @@ export default function UserStatusEditorAdmin({
                 </TableCell>
                 <TableCell align="left">
                   <Button
-                    type="submit"
+                    onClick={() => handleSubmit()}
                     variant="contained"
                     color="primary"
                   >
