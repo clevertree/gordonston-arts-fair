@@ -9,7 +9,7 @@ import {formatByType, FormatTypeList} from '@components/FormFields/formatting';
 
 export type FormFieldEvent = {
   target: {
-    value: string | undefined
+    value: string | undefined | unknown
   }
 }
 
@@ -134,7 +134,7 @@ export function useFormHook<T extends object>(
       defaultValue: currentValue,
       onChange: (e) => {
         const { value } = e.target;
-        const formattedValue = autoFormat ? formatByType(autoFormat, value) : value;
+        const formattedValue = autoFormat ? formatByType(autoFormat, `${value}`) : value;
         if (formattedValue !== value) e.target.value = `${formattedValue}`;
         setFieldValue(fieldName, `${formattedValue}`);
         if (validate) {
@@ -147,7 +147,7 @@ export function useFormHook<T extends object>(
         // Update form data if the value changed
         // debugger;
         const {value} = e.target;
-        if (typeof value !== "undefined" && defaultFormData[fieldName] !== value) {
+        if (typeof value === "string" && defaultFormData[fieldName] !== value) {
           setFieldValue(fieldName, value);
         }
       }
