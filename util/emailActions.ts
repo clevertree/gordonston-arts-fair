@@ -1,10 +1,11 @@
-/* eslint-disable no-console */
-
 'use server';
+/* eslint-disable no-console */
 
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
-import { MailResult } from '@types';
+import {MailResult} from '@types';
+import {EmailTemplate} from "@template/email";
+import {createElement} from "react";
 
 const {
   SMTP_SERVER_HOST,
@@ -142,7 +143,7 @@ export async function sendMail(options: Mail.Options): Promise<MailResult> {
 //     await addUserUserLogModel(userID, 'log-in');
 //   } else {
 //     // Register a new user
-//     const newUser = await UserModel.create({
+//     const newUser = await UserModel.create({F
 //       email: email.toLowerCase(),
 //       type: 'user',
 //       status: 'registered',
@@ -171,3 +172,29 @@ export async function sendMail(options: Mail.Options): Promise<MailResult> {
 //     redirectURL: (await isAdmin(userID)) ? '/user' : '/profile'
 //   };
 // }
+export async function getEmailInfoServer(to: string, template: EmailTemplate): Promise<Mail.Options> {
+    const {
+        default: MDXContent,
+        subject
+    } = template;
+    const ReactDOMServer = (await import('react-dom/server')).default;
+
+    const html = ReactDOMServer.renderToString(createElement(MDXContent));
+
+    // Replace anchor tags with their href attribute
+    const anchorReplaced = html.replace(
+        /<a\s+[^>]*href=["']([^"']+)["'][^>]*>(.*?)<\/a>/gi,
+        '$1'
+    );
+    // Remove all remaining HTML tags
+    const plainText = anchorReplaced.replace(/<[^>]+>/g, '');
+    // Trim and return
+    const text = plainText.trim().replaceAll("\n", "\n\n");
+
+    return {
+        to,
+        subject,
+        html,
+        text,
+    };
+}

@@ -1,0 +1,18 @@
+import {formatDate} from '@util/date';
+export const eventDate = new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`);
+export const boothFee = process.env.NEXT_PUBLIC_BOOTH_FEE;
+export const registrationFeeDate = new Date(`${process.env.NEXT_PUBLIC_REGISTRATION_FEE_DATE}`);
+export const paymentURL = `${process.env.NEXT_PUBLIC_BASE_URL}/payment/booth`;
+export const formattedEventDate = formatDate(eventDate);
+export const subject = 'Your exhibit has been declined'; // Email subject string
+// ######## Email Template Begins here ########
+
+Dear Artist,
+
+After thoughtful consideration, the Gordonston Art Fair regrets to inform you that your work was not accepted for our show this year.
+
+Because this is a juried show, we are limited to the number of exhibitors we can accept. Unfortunately, a lot of good work had to be juried out. We appreciate the opportunity to view your work and wish you the best in the future.
+
+Kind regards,
+
+The Gordonston Art Fair Committee

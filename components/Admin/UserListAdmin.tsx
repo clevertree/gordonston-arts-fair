@@ -214,7 +214,7 @@ export default function UserListAdmin({
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                   <TableCell className={styles.hideOnMobile}>
-                      <Link href={`/user/${id}`} target="_blank">
+                      <Link href={`/user/${id}`}>
                           {getFullName(first_name, last_name)}
                       </Link>
                   </TableCell>

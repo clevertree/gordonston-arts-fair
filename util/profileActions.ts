@@ -2,21 +2,27 @@
 
 'use server';
 
-import { del, put } from '@vercel/blob';
-import { ensureDatabase } from '@util/database';
-import { addUserUserLogModel } from '@util/logActions';
-import { imageDimensionsFromStream } from 'image-dimensions';
-import { UserFileUploadModel, UserModel } from '@util/models';
-import { UserStatus } from '@types';
-import { getProfileStatus } from '@util/profile';
-import { InferAttributes } from 'sequelize';
-import { validateSession } from '@util/session';
-import { HttpError, UnauthorizedError } from '@util/exception/httpError';
-import { currentUser } from '@clerk/nextjs/server';
-import ArtistApprovedEmailTemplate from '@template/email/artist-approved-email';
-import { sendMail } from '@util/emailActions';
-import ArtistStandbyEmailTemplate from '@template/email/artist-standby-email';
-import ArtistDeclinedEmailTemplate from '@template/email/artist-declined-email'; // For currentUser()
+import {del, put} from '@vercel/blob';
+import {ensureDatabase} from '@util/database';
+import {addUserUserLogModel} from '@util/logActions';
+import {imageDimensionsFromStream} from 'image-dimensions';
+import {UserFileUploadModel, UserModel} from '@util/models';
+import {UserStatus} from '@types';
+import {getProfileStatus} from '@util/profile';
+import {InferAttributes} from 'sequelize';
+import {validateSession} from '@util/session';
+import {HttpError, UnauthorizedError} from '@util/exception/httpError';
+import {currentUser} from '@clerk/nextjs/server';
+import {getEmailInfoServer, sendMail} from '@util/emailActions';
+
+import * as ArtistApprovedTemplate
+  from '@template/email/ArtistApprovedTemplate.mdx';
+import * as ArtistStandbyTemplate
+  from '@template/email/ArtistStandbyTemplate.mdx';
+import * as ArtistDeclinedTemplate
+  from '@template/email/ArtistDeclinedTemplate.mdx';
+
+// For currentUser()
 
 export async function fetchProfileByID(userID: number): Promise<UserModel> {
   await ensureDatabase();
@@ -160,7 +166,7 @@ export async function deleteFile(fileID: number) {
   try {
     await del(fileUpload.url);
     console.log('Deleted file: ', fileUpload.url);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting file: ', error);
   }
   const deleteAction = await UserFileUploadModel.destroy({
@@ -217,7 +223,7 @@ export async function updateUserStatus(
   userID: number,
   newStatus: UserStatus,
   message: string,
-  sendEmailTemplate: boolean = true
+  sendTemplate: boolean = true
 ) {
   await ensureDatabase();
   const userProfile = await fetchProfileByID(userID);
@@ -234,10 +240,10 @@ export async function updateUserStatus(
   // Add a log entry
   await addUserUserLogModel(userID, 'status-change', message);
 
-  if (sendEmailTemplate && userProfile.email) {
-    const emailTemplate = await getUserStatusEmailTemplate(userID, newStatus);
-    if (emailTemplate) {
-      await sendMail(emailTemplate);
+  if (sendTemplate && userProfile.email) {
+    const Template = await getUserStatusTemplate(userID, newStatus);
+    if (Template) {
+      await sendMail(Template);
       return {
         message: `Status updated successfully to ${newStatus}. Email sent to artist.`,
       };
@@ -252,22 +258,16 @@ export async function updateUserStatus(
   };
 }
 
-export async function getUserStatusEmailTemplate(userID: number, status: UserStatus) {
+export async function getUserStatusTemplate(userID: number, status: UserStatus) {
   await ensureDatabase();
   const userProfile = await fetchProfileByID(userID);
   switch (status) {
     case 'approved':
-      return ArtistApprovedEmailTemplate(
-        userProfile,
-      );
+      return getEmailInfoServer(userProfile.email, ArtistApprovedTemplate);
     case 'standby':
-      return ArtistStandbyEmailTemplate(
-        userProfile,
-      );
+      return getEmailInfoServer(userProfile.email, ArtistStandbyTemplate);
     case 'declined':
-      return ArtistDeclinedEmailTemplate(
-        userProfile,
-      );
+      return getEmailInfoServer(userProfile.email, ArtistDeclinedTemplate);
     default:
       return null;
   }

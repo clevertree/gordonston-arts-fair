@@ -7,6 +7,7 @@ import {SignedIn, SignedOut, SignInButton, UserButton,} from '@clerk/nextjs';
 import {Button, Stack, Typography} from '@mui/material';
 import {MdError} from 'react-icons/md';
 import Link from 'next/link';
+import {useRouter} from "next/navigation";
 
 export default function Error({
   error,
@@ -15,6 +16,7 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const router = useRouter();
   return (
     <div>
       <Stack spacing={4}
@@ -48,7 +50,10 @@ export default function Error({
         </SignedIn>
         <Button
           variant="contained"
-          onClick={() => reset()}
+          onClick={() => {
+            router.refresh();
+            reset();
+          }}
         >
           Refresh the page
         </Button>

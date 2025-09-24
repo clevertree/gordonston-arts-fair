@@ -22,6 +22,7 @@ import {templateList} from '@template/email';
 import {UserModel} from '@util/models';
 import {MailResult} from '@types';
 import SelectField from '@components/FormFields/SelectField';
+import {renderReactNodeToString} from "@util/emailClient";
 
 interface SendEmailAdminProps {
   sendMail(options: Mail.Options): Promise<MailResult>,
@@ -50,14 +51,21 @@ export default function SendEmailAdmin({
         action={async () => {
           setStatus('submitting');
 
-          const { status: updateStatus, message: updateMessage } = await sendMail({
-            to: email,
-            // html: body,
-            text: body,
-            subject
-          });
+          try {
+            const {
+              status: updateStatus,
+              message: updateMessage
+            } = await sendMail({
+              to: email,
+              // html: body,
+              text: body,
+              subject
+            });
+            setMessage([updateStatus, updateMessage]);
+          } catch (e: unknown) {
+            setMessage(['error', (e as Error).message]);
+          }
           setStatus('ready');
-          setMessage([updateStatus, updateMessage]);
           formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
           router.refresh(); // Refresh the current page
         }}
@@ -94,9 +102,11 @@ export default function SendEmailAdmin({
                       if (templateList[templateID]) {
                         const template = templateList[templateID];
                         if (template) {
-                          const emailOptions = template(userProfile);
-                          setBody(`${emailOptions.text}`);
-                          setSubject(`${emailOptions.subject}`);
+                          const {default: MDXComponent} = template;
+                          // const emailOptions = getEmailInfo(userProfile.email, template);
+                          setBody(renderReactNodeToString(
+                              <MDXComponent/>).text);
+                          setSubject(`${template.subject}`);
                         } else {
                           setMessage(['error', 'Invalid template ID. Please try again.']);
                         }
@@ -105,13 +115,12 @@ export default function SendEmailAdmin({
                   >
                     <MenuItem value="-1">Load a template</MenuItem>
                     {templateList.map((template, i) => {
-                      const emailOptions = template(userProfile);
                       return (
                         <MenuItem
-                          key={emailOptions.subject}
+                            key={template.subject}
                           value={i}
                         >
-                          {emailOptions.subject}
+                          {template.subject}
                         </MenuItem>
                       );
                     })}
