@@ -1,6 +1,6 @@
 const maxWidth = parseInt(process.env.NEXT_PUBLIC_MAX_IMAGE_WIDTH || "1024", 10);
 
-export async function convertImageToJPG(file: File, quality: number = 0.95) {
+export async function convertImageToJPG(file: File, quality: number = 0.95): Promise<File> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -41,7 +41,7 @@ export async function convertImageToJPG(file: File, quality: number = 0.95) {
                     reject('Could not get canvas context');
                 }
             };
-            img.src = `${e.target.result}`;
+            img.src = `${e.target?.result}`;
         };
         reader.onerror = reject;
         reader.readAsDataURL(file);
