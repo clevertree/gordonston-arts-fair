@@ -3,11 +3,9 @@
 // Error boundaries must be client components
 
 import React from 'react';
-import {
-  SignedIn, SignedOut, SignInButton, UserButton,
-} from '@clerk/nextjs';
-import { Button, Stack, Typography } from '@mui/material';
-import { MdError } from 'react-icons/md';
+import {SignedIn, SignedOut, SignInButton, UserButton,} from '@clerk/nextjs';
+import {Button, Stack, Typography} from '@mui/material';
+import {MdError} from 'react-icons/md';
 import Link from 'next/link';
 
 export default function Error({
@@ -19,8 +17,9 @@ export default function Error({
 }) {
   return (
     <div>
-
-      <Stack spacing={4}>
+      <Stack spacing={4}
+             className="flex flex-col items-center justify-center h-screen"
+      >
         <MdError size={100} color="red" style={{ margin: '0 auto' }} />
         <Typography component="h2" align="center">
           Error:

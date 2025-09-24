@@ -22,6 +22,7 @@ import {ProfileUploadForm} from '@components/User/ProfileUploadForm';
 import type {AlertColor} from '@mui/material/Alert';
 import PaymentModal from '@components/Modal/PaymentModal';
 import {useRouter} from 'next/navigation';
+import {convertImageToJPG} from "@util/convertImg";
 
 interface ProfileUploadsProps {
   userUploads: UserFileUploadModel[],
@@ -97,19 +98,25 @@ export function ProfileUploads({
                 const input = e.target;
                 if (input && input.files) {
                   let count = 0;
-                  let errorCount = 0;
+                  const errorCount = 0;
                   // setStatus('updating');
                   setMessage(['info', `Uploading ${input.files.length} files...`]);
                   let lastStatus: IProfileStatus | undefined;
                   try {
                     await Promise.all(Array.from(input.files).map(async (file) => {
-                      if (file.size < 1024 * 1024 * 5) {
-                        lastStatus = (await uploadFile(file)).result;
-                        count += 1;
-                      } else {
-                        errorCount += 1;
-                        setMessage(['error', `File ${file.name} must be less than 5MB. Skipping ${file.name}`]);
-                      }
+                      let convertedFile = file;
+                      // if (file.size > 1024 * 1024 * 5) {
+                      setMessage(['info', `Converting ${file.name} to JPG...`]);
+                      convertedFile = await convertImageToJPG(file);
+                      // }
+                      setMessage(['info', `Uploading ${file.name}...`]);
+                      const uploadResult = await uploadFile(convertedFile);
+                      lastStatus = uploadResult.result;
+                      count += 1;
+                      // } else {
+                      //   errorCount += 1;
+                      //   setMessage(['error', `File ${file.name} must be less than 5MB. Skipping ${file.name}`]);
+                      // }
                     }));
                   } catch (error: unknown) {
                     // eslint-disable-next-line no-console

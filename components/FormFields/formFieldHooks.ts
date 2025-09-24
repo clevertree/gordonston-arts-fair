@@ -145,7 +145,6 @@ export function useFormHook<T extends object>(
       },
       onBlur: (e) => {
         // Update form data if the value changed
-        // debugger;
         const {value} = e.target;
         if (typeof value === "string" && defaultFormData[fieldName] !== value) {
           setFieldValue(fieldName, value);
