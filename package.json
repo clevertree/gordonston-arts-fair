@@ -31,6 +31,7 @@
     "@vercel/blob": "^1.1.1",
     "@vercel/speed-insights": "^1.0.12",
     "clsx": "^2.1.0",
+    "dotenv": "^17.2.2",
     "image-dimensions": "^2.3.0",
     "jose": "^6.0.11",
     "next": "15.4.7",

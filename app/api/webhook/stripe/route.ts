@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
-import { headers } from 'next/headers';
-import { NextResponse } from 'next/server';
+import {headers} from 'next/headers';
+import {NextResponse} from 'next/server';
 import Stripe from 'stripe';
-import { addTransaction } from '@util/transActions';
-import { FeeMetaData } from '@app/api/checkout-sessions/[feeType]/route';
-import { fetchProfileByID, updateUserStatus } from '@util/profileActions';
+import {addTransaction} from '@util/transActions';
+import {FeeMetaData} from '@app/api/checkout-sessions/[feeType]/route';
+import {fetchProfileByID, updateUserStatus} from '@util/profileActions';
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -78,14 +78,14 @@ export async function POST(request: Request) {
 
         switch (feeType) {
           case 'registration':
-            if (profileInfo.status === 'registered') {
-              await updateUserStatus(userID, 'submitted', 'Registration fee paid');
-            }
+            // if (profileInfo.status === 'statusregistered') {
+            await updateUserStatus(userID, 'submitted', 'Registration fee paid');
+            // }
             break;
           case 'booth':
-            if (profileInfo.status === 'approved') {
-              await updateUserStatus(userID, 'paid', 'Booth fee paid');
-            }
+            // if (profileInfo.status === 'approved') {
+            await updateUserStatus(userID, 'paid', 'Booth fee paid');
+            // }
             break;
           default:
         }

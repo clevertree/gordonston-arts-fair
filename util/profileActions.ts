@@ -93,6 +93,9 @@ export async function updateProfile(updatedUserRow: InferAttributes<UserModel>) 
 
   const updatedUserRowDB = await userProfile.update({
     ...updatedUserRow,
+    ...(userProfile.status === 'imported' && ({
+      status: 'registered',
+    })),
     phone: `${updatedUserRow.phone || ''}`.replace(/\D/g, ''),
     phone2: `${updatedUserRow.phone2 || ''}`.replace(/\D/g, ''),
   });
