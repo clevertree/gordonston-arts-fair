@@ -1,4 +1,4 @@
-import { JWTPayload } from 'jose';
+import {JWTPayload} from 'jose';
 
 export interface SMSMessage {
   phone: string;
@@ -32,24 +32,20 @@ export type LogType =
     | 'log-in-error'
     | 'log-out'
     | 'register'
-    | 'register-error'
     | 'password-reset'
-    | 'password-reset-error'
     | 'message'
-    | 'message-error'
-    | 'status-change';
+    | 'status-change'
+    | 'error';
 
 export const logTypes: LogType[] = [
   'log-in',
   'log-in-error',
   'log-out',
   'register',
-  'register-error',
   'password-reset',
-  'password-reset-error',
   'message',
-  'message-error',
-  'status-change'
+  'status-change',
+  'error',
 ];
 
 export const profileStatuses: UserStatus[] = [

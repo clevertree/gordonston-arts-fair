@@ -1,8 +1,8 @@
 'use server';
 
-import { ensureDatabase } from '@util/database';
-import { UserLogModel } from '@util/models';
-import type { LogType } from '@types';
+import {ensureDatabase} from '@util/database';
+import {UserLogModel} from '@util/models';
+import type {LogType} from '@types';
 
 export interface UserLogSearchParams {
   type?: LogType,
@@ -38,6 +38,7 @@ export async function fetchUserLogs(userID: number, searchParams: UserLogSearchP
 
 export async function addUserUserLogModel(id: number | null, type: LogType, message: string = '') {
   await ensureDatabase();
+  console[type === 'error' ? 'error' : 'log'](message);
 
   await UserLogModel.create({
     user_id: id,

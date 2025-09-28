@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import {addTransaction} from '@util/transActions';
 import {FeeMetaData} from '@app/api/checkout-sessions/[feeType]/route';
 import {fetchProfileByID, updateUserStatus} from '@util/profileActions';
+import {addUserUserLogModel} from "@util/logActions";
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -78,14 +79,25 @@ export async function POST(request: Request) {
 
         switch (feeType) {
           case 'registration':
-            // if (profileInfo.status === 'statusregistered') {
-            await updateUserStatus(userID, 'submitted', 'Registration fee paid');
-            // }
+            switch (profileInfo.status) {
+              case 'imported':
+              case 'registered':
+                await updateUserStatus(userID, 'submitted', 'Registration fee paid');
+                break;
+              default:
+                await addUserUserLogModel(userID, 'error', 'Registration fee paid, but profile status is not imported or registered');
+                break;
+            }
             break;
           case 'booth':
-            // if (profileInfo.status === 'approved') {
-            await updateUserStatus(userID, 'paid', 'Booth fee paid');
-            // }
+            switch (profileInfo.status) {
+              case 'approved':
+                await updateUserStatus(userID, 'paid', 'Booth fee paid');
+                break;
+              default:
+                await addUserUserLogModel(userID, 'error', 'Booth fee paid, but profile status is not approved');
+                break;
+            }
             break;
           default:
         }
