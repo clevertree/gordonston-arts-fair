@@ -20,10 +20,11 @@ import './commands';
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 import {mount} from 'cypress/react';
-import {Box} from '@mui/material';
+import {Box, Typography} from '@mui/material';
 import '../../app/globals.scss';
 import ThemeRegistry from "@components/Theme/ThemeRegistry";
 import {AppRouterContext} from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import React from "react";
 
 
 // Augment the Cypress namespace to include type definitions for
@@ -47,9 +48,9 @@ Cypress.Commands.add('mount', (component) => {
     const wrappedContent = (
         <Box p={2}>
             <AppRouterContext.Provider value={mockRouter}>
-            <ThemeRegistry>
-            {component}
-            </ThemeRegistry>
+                <ThemeRegistry>
+                    {component}
+                </ThemeRegistry>
             </AppRouterContext.Provider>
         </Box>
     );

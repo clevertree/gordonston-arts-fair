@@ -45,3 +45,4 @@ export.csv
 
 # Backup
 backup
+.env*.local
