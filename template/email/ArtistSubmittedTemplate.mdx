@@ -2,6 +2,7 @@ import {formatDate} from '@util/date';
 export const eventDate = new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`);
 export const boothFee = process.env.NEXT_PUBLIC_BOOTH_FEE;
 export const registrationFeeDate = new Date(`${process.env.NEXT_PUBLIC_REGISTRATION_FEE_DATE}`);
+export const notifyStatusDate = new Date(process.env.NEXT_PUBLIC_NOTIFY_DATE);
 export const paymentURL = `${process.env.NEXT_PUBLIC_BASE_URL}/payment/booth`;
 export const formattedEventDate = formatDate(eventDate);
 export const subject = 'Your exhibit has been submitted successfully'; // Email subject string
@@ -9,13 +10,13 @@ export const subject = 'Your exhibit has been submitted successfully'; // Email 
 
 Dear Artist,
 
-Thank you for your interest in the Gordonston Art Fair. We are pleased to confirm that your application has been submitted and is now waiting for approval.
+Your application to Gordonston Art Fair for our {formattedEventDate} event has been received.
 
-We anticipate making final selections for the event on {formattedEventDate}. We appreciate your patience during the review process and are hopeful that you will be able to join us for an amazing and successful day.
+You will receive an email about your application status on or {formatDate(notifyStatusDate)}.
+The options for outcome are ACCEPTED, DECLINED, or WAITING LIST.
 
-Once approved, to reserve your exhibit space, you will be required to make a payment of the ${boothFee}.00 booth fee by {formatDate(registrationFeeDate)}, or your spot may be reassigned to another artist. Payment details and a link will be provided in your acceptance email.
+If accepted, you will have until {formatDate(registrationFeeDate)} to pay your booth fee of ${boothFee}.
 
-Please feel free to use your social media contacts to spread the word about the event!
+Sincerely,
 
-Kind regards,
 The Gordonston Art Fair Committee
