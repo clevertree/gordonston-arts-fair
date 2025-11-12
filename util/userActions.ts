@@ -4,7 +4,7 @@
 
 import { ensureDatabase } from '@util/database';
 import { UserFileUploadModel, UserModel } from '@util/models';
-
+import { Op } from 'sequelize';
 import { UserSearchParams } from '@types';
 
 export interface IUserSearchResponse {
@@ -17,7 +17,8 @@ export async function listUsersAsAdmin(params: UserSearchParams) {
 
   const {
     status,
-    orderBy = 'id',
+    search,
+    orderBy = 'updatedAt',
     order = 'desc',
     limit = 10,
   } = params;
@@ -25,26 +26,29 @@ export async function listUsersAsAdmin(params: UserSearchParams) {
 
   const offset = (page - 1) * limit;
 
+  const where: any = {
+    ...(status && status !== 'all' ? { status } : {}),
+  };
+
+  if (search && search.trim()) {
+    const term = `%${search.trim()}%`;
+    where[Op.or] = [
+      { email: { [Op.iLike]: term } },
+      { first_name: { [Op.iLike]: term } },
+      { last_name: { [Op.iLike]: term } },
+      { company_name: { [Op.iLike]: term } },
+      { phone: { [Op.iLike]: term } },
+      { phone2: { [Op.iLike]: term } },
+    ];
+  }
+
   const result = await UserModel.findAndCountAll({
-    // attributes: {
-    //   include: [
-    //     [Sequelize.fn('COUNT', Sequelize.col('UserFileUploadModel.id')), 'uploadCount']
-    //   ]
-    // },
     include: [{
       model: UserFileUploadModel,
-      // as: 'uploads',
-      // attributes: [
-      //   [Sequelize.fn('COUNT', Sequelize.col('UserFileUploadModel.id')), 'uploadCount']
-      //
-      // ],
       required: false,
     }],
     distinct: true,
-    where: {
-      ...(status && status !== 'all' ? { status } : {}),
-    },
-    // group: ['UserModel.id'],
+    where,
     order: [[orderBy, order === 'desc' ? 'DESC' : 'ASC']],
     limit,
     offset

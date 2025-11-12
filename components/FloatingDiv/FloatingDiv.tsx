@@ -74,20 +74,17 @@ export default function FloatingDiv({
       >
         {finalChildren}
       </div>
-      <div
-        role="button"
-        tabIndex={isFloating ? 0 : undefined}
+      <button
+        type="button"
+        aria-label="Back to top"
         className={clsx(
           styles.bottomText,
           !isFloating && styles.bottomTextHidden
         )}
         onClick={scrollToTop}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') scrollToTop();
-        }}
       >
         Back to top
-      </div>
+      </button>
     </Container>
   );
 }

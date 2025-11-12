@@ -127,30 +127,41 @@ export async function uploadFile(file: File) {
     // eslint-disable-next-line no-console
     const fileName = `${width}-${height}/${file.name}`;
 
-    console.log('Storing file: ', fileName, width, height);
-    const putResult = await put(`${imagePath}/${fileName}`, file, {
-        access: 'public',
-        contentType: file.type,
-        allowOverwrite: true
-    });
-
-    const createAction = await UserFileUploadModel.create({
+    // 1) Create DB record first with empty URL to ensure we never lose track of an attempted upload
+    const created = await UserFileUploadModel.create({
         user_id: userProfile.id,
         title: file.name,
+        description: '',
         width,
         height,
-        url: putResult.url
+        url: '',
+        feature: false,
     });
-    console.log('createAction', createAction);
+
+    console.log('Preparing to store file: ', fileName, width, height, 'db id=', created.id);
+
+    try {
+        // 2) Upload the blob
+        const putResult = await put(`${imagePath}/${fileName}`, file, {
+            access: 'public',
+            contentType: file.type,
+            allowOverwrite: true
+        });
+        // 3) Update the DB record with the URL
+        await created.update({ url: putResult.url });
+        console.log('Upload succeeded and DB updated for id=', created.id);
+    } catch (err) {
+        // Leave the record with empty url to signal incomplete upload
+        console.error('Upload failed for db id=', created.id, err);
+    }
 
     const {
         status: profileStatus,
     } = await fetchProfileStatus(userProfile);
 
     return {
-        message: 'File uploaded successfully',
+        message: 'File upload processed. If you do not see the image, please try re-uploading.',
         result: profileStatus,
-        // createAction,
     };
 }
 
@@ -166,8 +177,12 @@ export async function deleteFile(fileID: number) {
     if (!fileUpload) throw new Error(`File ID not found: ${fileID}`);
 
     try {
-        await del(fileUpload.url);
-        console.log('Deleted file: ', fileUpload.url);
+        if (fileUpload.url) {
+            await del(fileUpload.url);
+            console.log('Deleted file: ', fileUpload.url);
+        } else {
+            console.log('Skipping blob delete; DB record has empty URL for id=', fileUpload.id);
+        }
     } catch (error: unknown) {
         console.error('Error deleting file: ', error);
     }

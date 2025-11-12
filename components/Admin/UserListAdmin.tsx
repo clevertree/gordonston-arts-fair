@@ -13,7 +13,8 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Typography
+    Typography,
+    TextField
 } from '@mui/material';
 import type {AlertColor} from '@mui/material/Alert';
 import Link from 'next/link';
@@ -49,8 +50,10 @@ export default function UserListAdmin({
         pageCount,
     } = data;
     const [args, setArgs] = useState<UserSearchParams>({
-        status: 'submitted',
-        limit: 25
+        status: undefined,
+        limit: 25,
+        orderBy: 'updatedAt',
+        order: 'desc'
     });
     useEffect(() => {
         setMessage(['info', 'Fetching user logs...']);
@@ -110,7 +113,7 @@ export default function UserListAdmin({
             <div className="flex flex-row flex-wrap justify-between items-center">
                 Sort by:
                 <Paper className="flex flex-row flex-wrap  gap-1 p-1 mb-1" elevation={2}>
-                    {['email', 'last_name', 'createdAt', 'status'].map((field) => (
+                    {['email', 'last_name', 'createdAt', 'updatedAt', 'status'].map((field) => (
                         <Button
                             key={field}
                             size="x-small"
@@ -150,6 +153,16 @@ export default function UserListAdmin({
                     page={args.page || 1}
                     setPage={(page: number) => setArgs({...args, page})}
                     pageCount={pageCount}
+                />
+            </div>
+
+            <div className="flex flex-row flex-wrap justify-between items-center gap-2 my-2">
+                <TextField
+                    label="Search"
+                    placeholder="Name, email, company, phone"
+                    size="small"
+                    value={args.search || ''}
+                    onChange={(e) => setArgs({ ...args, search: e.target.value, page: 1 })}
                 />
             </div>
 

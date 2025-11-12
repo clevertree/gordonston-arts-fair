@@ -123,6 +123,11 @@ export function ProfileUploadForm({
     >
       <TableCell component="th" scope="row" sx={{ verticalAlign: 'top' }}>
 
+        {(!fileUploadServer.url || fileUploadServer.url.trim() === '') && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            Upload incomplete — please re-upload this image to finalize it.
+          </Alert>
+        )}
         {message && message[1] && (
         <Alert severity={message[0]}>
           {message[1]}

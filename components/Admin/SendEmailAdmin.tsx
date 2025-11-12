@@ -134,6 +134,7 @@ export default function SendEmailAdmin({
                 <TableCell>
                   <TextField
                     name="email"
+                    label="Recipient email"
                     fullWidth
                     variant="outlined"
                     value={email}
@@ -148,6 +149,7 @@ export default function SendEmailAdmin({
                 <TableCell>
                   <TextField
                     name="subject"
+                    label="Email subject"
                     fullWidth
                     variant="outlined"
                     value={subject}
@@ -162,6 +164,7 @@ export default function SendEmailAdmin({
                 <TableCell>
                   <TextField
                     name="body"
+                    label="Email body"
                     multiline
                     minRows={8}
                     fullWidth

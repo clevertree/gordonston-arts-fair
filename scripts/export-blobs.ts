@@ -1,9 +1,10 @@
 import {list} from '@vercel/blob';
 import {promises as fs} from 'fs';
 import path from 'path';
-import {config} from "dotenv";
+import dotenv from 'dotenv';
 
-config({path: "../.env.local"});
+// Load env vars from .env then .env.local (local overrides)
+dotenv.config({path: ['.env', '.env.local', '../.env', '../.env.local'], override: true});
 
 /**
  * Lists all blobs from Vercel Blob storage and downloads them to a local directory.

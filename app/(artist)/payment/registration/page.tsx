@@ -1,4 +1,4 @@
-import { fetchProfileFromSession, fetchProfileStatus } from '@util/profileActions';
+import { fetchProfileFromSession, fetchProfileStatus, fetchUserFiles } from '@util/profileActions';
 import Link from 'next/link';
 import Checkout from '@components/Payment/Checkout';
 import { ArtistStepper } from '@components/User/ArtistStepper';
@@ -7,6 +7,7 @@ import { Stack } from '@mui/material';
 import process from 'node:process';
 import { fetchTransactions } from '@util/transActions';
 import UserTransactionView from '@components/User/UserTransactionView';
+import ApplicationPreview from '@components/User/ApplicationPreview';
 
 export const metadata = {
   title: 'Artist Checkout',
@@ -25,6 +26,7 @@ export default async function CheckoutPage() {
   } = await fetchProfileStatus(userProfile);
   const transactions = await fetchTransactions(userProfile.id);
   const alreadyPaid = transactions.find((t) => parseInt(`${t.amount}`, 10) === feeAmount) !== undefined;
+  const userUploads = await fetchUserFiles(userProfile.id);
   const {
     complete: eligibleToRegister,
     message: eligibleToRegisterString
@@ -42,6 +44,8 @@ export default async function CheckoutPage() {
       <h1 className="items-center text-[color:var(--gold-color)] italic">Pay Artist Registration Fee</h1>
 
       <ArtistStepper profileStatus={profileStatus} />
+
+      <ApplicationPreview userProfile={userProfile} userUploads={userUploads} />
 
       <Checkout
         feeType="registration"

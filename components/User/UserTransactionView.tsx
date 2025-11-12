@@ -109,7 +109,7 @@ export default function UserTransactionView({
               createdAt, type, full_name, email, phone, amount
             }) => (
               <TableRow
-                key={email}
+                key={createdAt}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell align="center" scope="row">

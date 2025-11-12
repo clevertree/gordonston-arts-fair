@@ -46,3 +46,4 @@ export.csv
 # Backup
 backup
 .env*.local
+.vercel

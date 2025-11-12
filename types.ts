@@ -66,7 +66,8 @@ export interface UserSearchParams {
   order?: 'asc' | 'desc',
   orderBy?: string,
   page?: number,
-  limit?: number
+  limit?: number,
+  search?: string
 }
 
 export interface MailResult {

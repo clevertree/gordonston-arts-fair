@@ -103,6 +103,7 @@ export default function UserStatusEditorAdmin({
                   <Checkbox
                     onClick={() => setSendEmailTemplate(!sendEmailTemplate)}
                     checked={sendEmailTemplate}
+                    inputProps={{ 'aria-label': 'Send email template' }}
                   />
                 </TableCell>
                 <TableCell align="left">

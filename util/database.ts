@@ -1,11 +1,12 @@
-import { initDatabase } from '@util/models';
+import {initDatabase} from '@util/models';
+import {Sequelize} from "sequelize-typescript";
 
 // Initialize database connection on the first import
-let dbInitialized = false;
+let dbInitialized: Sequelize | undefined;
 
 export async function ensureDatabase() {
-  if (!dbInitialized) {
-    await initDatabase();
-    dbInitialized = true;
-  }
+    if (!dbInitialized) {
+        dbInitialized = await initDatabase();
+    }
+    return dbInitialized;
 }
