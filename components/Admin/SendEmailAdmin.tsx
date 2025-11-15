@@ -56,6 +56,7 @@ export default function SendEmailAdmin({
     const [email, setEmail] = useState(userEmail);
     const [subject, setSubject] = useState('');
     const [body, setBody] = useState('');
+    const [sentSuccessful, setSentSuccessful] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const router = useRouter();
 
@@ -108,6 +109,7 @@ export default function SendEmailAdmin({
                         const successCount = validRecipients.length - failed.length;
                         if (failed.length === 0) {
                             setMessage(['success', `Sent ${successCount} email${successCount === 1 ? '' : 's'} successfully.`]);
+                            setSentSuccessful(true);
                         } else if (successCount > 0) {
                             setMessage(['warning', `Sent ${successCount}/${validRecipients.length}. Failed: ${failed.map(f => `${f.email} (${f.error})`).join('; ')}`]);
                         } else {
@@ -234,7 +236,7 @@ export default function SendEmailAdmin({
                                         type="submit"
                                         variant="contained"
                                         color="primary"
-                                        disabled={status === 'submitting'}
+                                        disabled={status === 'submitting' || sentSuccessful}
                                     >
                                         {status === 'submitting' ? 'Sending…' : 'Send Email'}
                                     </Button>
@@ -243,6 +245,12 @@ export default function SendEmailAdmin({
                         </TableBody>
                     </Table>
                 </TableContainer>
+
+                {message && message[1] && (
+                    <Alert severity={message[0]}>
+                        {message[1]}
+                    </Alert>
+                )}
             </form>
         </Box>
     );
