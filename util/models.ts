@@ -226,6 +226,10 @@ export class UserTransactionModel extends Model {
     amount!: number | null;
 
     @AllowNull(false)
+    @Column(DataType.STRING(256))
+    provider_id!: string;
+
+    @AllowNull(false)
     @Column(DataType.JSON)
     content!: object;
 
