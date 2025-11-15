@@ -2,6 +2,8 @@ import AdminUserList from '@components/Admin/UserListAdmin';
 import { Stack } from '@mui/material';
 
 import { listUsersAsAdmin } from '@util/userActions';
+import { sendMail } from '@util/emailActions';
+import { updateUsersStatusBulk } from '@util/profileActions';
 
 import { validateAdminSession } from '@util/session';
 
@@ -21,7 +23,8 @@ export default async function AdminUserListPage() {
 
       <AdminUserList
         listUsersAsAdmin={listUsersAsAdmin}
-
+        sendMail={sendMail}
+        updateUsersStatusBulk={updateUsersStatusBulk}
       />
     </Stack>
   );

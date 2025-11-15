@@ -292,3 +292,30 @@ export async function getUserStatusTemplate(userID: number, status: UserStatus) 
             return null;
     }
 }
+
+export async function updateUsersStatusBulk(
+    userIDs: number[],
+    newStatus: UserStatus,
+    sendTemplate: boolean = true
+) {
+    await ensureDatabase();
+    const results: { userID: number; ok: boolean; message: string }[] = [];
+    for (const userID of userIDs) {
+        try {
+            const res = await updateUserStatus(
+                userID,
+                newStatus,
+                `${newStatus} set by admin bulk action`,
+                sendTemplate
+            );
+            results.push({ userID, ok: true, message: res.message });
+        } catch (e: any) {
+            results.push({ userID, ok: false, message: e.message });
+        }
+    }
+    const successCount = results.filter(r => r.ok).length;
+    const failCount = results.length - successCount;
+    return {
+        message: `Updated ${successCount} users to ${newStatus}${sendTemplate ? ' with emails' : ''}${failCount ? `; ${failCount} failed` : ''}.`
+    };
+}

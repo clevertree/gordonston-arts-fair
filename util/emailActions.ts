@@ -26,9 +26,9 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function sendMail(options: Mail.Options): Promise<MailResult> {
-  const email = `${options.to}`;
+  const toValue = options.to;
   const subject = `${options.subject}`;
-  if (!email) {
+  if (!toValue) {
     return { status: 'error', message: `Invalid recipient email: ${JSON.stringify(options)}` };
   }
   if (!subject) {
@@ -38,22 +38,30 @@ export async function sendMail(options: Mail.Options): Promise<MailResult> {
   const isVerified = await transporter.verify();
 
   const testMode = process.env.TEST_MODE !== 'false';
+
+  // Normalize recipients to an array of strings
+  const recipients: string[] = Array.isArray(toValue)
+    ? (toValue as string[])
+    : `${toValue}`.split(',').map((s) => s.trim()).filter(Boolean);
+
   if (!testMode) {
+    // Send a single email addressed to multiple recipients
     const info = await transporter.sendMail({
       from: EMAIL_ADMIN,
       bcc: EMAIL_BCC,
-      ...options
+      ...options,
+      to: recipients.join(', '),
     });
-    console.log('Mail sent to', email, `verified=${isVerified}`, info.messageId);
+    console.log('Mail sent to', recipients, `verified=${isVerified}`, info.messageId);
   } else {
-    console.log('TEST MODE: No actual mail was sent', subject);
+    console.log('TEST MODE: No actual mail was sent', subject, 'recipients:', recipients);
   }
 
   return {
     status: 'success',
     message: testMode
-      ? `TEST MODE: ${subject}`
-      : `Email sent: ${subject}`,
+      ? `TEST MODE: ${subject} (to ${recipients.length} recipients)`
+      : `Email sent: ${subject} (to ${recipients.length} recipients)`,
   };
 }
 
