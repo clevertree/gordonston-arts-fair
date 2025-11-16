@@ -7,17 +7,21 @@ export const formattedEventDate = formatDate(eventDate);
 export const subject = 'Your exhibit has been approved'; // Email subject string
 // ######## Email Template Begins here ########
 
-Dear Artist,
+Dear Applicant,
 
-Congratulations! After thoughtful consideration, the Gordonston Art Fair is pleased to inform you that you have been accepted to participate in our show on {formattedEventDate}. We are looking forward to an amazing, and successful day, we are thrilled that you will be a part of it!
+Congratulations! After thoughtful consideration, the Gordonston Art Fair is pleased to inform you that you have been accepted to participate in our art fair on {formattedEventDate}.
+We are looking forward to a beautiful and successful day and are pleased that you will be a part of it.
 
-To reserve your exhibit space, you must make payment of the ${boothFee}.00 booth fee by {formatDate(registrationFeeDate)}, or your spot may be reassigned to another artist. Payment can be made by clicking the link below to return to our registration site. There you can make payment via our PayPal account. Checks may also be sent to Gordonston Art Fair, 117 Daisy Court, Savannah, GA, 31404.
+To reserve your exhibit space, you must make payment of the ${boothFee}.00 booth fee by {formatDate(registrationFeeDate)}, or your spot will be assigned to another artist.
+Payment can be made by clicking the link below to return to our registration site. There you can make payment via our PayPal account.
+Checks may also be sent to Gordonston Art Fair, 117 Daisy Court, Savannah, GA, 31404.
 
 <a href={paymentURL}>Click here to make payment</a>
 
-Please feel free to use your social media contacts to spread the word about the event!
+Please feel free to use your social media contacts to spread the word about the event.
+We will be sending out a poster pdf which we encourage you to share.
 
-Again, congratulations, we look forward to seeing you in September!
+Again, congratulations, we look forward to seeing you in February.
 
 Kind regards,
 
