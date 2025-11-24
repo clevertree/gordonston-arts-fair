@@ -87,8 +87,27 @@ export async function fetchOrCreateProfileByEmail(email: string): Promise<UserMo
     return newUser;
 }
 
-export async function updateProfile(updatedUserRow: InferAttributes<UserModel>) {
-    const userProfile = await fetchProfileFromSession();
+async function isAdmin(): Promise<boolean> {
+    const user = await currentUser();
+    const userType = user?.publicMetadata?.type as string | undefined;
+    return userType === 'admin';
+}
+
+async function assertOwnerOrAdmin(targetUserID: number): Promise<UserModel> {
+    await validateSession();
+    const admin = await isAdmin();
+    if (admin) {
+        return fetchProfileByID(targetUserID);
+    }
+    const sessionUser = await fetchProfileFromSession();
+    if (sessionUser.id !== targetUserID) {
+        throw HttpError.Forbidden('You are not authorized to perform this action');
+    }
+    return sessionUser;
+}
+
+export async function updateProfile(userID: number, updatedUserRow: InferAttributes<UserModel>) {
+    const userProfile = await assertOwnerOrAdmin(userID);
 
     const updatedUserRowDB = await userProfile.update({
         ...updatedUserRow,
@@ -165,8 +184,8 @@ export async function uploadFile(file: File) {
     };
 }
 
-export async function deleteFile(fileID: number) {
-    const userProfile = await fetchProfileFromSession();
+export async function deleteFile(userID: number, fileID: number) {
+    const userProfile = await assertOwnerOrAdmin(userID);
 
     const fileUpload = await UserFileUploadModel.findOne({
         where: {
@@ -203,18 +222,20 @@ export async function deleteFile(fileID: number) {
     };
 }
 
-export async function updateFile(updatedFile: InferAttributes<UserFileUploadModel>) {
-    const userProfile = await fetchProfileFromSession();
-    if (updatedFile.user_id !== userProfile.id) {
-        throw HttpError.Forbidden(
-            'You are not authorized to update this file'
-        );
+export async function updateFile(userID: number, updatedFile: InferAttributes<UserFileUploadModel>) {
+    const userProfile = await assertOwnerOrAdmin(userID);
+    if (updatedFile.user_id && updatedFile.user_id !== userProfile.id) {
+        throw HttpError.Forbidden('You are not authorized to update this file');
     }
 
     await ensureDatabase();
 
     const fileUpload = await UserFileUploadModel.findByPk(updatedFile.id);
     if (!fileUpload) throw new Error(`File ID not found: ${updatedFile.id}`);
+
+    if (fileUpload.user_id !== userProfile.id) {
+        throw HttpError.Forbidden('You are not authorized to update this file');
+    }
 
     const {
         status: profileStatus,
@@ -223,7 +244,7 @@ export async function updateFile(updatedFile: InferAttributes<UserFileUploadMode
     return {
         message: 'File description updated successfully',
         result: profileStatus,
-        updateAction: fileUpload.update(updatedFile)
+        updateAction: fileUpload.update({ ...updatedFile, user_id: userProfile.id })
     };
 }
 

@@ -1,5 +1,9 @@
 import {
-  deleteFile, fetchProfileFromSession, fetchProfileStatus, updateFile, uploadFile
+  deleteFile as deleteFileAction,
+  fetchProfileFromSession,
+  fetchProfileStatus,
+  updateFile as updateFileAction,
+  uploadFile
 } from '@util/profileActions';
 import Link from 'next/link';
 import { ArtistStepper } from '@components/User/ArtistStepper';
@@ -26,9 +30,15 @@ export default async function ProfileUploadsPage() {
 
       <ProfileUploads
         userUploads={userUploads.map((u) => u.toJSON())}
-        updateFile={updateFile}
+        updateFile={async (file) => {
+          'use server';
+          return updateFileAction(userProfile.id, file);
+        }}
         uploadFile={uploadFile}
-        deleteFile={deleteFile}
+        deleteFile={async (fileID) => {
+          'use server';
+          return deleteFileAction(userProfile.id, fileID);
+        }}
       />
       <Link href="/profile/edit">Click here to edit your Artist Profile</Link>
       <Link href="/profile">Click here to return to your profile</Link>
