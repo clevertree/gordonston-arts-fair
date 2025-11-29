@@ -12,14 +12,17 @@ interface CheckoutProps {
   feeType: 'registration' | 'booth',
   feeText: string,
   buttonText: string,
-  disabled?: boolean
+  disabled?: boolean,
+  // When provided, checkout will use the public, email-based API route
+  publicEmail?: string
 }
 
 export default function Checkout({
   stripePublishableKey, feeType,
   buttonText,
   feeText,
-  disabled
+  disabled,
+  publicEmail
 }: CheckoutProps) {
   const [message, setMessage] = useState<[AlertColor, string]>(['info', feeText]);
 
@@ -28,13 +31,17 @@ export default function Checkout({
     const stripePromise = loadStripe(stripePublishableKey);
     const stripe = await stripePromise;
     if (!stripe) throw new Error('Invalid stripe instance');
-    const response = await fetch(`/api/checkout-sessions/${feeType}`, {
+    const endpoint = publicEmail
+      ? `/api/checkout-sessions-public/${feeType}`
+      : `/api/checkout-sessions/${feeType}`;
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         originUrl: window.location.origin,
+        email: publicEmail,
       }),
     });
     const { sessionId, message: statusMessage } = await response.json();

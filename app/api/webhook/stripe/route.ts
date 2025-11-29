@@ -3,9 +3,9 @@ import {headers} from 'next/headers';
 import {NextResponse} from 'next/server';
 import Stripe from 'stripe';
 import {addTransaction} from '@util/transActions';
-import {FeeMetaData} from '@app/api/checkout-sessions/[feeType]/route';
 import {fetchProfileByID, updateUserStatus} from '@util/profileActions';
 import {addUserUserLogModel} from "@util/logActions";
+import {FeeMetaData} from "@util/checkout";
 
 export async function POST(request: Request) {
     const body = await request.text();

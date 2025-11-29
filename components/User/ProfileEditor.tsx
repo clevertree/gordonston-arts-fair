@@ -105,9 +105,14 @@ function ProfileEditor({
                 }
             } = await updateProfile(userProfileClient);
             setStatus('ready');
-            setMessage([isUpdatedProfileComplete ? 'success' : 'info', isUpdatedProfileCompleteMessage]);
-            if (action) {
-                setShowModal(action);
+            if (adminMode) {
+                setMessage(['success', "Artist profile updated successfully."]);
+
+            } else {
+                setMessage([isUpdatedProfileComplete ? 'success' : 'info', isUpdatedProfileCompleteMessage]);
+                if (action) {
+                    setShowModal(action);
+                }
             }
         } catch (e: unknown) {
             setStatus('ready');
