@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import process from "node:process";
 import {UserModel} from "@util/models";
 import {NextResponse} from "next/server";
+import {FeeType} from "@types";
 
 const stripeSecretKey = `${process.env.TEST_MODE === 'false'
     ? process.env.STRIPE_SECRET_KEY_LIVE
@@ -13,10 +14,10 @@ const BASE_URL = `${process.env.NEXT_PUBLIC_BASE_URL}`;
 
 export interface FeeMetaData {
     userID: number;
-    feeType: string;
+    feeType: FeeType
 }
 
-export async function handleCheckout(profileData: UserModel, feeType: string) {
+export async function handleCheckout(profileData: UserModel, feeType: FeeType) {
     const lineItem = {
         price_data: {
             currency: 'usd',
@@ -36,6 +37,10 @@ export async function handleCheckout(profileData: UserModel, feeType: string) {
         case 'booth':
             lineItem.price_data.unit_amount = parseInt(`${process.env.NEXT_PUBLIC_BOOTH_FEE}`, 10) * 100;
             lineItem.price_data.product_data.name = 'Artist Booth Fee';
+            break;
+        case 'booth-double':
+            lineItem.price_data.unit_amount = parseInt(`${process.env.NEXT_PUBLIC_BOOTH_DOUBLE_FEE}`, 10) * 100;
+            lineItem.price_data.product_data.name = 'Artist Double Booth Fee';
             break;
         default:
             return NextResponse.json({

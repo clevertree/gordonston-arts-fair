@@ -3,6 +3,8 @@ import Checkout from '@components/Payment/Checkout';
 import {fetchOrCreateProfileByEmail} from '@util/profileActions';
 import {fetchTransactions} from '@util/transActions';
 import {UserModel} from "@util/models";
+import process from "node:process";
+import {Typography} from "@mui/material";
 
 export const metadata = {
     title: 'Artist Payment',
@@ -56,6 +58,7 @@ export default async function PublicPaymentPage({
     const registrationEndDate = new Date(`${process.env.NEXT_PUBLIC_REGISTRATION_END_DATE}`);
     const registrationFee = parseInt(`${process.env.NEXT_PUBLIC_REGISTRATION_FEE}`, 10);
     const boothFee = parseInt(`${process.env.NEXT_PUBLIC_BOOTH_FEE}`, 10);
+    const boothDoubleFee = parseInt(`${process.env.NEXT_PUBLIC_BOOTH_DOUBLE_FEE}`, 10);
 
     const hasPaidRegistration = transactions.some((t) => parseInt(`${t.amount}`, 10) === registrationFee);
     const hasPaidBooth = transactions.some((t) => parseInt(`${t.amount}`, 10) === boothFee);
@@ -92,7 +95,7 @@ export default async function PublicPaymentPage({
                     />
                 )}
 
-                {showBoothButton && (
+                {showBoothButton && <>
                     <Checkout
                         feeType="booth"
                         feeText={`Please click below to pay the $${boothFee} booth fee.`}
@@ -100,7 +103,17 @@ export default async function PublicPaymentPage({
                         stripePublishableKey={stripePublishableKey}
                         publicEmail={email}
                     />
-                )}
+                    <Typography>
+                        If you are planning to have 2 booths, please pay the double booth fee instead:
+                    </Typography>
+                    <Checkout
+                        feeType="booth-double"
+                        feeText={`Please click below to pay the $${boothDoubleFee} double booth fee.`}
+                        buttonText="Pay Double Booth Fee"
+                        stripePublishableKey={stripePublishableKey}
+                        publicEmail={email}
+                    />
+                                    </>}
 
                 {!showRegistrationButton && !showBoothButton && (
                     <div className="rounded border p-4">

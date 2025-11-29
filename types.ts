@@ -1,20 +1,22 @@
 import {JWTPayload} from 'jose';
 
 export interface SMSMessage {
-  phone: string;
-  message: string;
+    phone: string;
+    message: string;
 }
 
+export type FeeType = 'registration' | 'booth' | 'booth-double'
+
 export interface SessionPayload extends JWTPayload {
-  userID: number,
-  authID: string
-  // expiresAt: Date
+    userID: number,
+    authID: string
+    // expiresAt: Date
 }
 
 export type ActionResponse = {
-  status: 'success' | 'error';
-  message: string;
-  redirectURL?: string;
+    status: 'success' | 'error';
+    message: string;
+    redirectURL?: string;
 };
 // User model types
 export type UserStatus =
@@ -38,39 +40,39 @@ export type LogType =
     | 'error';
 
 export const logTypes: LogType[] = [
-  'log-in',
-  'log-in-error',
-  'log-out',
-  'register',
-  'password-reset',
-  'message',
-  'status-change',
-  'error',
+    'log-in',
+    'log-in-error',
+    'log-out',
+    'register',
+    'password-reset',
+    'message',
+    'status-change',
+    'error',
 ];
 
 export const profileStatuses: UserStatus[] = [
-  'unregistered',
-  'registered',
-  'submitted',
-  'approved',
-  'standby',
-  'declined',
-  'paid',
-  'imported'
+    'unregistered',
+    'registered',
+    'submitted',
+    'approved',
+    'standby',
+    'declined',
+    'paid',
+    'imported'
 ];
 export type TransactionType = 'charge.succeeded' | 'charge.refunded';
 export const transactionTypes: TransactionType[] = ['charge.succeeded', 'charge.refunded'];
 
 export interface UserSearchParams {
-  status?: string,
-  order?: 'asc' | 'desc',
-  orderBy?: string,
-  page?: number,
-  limit?: number,
-  search?: string
+    status?: string,
+    order?: 'asc' | 'desc',
+    orderBy?: string,
+    page?: number,
+    limit?: number,
+    search?: string
 }
 
 export interface MailResult {
-  status: 'success' | 'error';
-  message: string;
+    status: 'success' | 'error';
+    message: string;
 }
