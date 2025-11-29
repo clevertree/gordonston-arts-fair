@@ -29,11 +29,7 @@ export default async function CheckoutPage() {
         (parseInt(`${t.amount}`, 10) === feeAmount) ||
         (parseInt(`${t.amount}`, 10) === feeAmountDouble)
     ) !== undefined;
-    let feeText = alreadyPaid
-        ? 'You have already paid this fee.'
-        : `Please click below to pay the $${feeAmount} booth fee.`;
     const eligibleToRegister = userProfile.status === 'approved';
-    if (!eligibleToRegister) feeText = 'You are not eligible to pay the booth fee. Please contact the admin for booth approval';
     const USER_LABEL = process.env.NEXT_PUBLIC_USER_LABEL || 'User';
 
     return (
@@ -42,9 +38,9 @@ export default async function CheckoutPage() {
 
             <ArtistStepper profileStatus={profileStatus}/>
 
-            {alreadyPaid ? <>
+            {alreadyPaid ? (
                 <p>You have already paid this fee.</p>
-                           </> : <>
+            ) : <>
                 <Checkout
                     title="Pay Booth Fee"
                     feeType="booth"
@@ -64,7 +60,7 @@ export default async function CheckoutPage() {
                     stripePublishableKey={stripePublishableKey}
                     disabled={alreadyPaid || !eligibleToRegister}
                 />
-                                 </>}
+                </>}
 
             <UserTransactionView
                 title={`${USER_LABEL} Transactions`}

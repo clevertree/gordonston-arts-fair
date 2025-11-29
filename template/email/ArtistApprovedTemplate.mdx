@@ -3,6 +3,7 @@ export const eventDate = new Date(`${process.env.NEXT_PUBLIC_EVENT_DATE}`);
 export const boothFee = process.env.NEXT_PUBLIC_BOOTH_FEE;
 export const registrationFeeDate = new Date(`${process.env.NEXT_PUBLIC_REGISTRATION_FEE_DATE}`);
 export const paymentURL = `${process.env.NEXT_PUBLIC_BASE_URL}/payment/booth`;
+export const paymentURLPublic = `${process.env.NEXT_PUBLIC_BASE_URL}/payment`;
 export const formattedEventDate = formatDate(eventDate);
 export const subject = 'Your exhibit has been approved'; // Email subject string
 // ######## Email Template Begins here ########
@@ -17,6 +18,10 @@ Payment can be made by clicking the link below to return to our registration sit
 Checks may also be sent to Gordonston Art Fair, 117 Daisy Court, Savannah, GA, 31404.
 
 <a href={paymentURL}>Click here to make payment</a>
+
+Here is an alternate link for those having trouble with the logged-in session:
+
+<a href={paymentURLPublic}>Click here to make payment (alternate link)</a>
 
 Please feel free to use your social media contacts to spread the word about the event.
 We will be sending out a poster pdf which we encourage you to share.
