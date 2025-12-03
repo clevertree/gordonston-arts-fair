@@ -90,6 +90,7 @@ export async function POST(request: Request) {
                                 break;
                         }
                         break;
+                    case 'booth-double':
                     case 'booth':
                         switch (profileInfo.status) {
                             case 'approved':
@@ -101,6 +102,7 @@ export async function POST(request: Request) {
                         }
                         break;
                     default:
+                        console.error('Invalid fee type:' + feeType);
                 }
             } else {
                 console.error('No userID passed back from stripe');
