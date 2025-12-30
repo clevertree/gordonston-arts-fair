@@ -149,6 +149,7 @@ export default function SendEmailAdmin({
                                         fullWidth
                                         variant="outlined"
                                         value={userStatus || ''}
+                                        disabled={status === 'submitting' || sentSuccessful}
                                         onChange={(e) => {
                                             setBody('');
                                             setSubject('');
@@ -192,6 +193,7 @@ export default function SendEmailAdmin({
                                         fullWidth
                                         variant="outlined"
                                         value={email}
+                                        disabled={status === 'submitting' || sentSuccessful}
                                         onChange={(e) => setEmail(e.target.value)}
                                         helperText={`${validRecipients.length} valid recipients${invalidRecipients.length ? `, ${invalidRecipients.length} invalid recipients` : ''}`}
                                         error={invalidRecipients.length > 0}
@@ -209,6 +211,7 @@ export default function SendEmailAdmin({
                                         fullWidth
                                         variant="outlined"
                                         value={subject}
+                                        disabled={status === 'submitting' || sentSuccessful}
                                         onChange={(e) => setSubject(e.target.value)}
                                     />
                                 </TableCell>
@@ -226,6 +229,7 @@ export default function SendEmailAdmin({
                                         fullWidth
                                         variant="outlined"
                                         value={body}
+                                        disabled={status === 'submitting' || sentSuccessful}
                                         onChange={(e) => setBody(e.target.value)}
                                     />
                                 </TableCell>
@@ -235,10 +239,10 @@ export default function SendEmailAdmin({
                                     <Button
                                         type="submit"
                                         variant="contained"
-                                        color="primary"
+                                        color={sentSuccessful ? "success" : "primary"}
                                         disabled={status === 'submitting' || sentSuccessful}
                                     >
-                                        {status === 'submitting' ? 'Sending…' : 'Send Email'}
+                                        {status === 'submitting' ? 'Sending…' : sentSuccessful ? 'Sent Successfully' : 'Send Email'}
                                     </Button>
                                 </TableCell>
                             </TableRow>
